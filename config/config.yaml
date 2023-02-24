@@ -14,5 +14,5 @@ mongo:
   user_collection: "users"
 
 telegram:
-  token: ""
-  boturl: ""
+  token: "6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro"
+  boturl: "http://t.me/DeepFlowerbot"
