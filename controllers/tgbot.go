@@ -42,21 +42,19 @@ func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Re
 	userName := upd.Message.From.UserName
 	languageCode := upd.Message.From.LanguageCode
 
-	t.Logger.Printf("user telegrammId %s ChatId %s firstname %s lastname %s username %s languageCode %s", tgId, chatId, firstName, lastName, userName, languageCode)
+	t.Logger.Printf("user telegrammId %s ChatId %s firstname %s lastname %s username %s languageCode %s",
+		tgId, chatId, firstName, lastName, userName, languageCode)
 
 	// обработка регистрации через телеграмм
 	if upd.Message.Text == "/start" {
-		// проверка - зарегистрирован ли пользователь в базе
-		// если зареган отправить уведомление
-		// сохранить данные пользователя в базу
-		// сгенерировать временный пароль
-		// отправить данные для входа пользователю
-		text, err := t.Authusecase.RegistrationFromTg(tgId, chatId, userName, firstName, lastName, languageCode)
+		var message string
+		usepas, err := t.Authusecase.RegistrationFromTg(tgId, chatId, userName, firstName, lastName, languageCode)
 		if err != nil {
-			text = "error"
+			message = "Registration error"
 		}
+		message = fmt.Sprintf("Success Registration. Username: %s Password: %s", usepas.Username, usepas.Password)
 
-		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, text)
+		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, message)
 		t.Bot.Send(msg)
 	}
 	w.WriteHeader(http.StatusOK)
