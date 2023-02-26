@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )
@@ -32,17 +33,17 @@ func (app *App) Run() error {
 
 	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
 	zlog := zerolog.New(output).With().Timestamp().Logger()
-	dbPool, err := repository.NewSqlitePool(viper.GetString(""))
+	dbPool, err := repository.NewPostgresPool(viper.GetString("postgres.address"))
 	if err != nil {
 		return err
 	}
 
-	userstore := repository.NewUserStorage(dbPool, &zlog)
-	authusecase := usecase.NewAuthUsecase(&userstore, &zlog)
-	auth := ctrl.NewAuthController(&authusecase)
+	userstore := repository.NewUserStorage(dbPool)
+	authusecase := usecase.NewAuthUsecase(&userstore)
+	auth := ctrl.NewAuthController(&authusecase, &zlog)
 	bot, _ := ctrl.NewBot(true, &http.Client{}, &zlog, &authusecase)
 
-	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://c10e-109-106-142-238.eu.ngrok.io/bot
+	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://62fb-5-187-75-135.eu.ngrok.io/bot
 
 	r := chi.NewRouter()
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("info")) })

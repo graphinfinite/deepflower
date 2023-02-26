@@ -13,8 +13,8 @@ type AuthController struct {
 	L  *zerolog.Logger
 }
 
-func NewAuthController(uc *usecase.AuthUsecase) AuthController {
-	return AuthController{Uc: uc}
+func NewAuthController(uc *usecase.AuthUsecase, logger *zerolog.Logger) AuthController {
+	return AuthController{Uc: uc, L: logger}
 
 }
 

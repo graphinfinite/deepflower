@@ -5,21 +5,18 @@ import (
 	"deepflower/model"
 	"errors"
 	"fmt"
-
-	"github.com/rs/zerolog"
 )
 
 type UserStorage struct {
 	Db *sql.DB
-	L  *zerolog.Logger
 }
 
-func NewUserStorage(dbpool *sql.DB, logger *zerolog.Logger) UserStorage {
-	return UserStorage{Db: dbpool, L: logger}
+func NewUserStorage(dbpool *sql.DB) UserStorage {
+	return UserStorage{Db: dbpool}
 }
 
-// если пользователь не найден возвращает ошибку UserNotFoundStorageError
-// db.error NewErrStoreUnknow
+// return user
+// if user not found -> UserNotFoundStorageError
 func (s *UserStorage) GetUserByTgId(tgId int) (model.User, error) {
 	//TODO
 
@@ -38,10 +35,11 @@ func (s *UserStorage) GetUserByTgId(tgId int) (model.User, error) {
 	return user, nil
 }
 
-func (s *UserStorage) CreateUser(tgId int, chatId int64, TgUserName, TgFirstName, TgLastName, TgLanguageCode, hash, newusername string) (int, error) {
+// return user id(int)
+func (s *UserStorage) CreateUser(tgId int, tgchatId int64, tgUserName, tgFirstName, tgLastName, tgLanguageCode, hash, newusername string) (int, error) {
 	var id int
 	query := `INSERT INTO user(tgId, chatId, TgUserName, tgFirstName, tgLastName, tgLanguageCode, hashedPassword, username) VALUES(?,?,?,?,?,?) returning id; `
-	err := s.Db.QueryRow(query, tgId, chatId, TgUserName, TgFirstName, TgLastName, TgLanguageCode, hash, newusername).Scan(&id)
+	err := s.Db.QueryRow(query, tgId, tgchatId, tgUserName, tgFirstName, tgLastName, tgLanguageCode, hash, newusername).Scan(&id)
 	if err != nil {
 		return 0, err
 	}

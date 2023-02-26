@@ -3,6 +3,7 @@ package controllers
 import (
 	h "deepflower/helpers"
 	"deepflower/usecase"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -45,15 +46,22 @@ func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Re
 	t.Logger.Printf("user telegrammId %s ChatId %s firstname %s lastname %s username %s languageCode %s",
 		tgId, chatId, firstName, lastName, userName, languageCode)
 
-	// обработка регистрации через телеграмм
+	// registration
 	if upd.Message.Text == "/start" {
 		var message string
+		var ErrAuthUserAlreadyExist usecase.ErrAuthUserAlreadyExist
 		usepas, err := t.Authusecase.RegistrationFromTg(tgId, chatId, userName, firstName, lastName, languageCode)
 		if err != nil {
-			message = "Registration error"
-		}
-		message = fmt.Sprintf("Success Registration. Username: %s Password: %s", usepas.Username, usepas.Password)
+			if errors.Is(err, ErrAuthUserAlreadyExist) {
+				message = fmt.Sprintf("Glad to see you here again, %s!", usepas.Username)
+			} else {
+				message = "I'm broke. Sorry"
+				t.Logger.Printf("some problem with registration: %s", err.Error())
 
+			}
+		} else {
+			message = fmt.Sprintf("Success Registration. Username: %s Password: %s", usepas.Username, usepas.Password)
+		}
 		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, message)
 		t.Bot.Send(msg)
 	}

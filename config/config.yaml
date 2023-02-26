@@ -8,6 +8,10 @@ auth:
   signing_key: "signing_key"
   token_ttl: 77777
 
+
+postgres: 
+    address: "postgres://localhost:5432/database?sslmode=enable"
+
 mongo:
   uri: "mongodb://mongodb:29078"
   name: "deepflowerdb"
