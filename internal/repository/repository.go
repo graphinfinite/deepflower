@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"deepflower/model"
+	"deepflower/internal/model"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
@@ -11,6 +11,21 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 )
+
+func MigrateDb(db *sql.DB) error {
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return err
+	}
+	m, err := migrate.NewWithDatabaseInstance(
+		"file:///migrations",
+		"postgres", driver)
+	if err != nil {
+		return err
+	}
+	m.Up()
+	return nil
+}
 
 func NewPostgresPool(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", "postgres://localhost:5432/database?sslmode=enable")
@@ -20,21 +35,7 @@ func NewPostgresPool(dsn string) (*sql.DB, error) {
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
-
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
-	if err != nil {
-		return nil, err
-	}
-	m, err := migrate.NewWithDatabaseInstance(
-		"file:///migrations",
-		"postgres", driver)
-	if err != nil {
-		return nil, err
-	}
-	m.Up()
-
 	return db, nil
-
 }
 
 type UserStorageInteface interface {

@@ -2,9 +2,9 @@ package app
 
 import (
 	"context"
-	ctrl "deepflower/controllers"
-	"deepflower/repository"
-	"deepflower/usecase"
+	ctrl "deepflower/internal/controllers"
+	"deepflower/internal/repository"
+	"deepflower/internal/usecase"
 	"fmt"
 	"net"
 	"net/http"
@@ -31,10 +31,13 @@ func (app *App) Run() error {
 	// https://github.com/Permify/go-role
 	// https://habr.com/ru/company/vk/blog/692062/
 
-	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
-	zlog := zerolog.New(output).With().Timestamp().Logger()
+	zlog := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 	dbPool, err := repository.NewPostgresPool(viper.GetString("postgres.address"))
 	if err != nil {
+		return err
+	}
+
+	if err := repository.MigrateDb(dbPool); err != nil {
 		return err
 	}
 

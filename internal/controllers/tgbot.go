@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	h "deepflower/helpers"
-	"deepflower/usecase"
+	h "deepflower/internal/helpers"
+	"deepflower/internal/usecase"
 	"errors"
 	"fmt"
 	"net/http"

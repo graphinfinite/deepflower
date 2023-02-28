@@ -1,12 +1,12 @@
 package usecase
 
 import (
-	"deepflower/repository"
+	"deepflower/internal/repository"
 	"errors"
 	"fmt"
 
-	h "deepflower/helpers"
-	m "deepflower/model"
+	h "deepflower/internal/helpers"
+	m "deepflower/internal/model"
 )
 
 type AuthUsecase struct {

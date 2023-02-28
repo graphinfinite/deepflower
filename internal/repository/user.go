@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"deepflower/model"
+	"deepflower/internal/model"
 	"errors"
 	"fmt"
 )

@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"deepflower/usecase"
+	"deepflower/internal/usecase"
 	"net/http"
 
 	"github.com/rs/zerolog"
