@@ -27,15 +27,20 @@ func NewAuthUsecase(r UserStorageInterface) AuthUsecase {
 // if user with tgId already exist -> ErrAuthUserAlreadyExist (and update chatId, userName, firstName, lastName, languageCode)
 func (auth *AuthUsecase) RegistrationFromTg(tguser m.UserTelegram) (m.User, error) {
 	var ErrUserNotFound repository.ErrStoreUserNotFound
+
+	print("GGGGGGGG")
 	user, err := auth.Rep.GetUserByTgId(tguser.TgId)
+	print("GGGGGGGGAAAAAAA")
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
+			print("ErrUserNotFoundErrUserNotFound")
 			newusername := h.GenUserName()
 			newpassword := h.GenNewPassword()
 			hash, err := h.HashAndSalt([]byte(newpassword))
 			if err != nil {
 				return m.User{}, err
 			}
+
 			_, err = auth.Rep.CreateUser(m.User{UserTelegram: tguser, HashedPassword: hash, Username: newusername})
 			if err != nil {
 				return m.User{}, err

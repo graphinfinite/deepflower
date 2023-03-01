@@ -7,12 +7,14 @@ import (
 )
 
 func main() {
-	if err := config.Init(); err != nil {
+
+	cfg, err := config.Init()
+	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
-	app := app.NewApp()
 
-	if err := app.Run(); err != nil {
+	app := app.NewApp()
+	if err := app.Run(cfg); err != nil {
 		log.Fatalf("%s", err.Error())
 	}
 

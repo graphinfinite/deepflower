@@ -20,7 +20,9 @@ func NewUserStorage(dbpool *sql.DB) UserStorage {
 func (s *UserStorage) GetUserByTgId(tgId int) (model.User, error) {
 	//TODO
 
-	query := `SELECT username FROM user WHERE tgId = ?`
+	print("FFFFFFFACCK")
+
+	query := `SELECT username FROM "user" WHERE tgId = ?`
 	user := model.User{}
 	err := s.Db.QueryRow(query, tgId).Scan(&user.Username)
 	if err != nil {
