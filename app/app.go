@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"deepflower/config"
 	ctrl "deepflower/internal/controllers"
 	"deepflower/internal/repository"
 	"deepflower/internal/usecase"
@@ -26,71 +27,42 @@ func NewApp() *App {
 	return &App{}
 }
 
-type PostgresConfig struct {
-	Host,
-	Port,
-	User,
-	Password,
-	Dbname,
-	Sslmode string
-}
-
-func (app *App) Run() error {
+func (app *App) Run(cfg config.Configuration) error {
 
 	// https://github.com/Permify/go-role
 	// https://habr.com/ru/company/vk/blog/692062/
 
 	zlog := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 
-	pgconf := PostgresConfig{Host: viper.GetString("postgres.host"),
-		Port:     viper.GetString("postgres.port"),
-		User:     viper.GetString("postgres.user"),
-		Password: viper.GetString("postgres.password"),
-		Dbname:   viper.GetString("postgres.dbname")}
-
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		pgconf.Host,
-		pgconf.Port,
-		pgconf.User,
-		pgconf.Password,
-		pgconf.Dbname)
+		cfg.Postgres.Host,
+		cfg.Postgres.Port,
+		cfg.Postgres.User,
+		cfg.Postgres.Password,
+		cfg.Postgres.Dbname)
 
 	zlog.Printf("psqlInfo: %s", psqlInfo)
 	dbPool, err := repository.NewPostgresPool(psqlInfo)
 	if err != nil {
 		return err
 	}
-	// migrations
-	// if err := repository.MigrateDb(dbPool); err != nil {
-	// 	return err
-	// }
-	q := `CREATE TABLE IF NOT EXISTS "user" (
-		id serial PRIMARY KEY,
-		createdAt timestamp DEFAULT current_timestamp NOT NULL,
-		updatedAt timestamp DEFAULT current_timestamp NOT NULL,
-		username VARCHAR(64) UNIQUE NOT NULL,
-		password VARCHAR(64) NOT NULL,
-		hashedPassword VARCHAR(128) NOT NULL,
-		active BOOLEAN NOT NULL,
-		tgId    integer UNIQUE NOT NULL,
-		tgChatId integer NOT NULL,
-		tgUserName VARCHAR(64),
-	 	tgFirstName VARCHAR(64) NOT NULL,
-	    tgLastName VARCHAR(64) NOT NULL, 
-	  	tgLanguageCode VARCHAR(64) NOT NULL);`
-
 	defer dbPool.Close()
-	_, errDb := dbPool.Exec(q)
-	if errDb != nil {
-		return errDb
+	// migrations
+	if err := repository.MigrateDb(dbPool); err != nil {
+		return err
 	}
+
+	client := http.Client{}
 
 	userstore := repository.NewUserStorage(dbPool)
 	authusecase := usecase.NewAuthUsecase(&userstore)
 	auth := ctrl.NewAuthController(&authusecase, &zlog)
-	bot, _ := ctrl.NewBot(true, &http.Client{}, &zlog, &authusecase)
+	bot, _ := ctrl.NewBot(true, &client, &zlog, &authusecase)
 
+	// temporary webhook set
+	//_, err := client.Get("https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://e33b-109-106-142-77.eu.ngrok.io/bot")
+	//if err!= nil{}
 	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://62fb-5-187-75-135.eu.ngrok.io/bot
 
 	r := chi.NewRouter()
