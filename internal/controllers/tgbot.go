@@ -2,6 +2,7 @@ package controllers
 
 import (
 	h "deepflower/internal/helpers"
+	"deepflower/internal/model"
 	"deepflower/internal/usecase"
 	"errors"
 	"fmt"
@@ -15,10 +16,14 @@ import (
 type TelegramBot struct {
 	Bot         *tgbotapi.BotAPI
 	Logger      *zerolog.Logger
-	Authusecase *usecase.AuthUsecase
+	Authusecase AuthUsecaseInterface
 }
 
-func NewBot(debug bool, client *http.Client, logger *zerolog.Logger, authusecase *usecase.AuthUsecase) (TelegramBot, error) {
+type AuthUsecaseInterface interface {
+	RegistrationFromTg(tguser model.UserTelegram) (model.User, error)
+}
+
+func NewBot(debug bool, client *http.Client, logger *zerolog.Logger, authusecase AuthUsecaseInterface) (TelegramBot, error) {
 	bot, err := tgbotapi.NewBotAPIWithClient(viper.GetString("telegram.token"), client)
 	bot.Debug = debug
 	if err != nil {
@@ -31,26 +36,22 @@ func NewBot(debug bool, client *http.Client, logger *zerolog.Logger, authusecase
 func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var upd tgbotapi.Update
-
 	if err := h.DecodeJSONBody(w, r, &upd); err != nil {
 		fmt.Println(err)
 	}
-
-	tgId := upd.Message.From.ID
-	chatId := upd.Message.Chat.ID
-	firstName := upd.Message.From.FirstName
-	lastName := upd.Message.From.LastName
-	userName := upd.Message.From.UserName
-	languageCode := upd.Message.From.LanguageCode
-
-	t.Logger.Printf("user telegrammId %s ChatId %s firstname %s lastname %s username %s languageCode %s",
-		tgId, chatId, firstName, lastName, userName, languageCode)
-
+	u := model.UserTelegram{TgId: upd.Message.From.ID,
+		TgChatId:       upd.Message.Chat.ID,
+		TgFirstName:    upd.Message.From.FirstName,
+		TgLastName:     upd.Message.From.LastName,
+		TgUserName:     upd.Message.From.UserName,
+		TgLanguageCode: upd.Message.From.LanguageCode,
+	}
+	t.Logger.Printf("%s", u)
 	// registration
 	if upd.Message.Text == "/start" {
 		var message string
 		var ErrAuthUserAlreadyExist usecase.ErrAuthUserAlreadyExist
-		usepas, err := t.Authusecase.RegistrationFromTg(tgId, chatId, userName, firstName, lastName, languageCode)
+		usepas, err := t.Authusecase.RegistrationFromTg(u)
 		if err != nil {
 			if errors.Is(err, ErrAuthUserAlreadyExist) {
 				message = fmt.Sprintf("Glad to see you here again, %s!", usepas.Username)

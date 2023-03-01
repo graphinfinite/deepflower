@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"deepflower/internal/usecase"
 	"net/http"
 
 	"github.com/rs/zerolog"
@@ -9,11 +8,11 @@ import (
 )
 
 type AuthController struct {
-	Uc *usecase.AuthUsecase
+	Uc AuthUsecaseInterface
 	L  *zerolog.Logger
 }
 
-func NewAuthController(uc *usecase.AuthUsecase, logger *zerolog.Logger) AuthController {
+func NewAuthController(uc AuthUsecaseInterface, logger *zerolog.Logger) AuthController {
 	return AuthController{Uc: uc, L: logger}
 
 }

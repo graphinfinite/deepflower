@@ -36,9 +36,29 @@ func (app *App) Run() error {
 	if err != nil {
 		return err
 	}
+	// migrations
+	// if err := repository.MigrateDb(dbPool); err != nil {
+	// 	return err
+	// }
+	q := `CREATE TABLE IF NOT EXIST user(
+		ID             integer PRIMARY KEY,
+		CreatedAt      timestamp DEFAULT current_timestamp NOT NULL,
+		UpdatedAt      timestamp DEFAULT current_timestamp NOT NULL,
+		Username       VARCHAR(64) UNIQUE NOT NULL,
+		Password       VARCHAR(64) NOT NULL,
+		HashedPassword VARCHAR(128) NOT NULL,
+		Active         BOOL NOT NULL,
+		TgId    integer UNIQUE NOT NULL,
+		TgChatId integer NOT NULL
+		TgUserName VARCHAR(64),
+	 	TgFirstName VARCHAR(64) NOT NULL,
+	    TgLastName VARCHAR(64) NOT NULL, 
+	  	TgLanguageCode VARCHAR(64) NOT NULL)`
 
-	if err := repository.MigrateDb(dbPool); err != nil {
-		return err
+	defer dbPool.Close()
+	_, errDb := dbPool.Exec(q)
+	if errDb != nil {
+		return errDb
 	}
 
 	userstore := repository.NewUserStorage(dbPool)

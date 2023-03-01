@@ -36,10 +36,10 @@ func (s *UserStorage) GetUserByTgId(tgId int) (model.User, error) {
 }
 
 // return user id(int)
-func (s *UserStorage) CreateUser(tgId int, tgchatId int64, tgUserName, tgFirstName, tgLastName, tgLanguageCode, hash, newusername string) (int, error) {
+func (s *UserStorage) CreateUser(u model.User) (int, error) {
 	var id int
 	query := `INSERT INTO user(tgId, chatId, TgUserName, tgFirstName, tgLastName, tgLanguageCode, hashedPassword, username) VALUES(?,?,?,?,?,?) returning id; `
-	err := s.Db.QueryRow(query, tgId, tgchatId, tgUserName, tgFirstName, tgLastName, tgLanguageCode, hash, newusername).Scan(&id)
+	err := s.Db.QueryRow(query, u.TgId, u.TgChatId, u.TgUserName, u.TgFirstName, u.TgLastName, u.TgLanguageCode, u.HashedPassword, u.Username).Scan(&id)
 	if err != nil {
 		return 0, err
 	}

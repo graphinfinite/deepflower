@@ -1,12 +1,20 @@
-FROM golang:1.14.6-alpine3.12 as builder
-COPY go.mod go.sum /go/src/gitlab.com/idoko/bucketeer/
-WORKDIR /go/src/gitlab.com/idoko/bucketeer
-RUN go mod download
-COPY . /go/src/gitlab.com/idoko/bucketeer
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o build/bucketeer gitlab.com/idoko/bucketeer
+FROM golang:1.15-alpine3.12 AS builder
 
-FROM alpine
-RUN apk add --no-cache ca-certificates && update-ca-certificates
-COPY --from=builder /go/src/gitlab.com/idoko/bucketeer/build/bucketeer /usr/bin/bucketeer
-EXPOSE 8080 8080
-ENTRYPOINT ["/usr/bin/bucketeer"]
+RUN go version
+
+COPY ./ ./
+WORKDIR /deepflower/
+
+RUN go mod download
+RUN GOOS=linux go build -o ./.bin/deepflower ./cmd/deepflower/main.go
+
+FROM alpine:latest
+
+WORKDIR /root/
+
+COPY --from=builder /deepflower/.bin/deepflower .
+COPY --from=builder /deepflower/config config/
+
+EXPOSE 80 8787
+
+CMD ["./deepflower"]

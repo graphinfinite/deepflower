@@ -10,7 +10,7 @@ auth:
 
 
 postgres: 
-    address: "postgres://localhost:5432/database?sslmode=enable"
+    address: "postgres://postgres:postgrespw@localhost:32768"
 
 mongo:
   uri: "mongodb://mongodb:29078"
