@@ -26,13 +26,38 @@ func NewApp() *App {
 	return &App{}
 }
 
+type PostgresConfig struct {
+	Host,
+	Port,
+	User,
+	Password,
+	Dbname,
+	Sslmode string
+}
+
 func (app *App) Run() error {
 
 	// https://github.com/Permify/go-role
 	// https://habr.com/ru/company/vk/blog/692062/
 
 	zlog := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
-	dbPool, err := repository.NewPostgresPool(viper.GetString("postgres.address"))
+
+	pgconf := PostgresConfig{Host: viper.GetString("postgres.host"),
+		Port:     viper.GetString("postgres.port"),
+		User:     viper.GetString("postgres.user"),
+		Password: viper.GetString("postgres.password"),
+		Dbname:   viper.GetString("postgres.dbname")}
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		pgconf.Host,
+		pgconf.Port,
+		pgconf.User,
+		pgconf.Password,
+		pgconf.Dbname)
+
+	zlog.Printf("psqlInfo: %s", psqlInfo)
+	dbPool, err := repository.NewPostgresPool(psqlInfo)
 	if err != nil {
 		return err
 	}
@@ -40,20 +65,20 @@ func (app *App) Run() error {
 	// if err := repository.MigrateDb(dbPool); err != nil {
 	// 	return err
 	// }
-	q := `CREATE TABLE IF NOT EXIST user(
-		ID             integer PRIMARY KEY,
-		CreatedAt      timestamp DEFAULT current_timestamp NOT NULL,
-		UpdatedAt      timestamp DEFAULT current_timestamp NOT NULL,
-		Username       VARCHAR(64) UNIQUE NOT NULL,
-		Password       VARCHAR(64) NOT NULL,
-		HashedPassword VARCHAR(128) NOT NULL,
-		Active         BOOL NOT NULL,
-		TgId    integer UNIQUE NOT NULL,
-		TgChatId integer NOT NULL
-		TgUserName VARCHAR(64),
-	 	TgFirstName VARCHAR(64) NOT NULL,
-	    TgLastName VARCHAR(64) NOT NULL, 
-	  	TgLanguageCode VARCHAR(64) NOT NULL)`
+	q := `CREATE TABLE IF NOT EXISTS "user" (
+		id serial PRIMARY KEY,
+		createdAt timestamp DEFAULT current_timestamp NOT NULL,
+		updatedAt timestamp DEFAULT current_timestamp NOT NULL,
+		username VARCHAR(64) UNIQUE NOT NULL,
+		password VARCHAR(64) NOT NULL,
+		hashedPassword VARCHAR(128) NOT NULL,
+		active BOOLEAN NOT NULL,
+		tgId    integer UNIQUE NOT NULL,
+		tgChatId integer NOT NULL,
+		tgUserName VARCHAR(64),
+	 	tgFirstName VARCHAR(64) NOT NULL,
+	    tgLastName VARCHAR(64) NOT NULL, 
+	  	tgLanguageCode VARCHAR(64) NOT NULL);`
 
 	defer dbPool.Close()
 	_, errDb := dbPool.Exec(q)

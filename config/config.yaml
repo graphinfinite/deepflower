@@ -1,6 +1,5 @@
 host: "127.0.0.1"
 port: 8787
-
 project_name: "deepflower"
 
 auth:
@@ -8,14 +7,13 @@ auth:
   signing_key: "signing_key"
   token_ttl: 77777
 
-
 postgres: 
-    address: "postgres://postgres:postgrespw@localhost:32768"
-
-mongo:
-  uri: "mongodb://mongodb:29078"
-  name: "deepflowerdb"
-  user_collection: "users"
+    #address: "postgres://postgres:postgrespw@localhost:32768"
+    host: host.docker.internal
+    port: 32771
+    user: "postgres"
+    password: "postgrespw"
+    dbname: "deepflower"
 
 telegram:
   token: "6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro"

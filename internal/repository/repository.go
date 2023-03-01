@@ -28,7 +28,7 @@ func MigrateDb(db *sql.DB) error {
 }
 
 func NewPostgresPool(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", "postgres://localhost:5432/database?sslmode=enable")
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
