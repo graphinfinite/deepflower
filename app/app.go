@@ -63,7 +63,7 @@ func (app *App) Run(cfg config.Configuration) error {
 	// temporary webhook set
 	//_, err := client.Get("https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://e33b-109-106-142-77.eu.ngrok.io/bot")
 	//if err!= nil{}
-	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://62fb-5-187-75-135.eu.ngrok.io/bot
+	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://d5d8-109-106-142-77.eu.ngrok.io/bot
 
 	r := chi.NewRouter()
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("info")) })
