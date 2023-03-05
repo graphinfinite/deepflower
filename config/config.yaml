@@ -8,9 +8,8 @@ auth:
   token_ttl: 77777
 
 postgres: 
-    #address: "postgres://postgres:postgrespw@localhost:32768"
     host: host.docker.internal
-    port: 32771
+    port: 32768
     user: "postgres"
     password: "postgrespw"
     dbname: "deepflower"

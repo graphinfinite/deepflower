@@ -27,28 +27,27 @@ func NewAuthUsecase(r UserStorageInterface) AuthUsecase {
 // if user with tgId already exist -> ErrAuthUserAlreadyExist (and update chatId, userName, firstName, lastName, languageCode)
 func (auth *AuthUsecase) RegistrationFromTg(tguser m.UserTelegram) (m.User, error) {
 	var ErrUserNotFound repository.ErrStoreUserNotFound
+	fmt.Printf("\nREGISTRATIO USECASE %d \n", tguser.TgId)
+	_, err := auth.Rep.GetUserByTgId(tguser.TgId)
 
-	print("GGGGGGGG")
-	user, err := auth.Rep.GetUserByTgId(tguser.TgId)
-	print("GGGGGGGGAAAAAAA")
-	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			print("ErrUserNotFoundErrUserNotFound")
-			newusername := h.GenUserName()
-			newpassword := h.GenNewPassword()
-			hash, err := h.HashAndSalt([]byte(newpassword))
-			if err != nil {
-				return m.User{}, err
-			}
-
-			_, err = auth.Rep.CreateUser(m.User{UserTelegram: tguser, HashedPassword: hash, Username: newusername})
-			if err != nil {
-				return m.User{}, err
-			}
-			return m.User{Username: newusername, Password: newpassword}, nil
+	fmt.Printf("%T, %s", err, err.Error())
+	switch {
+	case errors.Is(err, ErrUserNotFound):
+		fmt.Print("ErrUserNotFound")
+		newusername := h.GenUserName()
+		newpassword := h.GenNewPassword()
+		hash, err := h.HashAndSalt([]byte(newpassword))
+		if err != nil {
+			return m.User{}, err
 		}
+		_, err = auth.Rep.CreateUser(m.User{UserTelegram: tguser, HashedPassword: hash, Username: newusername})
+		if err != nil {
+			return m.User{}, err
+		}
+		return m.User{Username: newusername, Password: newpassword}, nil
+	case err != nil:
+		return m.User{}, err
+	default:
+		return m.User{}, NewErrAuthUserAlreadyExist("", fmt.Errorf("user with tgid: %d already exist", tguser.TgId))
 	}
-	//TODO: update chatId, userName, firstName, lastName, languageCode for user
-	return m.User{Username: user.Username, Password: ""}, NewErrAuthUserAlreadyExist("", fmt.Errorf("user with tgid: %d already exist", tguser.TgId))
-
 }

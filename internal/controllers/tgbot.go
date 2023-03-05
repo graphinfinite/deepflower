@@ -39,14 +39,15 @@ func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Re
 	if err := h.DecodeJSONBody(w, r, &upd); err != nil {
 		fmt.Println(err)
 	}
-	u := model.UserTelegram{TgId: upd.Message.From.ID,
+	u := model.UserTelegram{
+		TgId:           upd.Message.From.ID,
 		TgChatId:       upd.Message.Chat.ID,
 		TgFirstName:    upd.Message.From.FirstName,
 		TgLastName:     upd.Message.From.LastName,
 		TgUserName:     upd.Message.From.UserName,
 		TgLanguageCode: upd.Message.From.LanguageCode,
 	}
-	t.Logger.Printf("User data: %s", u)
+	t.Logger.Printf("User data: %#v", u)
 	// registration
 	if upd.Message.Text == "/start" {
 		var message string

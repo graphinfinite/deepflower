@@ -10,15 +10,14 @@ import (
 )
 
 func MigrateDb(dbPool *sql.DB) error {
-	q := `CREATE TABLE IF NOT EXISTS "user" (
+	q := `CREATE TABLE IF NOT EXISTS "users" (
 		id serial PRIMARY KEY,
 		createdAt timestamp DEFAULT current_timestamp NOT NULL,
 		updatedAt timestamp DEFAULT current_timestamp NOT NULL,
 		username VARCHAR(64) UNIQUE NOT NULL,
-		password VARCHAR(64) NOT NULL,
 		hashedPassword VARCHAR(128) NOT NULL,
 		active BOOLEAN NOT NULL,
-		tgId    integer UNIQUE NOT NULL,
+		tgId integer UNIQUE NOT NULL,
 		tgChatId integer NOT NULL,
 		tgUserName VARCHAR(64),
 	 	tgFirstName VARCHAR(64) NOT NULL,
