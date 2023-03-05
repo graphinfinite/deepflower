@@ -58,20 +58,19 @@ func (app *App) Run(cfg config.Configuration) error {
 	userstore := repository.NewUserStorage(dbPool)
 	authusecase := usecase.NewAuthUsecase(&userstore)
 	auth := ctrl.NewAuthController(&authusecase, &zlog)
-	bot, _ := ctrl.NewBot(true, &client, &zlog, &authusecase)
+	bot, _ := ctrl.NewBot(false, &client, &zlog, &authusecase)
 
 	// temporary webhook set
 	//_, err := client.Get("https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://e33b-109-106-142-77.eu.ngrok.io/bot")
 	//if err!= nil{}
-	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://d5d8-109-106-142-77.eu.ngrok.io/bot
+	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://ad37-5-187-87-224.eu.ngrok.io/bot
 
 	r := chi.NewRouter()
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("info")) })
 	// first auth with telegram account
 	r.Get("/auth/register/tg", auth.RedirectToTelegram)
 	r.Post("/bot", bot.TelegramBotMessageReader)
-
-	// r.HandleFunc("/auth/login", TelegramBotMessageReader).Methods("POST")
+	r.Get("/auth/login", auth.Login)
 	// r.HandleFunc("/auth/logout", TelegramBotMessageReader).Methods("POST")
 	// r.HandleFunc("/auth/remove", TelegramBotMessageReader).Methods("POST")
 

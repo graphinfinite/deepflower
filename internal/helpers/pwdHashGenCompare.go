@@ -21,17 +21,18 @@ func GenNewPassword() string {
 	return fmt.Sprint(r.Uint64())
 
 }
-func HashAndSalt(password []byte) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.MinCost)
+func HashAndSalt(password []byte, hashSalt int) (string, error) {
+	hash, err := bcrypt.GenerateFromPassword(password, hashSalt)
 	if err != nil {
 		return "", err
 	}
 	return string(hash), nil
 }
 
-func ComparePasswords(HashedPassword string, plainPassword []byte) bool {
+func ComparePasswords(HashedPassword, plainPassword string) bool {
 	byteHash := []byte(HashedPassword)
-	err := bcrypt.CompareHashAndPassword(byteHash, plainPassword)
+	bplainPassword := []byte(plainPassword)
+	err := bcrypt.CompareHashAndPassword(byteHash, bplainPassword)
 	if err != nil {
 		return false
 	}
