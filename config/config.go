@@ -1,18 +1,42 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"fmt"
+
+	"github.com/spf13/viper"
+)
 
 type Configuration struct {
-	Postgres PostgresConfig
+	Db       DbConfig
+	Auth     AuthConfig
+	Server   ServerConfig
+	Telegram TelegramConfig
 }
 
-type PostgresConfig struct {
+type AuthConfig struct {
+	Hash_salt   int
+	Signing_key int
+	Token_ttl   int
+}
+
+type DbConfig struct {
 	Host,
 	Port,
 	User,
 	Password,
 	Dbname,
-	Sslmode string
+	Sslmode,
+	Psql string
+}
+
+type ServerConfig struct {
+	Host,
+	Port string
+}
+
+type TelegramConfig struct {
+	Token,
+	Boturl string
 }
 
 func Init() (Configuration, error) {
@@ -23,11 +47,35 @@ func Init() (Configuration, error) {
 		return Configuration{}, err
 	}
 
-	pgconf := PostgresConfig{Host: viper.GetString("postgres.host"),
+	viper.AutomaticEnv()
+
+	dbconf := DbConfig{
+		Host:     viper.GetString("postgres.host"),
 		Port:     viper.GetString("postgres.port"),
 		User:     viper.GetString("postgres.user"),
 		Password: viper.GetString("postgres.password"),
 		Dbname:   viper.GetString("postgres.dbname")}
 
-	return Configuration{Postgres: pgconf}, nil
+	dbconf.Psql = fmt.Sprintf("host=%s port=%s user=%s "+"password=%s dbname=%s sslmode=disable",
+		dbconf.Host,
+		dbconf.Port,
+		dbconf.User,
+		dbconf.Password,
+		dbconf.Dbname)
+
+	authconf := AuthConfig{
+		Hash_salt:   viper.GetInt("auth.hash_salt"),
+		Signing_key: viper.GetInt("auth.signing_key"),
+		Token_ttl:   viper.GetInt("auth.token_ttl")}
+
+	srvconf := ServerConfig{
+		Host: viper.GetString("host"),
+		Port: viper.GetString("port"),
+	}
+	tgconf := TelegramConfig{
+		Token:  viper.GetString("telegram.token"),
+		Boturl: viper.GetString("telegram.boturl"),
+	}
+
+	return Configuration{Db: dbconf, Auth: authconf, Server: srvconf, Telegram: tgconf}, nil
 }

@@ -15,7 +15,7 @@ import (
 type AuthUsecase struct {
 	Rep            UserStorageInterface
 	hashSalt       int
-	signingKey     []byte
+	signingKey     int
 	expireDuration time.Duration
 }
 
@@ -25,8 +25,8 @@ type UserStorageInterface interface {
 	GetUserByUsername(username string) (m.User, error)
 }
 
-func NewAuthUsecase(r UserStorageInterface) AuthUsecase {
-	return AuthUsecase{Rep: r}
+func NewAuthUsecase(r UserStorageInterface, hashSalt int, signingKey int, expireDuration time.Duration) AuthUsecase {
+	return AuthUsecase{Rep: r, hashSalt: hashSalt, signingKey: signingKey, expireDuration: expireDuration}
 }
 
 // generate new username and password. save new user data.

@@ -1,6 +1,7 @@
-package helpers
+package controllers
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +12,53 @@ import (
 	"github.com/golang/gddo/httputil/header"
 )
 
+const (
+	STATUS_OK    = "ok"
+	STATUS_ERROR = "error"
+)
+
+type response struct {
+	Status string `json:"status"`
+	Msg    string `json:"message,omitempty"`
+}
+
+type responseWithStruct struct {
+	Status string      `json:"status"`
+	Msg    string      `json:"message,omitempty"`
+	Data   interface{} `json:"data"`
+}
+
+func newResponse(status, msg string) *response {
+	return &response{
+		Status: status,
+		Msg:    msg,
+	}
+}
+
+func JSON(w http.ResponseWriter, status, message string) {
+	buf := &bytes.Buffer{}
+	encoder := json.NewEncoder(buf)
+	encoder.SetEscapeHTML(true)
+	if err := encoder.Encode(newResponse(status, message)); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Write(buf.Bytes())
+}
+
+func JSONstruct(w http.ResponseWriter, status, message string, v interface{}) {
+	buf := &bytes.Buffer{}
+	encoder := json.NewEncoder(buf)
+	encoder.SetEscapeHTML(true)
+	rvs := responseWithStruct{Status: status, Msg: message, Data: v}
+	if err := encoder.Encode(rvs); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Write(buf.Bytes())
+}
+
 type malformedRequest struct {
 	status int
 	msg    string
@@ -18,6 +66,9 @@ type malformedRequest struct {
 
 func (mr *malformedRequest) Error() string {
 	return mr.msg
+}
+func (mr *malformedRequest) HttpStatus() int {
+	return mr.status
 }
 
 func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) error {
@@ -28,12 +79,9 @@ func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) err
 			return &malformedRequest{status: http.StatusUnsupportedMediaType, msg: msg}
 		}
 	}
-
 	r.Body = http.MaxBytesReader(w, r.Body, 1048576)
-
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
-
 	err := dec.Decode(&dst)
 	if err != nil {
 		var syntaxError *json.SyntaxError
@@ -74,6 +122,5 @@ func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) err
 		msg := "Request body must only contain a single JSON object"
 		return &malformedRequest{status: http.StatusBadRequest, msg: msg}
 	}
-
 	return nil
 }

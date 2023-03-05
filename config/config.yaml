@@ -3,9 +3,9 @@ port: 8787
 project_name: "deepflower"
 
 auth:
-  hash_salt: "hash_salt"
-  signing_key: "signing_key"
-  token_ttl: 77777
+  hash_salt: 1234
+  signing_key: 10
+  token_ttl: 7777 #min
 
 postgres: 
     host: host.docker.internal

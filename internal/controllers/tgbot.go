@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	h "deepflower/internal/helpers"
 	"deepflower/internal/model"
 	"deepflower/internal/usecase"
 	"errors"
@@ -10,7 +9,6 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/rs/zerolog"
-	"github.com/spf13/viper"
 )
 
 type TelegramBot struct {
@@ -19,8 +17,8 @@ type TelegramBot struct {
 	Authusecase AuthUsecaseInterface
 }
 
-func NewBot(debug bool, client *http.Client, logger *zerolog.Logger, authusecase AuthUsecaseInterface) (TelegramBot, error) {
-	bot, err := tgbotapi.NewBotAPIWithClient(viper.GetString("telegram.token"), client)
+func NewBot(debug bool, token string, client *http.Client, authusecase AuthUsecaseInterface, logger *zerolog.Logger) (TelegramBot, error) {
+	bot, err := tgbotapi.NewBotAPIWithClient(token, client)
 	bot.Debug = debug
 	if err != nil {
 		return TelegramBot{}, err
@@ -31,7 +29,7 @@ func NewBot(debug bool, client *http.Client, logger *zerolog.Logger, authusecase
 func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var upd tgbotapi.Update
-	if err := h.DecodeJSONBody(w, r, &upd); err != nil {
+	if err := DecodeJSONBody(w, r, &upd); err != nil {
 		fmt.Println(err)
 	}
 	u := model.UserTelegram{

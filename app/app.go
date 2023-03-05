@@ -15,8 +15,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog"
-	"github.com/spf13/viper"
 )
 
 type App struct {
@@ -28,62 +28,52 @@ func NewApp() *App {
 }
 
 func (app *App) Run(cfg config.Configuration) error {
-
-	// https://github.com/Permify/go-role
-	// https://habr.com/ru/company/vk/blog/692062/
-
 	zlog := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		cfg.Postgres.Host,
-		cfg.Postgres.Port,
-		cfg.Postgres.User,
-		cfg.Postgres.Password,
-		cfg.Postgres.Dbname)
-
-	zlog.Printf("psqlInfo: %s", psqlInfo)
-	dbPool, err := repository.NewPostgresPool(psqlInfo)
+	zlog.Info().Msgf("configurate %+v", cfg)
+	zlog.Info().Msgf("connect to db...")
+	dbPool, err := repository.NewPostgresPool(cfg.Db.Psql)
 	if err != nil {
 		return err
 	}
 	defer dbPool.Close()
 	// migrations
+	zlog.Info().Msgf("migrate... ")
 	if err := repository.MigrateDb(dbPool); err != nil {
 		return err
 	}
-
-	client := http.Client{}
-
+	client := http.Client{Timeout: time.Second * 10}
 	userstore := repository.NewUserStorage(dbPool)
-	authusecase := usecase.NewAuthUsecase(&userstore)
+	authusecase := usecase.NewAuthUsecase(
+		&userstore,
+		cfg.Auth.Hash_salt,
+		cfg.Auth.Signing_key,
+		time.Duration(cfg.Auth.Token_ttl))
 	auth := ctrl.NewAuthController(&authusecase, &zlog)
-	bot, _ := ctrl.NewBot(false, &client, &zlog, &authusecase)
+	bot, _ := ctrl.NewBot(false, cfg.Telegram.Token, &client, &authusecase, &zlog)
 
-	// temporary webhook set
-	//_, err := client.Get("https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://e33b-109-106-142-77.eu.ngrok.io/bot")
-	//if err!= nil{}
 	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://ad37-5-187-87-224.eu.ngrok.io/bot
 
 	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("info")) })
-	// first auth with telegram account
-	r.Get("/auth/register/tg", auth.RedirectToTelegram)
-	r.Post("/bot", bot.TelegramBotMessageReader)
-	r.Get("/auth/login", auth.Login)
-	// r.HandleFunc("/auth/logout", TelegramBotMessageReader).Methods("POST")
-	// r.HandleFunc("/auth/remove", TelegramBotMessageReader).Methods("POST")
+
+	r.Use(middleware.Timeout(60 * time.Second))
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("info")) }) //root
+	r.Get("/auth/sign-up/tg", auth.RedirectToTelegram)                                   // redirect to tg bot
+	r.Post("/bot", bot.TelegramBotMessageReader)                                         // entrypoint to tg bot
+	r.Post("/auth/sign-in", auth.Login)                                                  // jwt-auth
+	r.Route("/miau", func(r chi.Router) {
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("strange")) })
+	})
 
 	// HTTP Server
 	app.httpServer = &http.Server{
-		Addr:           net.JoinHostPort(viper.GetString("host"), viper.GetString("port")),
+		Addr:           net.JoinHostPort(cfg.Server.Host, cfg.Server.Port),
 		Handler:        r,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
-
-	fmt.Printf("deepflower server start... %s", app.httpServer.Addr)
+	zlog.Info().Msgf("deepflower server start... %s", app.httpServer.Addr)
 	go func() {
 		err := app.httpServer.ListenAndServe()
 		zlog.Info().Msg(err.Error())
