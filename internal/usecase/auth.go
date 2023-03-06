@@ -15,7 +15,7 @@ import (
 type AuthUsecase struct {
 	Rep            UserStorageInterface
 	hashSalt       int
-	signingKey     int
+	signingKey     string
 	expireDuration time.Duration
 }
 
@@ -25,7 +25,7 @@ type UserStorageInterface interface {
 	GetUserByUsername(username string) (m.User, error)
 }
 
-func NewAuthUsecase(r UserStorageInterface, hashSalt int, signingKey int, expireDuration time.Duration) AuthUsecase {
+func NewAuthUsecase(r UserStorageInterface, hashSalt int, signingKey string, expireDuration time.Duration) AuthUsecase {
 	return AuthUsecase{Rep: r, hashSalt: hashSalt, signingKey: signingKey, expireDuration: expireDuration}
 }
 
@@ -61,30 +61,46 @@ func (auth *AuthUsecase) Login(username, password string) (token string, err err
 		return "", err
 	}
 	if ok := h.ComparePasswords(user.HashedPassword, password); !ok {
-		return "", fmt.Errorf("err")
+		return "", fmt.Errorf("password invalide")
 	}
 	jwttoken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user":      "bar",
-		"IssuedAt":  time.Now().Unix(),
-		"ExpiresAt": time.Now().Add(auth.expireDuration).Unix(),
+		"sub": username,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(auth.expireDuration).Unix(),
 	})
-	tokenString, err := jwttoken.SignedString(auth.signingKey)
-	fmt.Printf("Token& :%s, Error vith token generate %s", tokenString, err.Error())
-	return tokenString, err
+	tokenString, err := jwttoken.SignedString([]byte(auth.signingKey))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }
 
-func (auth *AuthUsecase) Logout(username string) error {
+func (auth *AuthUsecase) ValidateJwtToken(tokenString string) (bool, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
+		return []byte(auth.signingKey), nil
+	})
 
-	//
+	claims, ok := token.Claims.(jwt.MapClaims)
+	switch {
+	case ok && token.Valid:
+		// TODO check exp date and user
+		print(claims.GetSubject())
+		print(claims.GetExpirationTime())
+		return true, nil
+	case !ok || !token.Valid:
+		return false, nil
+	case err != nil:
+		return false, err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		fmt.Println(claims.GetSubject())
+		return true, nil
+	}
 
-	return nil
-
-}
-
-func (auth *AuthUsecase) ValidateJwtToken(username string) error {
-
-	//
-
-	return nil
+	return false, nil
 
 }

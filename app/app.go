@@ -37,22 +37,22 @@ func (app *App) Run(cfg config.Configuration) error {
 		return err
 	}
 	defer dbPool.Close()
-	// migrations
 	zlog.Info().Msgf("migrate... ")
 	if err := repository.MigrateDb(dbPool); err != nil {
 		return err
 	}
 	client := http.Client{Timeout: time.Second * 10}
 	userstore := repository.NewUserStorage(dbPool)
+
 	authusecase := usecase.NewAuthUsecase(
 		&userstore,
 		cfg.Auth.Hash_salt,
 		cfg.Auth.Signing_key,
-		time.Duration(cfg.Auth.Token_ttl))
+		time.Duration(cfg.Auth.Token_ttl)*time.Minute)
 	auth := ctrl.NewAuthController(&authusecase, &zlog)
 	bot, _ := ctrl.NewBot(false, cfg.Telegram.Token, &client, &authusecase, &zlog)
 
-	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://ad37-5-187-87-224.eu.ngrok.io/bot
+	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://dfeb-5-187-87-224.eu.ngrok.io/bot
 
 	r := chi.NewRouter()
 
@@ -62,6 +62,7 @@ func (app *App) Run(cfg config.Configuration) error {
 	r.Post("/bot", bot.TelegramBotMessageReader)                                         // entrypoint to tg bot
 	r.Post("/auth/sign-in", auth.Login)                                                  // jwt-auth
 	r.Route("/miau", func(r chi.Router) {
+		r.Use(auth.JWT)
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("strange")) })
 	})
 

@@ -47,10 +47,12 @@ func (auth *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	u := loginUser{}
 	if err := DecodeJSONBody(w, r, &u); err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
+		return
 	}
 	token, err := auth.Uc.Login(u.Username, u.Password)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
+		return
 	}
-	JSONstruct(w, STATUS_OK, "", newSignInResponse(token))
+	JSONstruct(w, STATUS_OK, "token successfully generated", newSignInResponse(token))
 }
