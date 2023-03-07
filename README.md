@@ -1,7 +1,9 @@
 Information.
 
 for local test see ---> config/config.yaml 
+
 docker pull postgres:latest
+
 docker run
     --name myPostgresDb
     -p 32768:5432
