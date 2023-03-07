@@ -11,6 +11,8 @@ type User struct {
 	Password       string
 	HashedPassword string
 	Active         bool
+	Status         uint
+	Energy         uint64
 }
 
 type UserTelegram struct {

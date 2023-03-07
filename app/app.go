@@ -57,13 +57,24 @@ func (app *App) Run(cfg config.Configuration) error {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Timeout(60 * time.Second))
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("info")) }) //root
-	r.Get("/auth/sign-up/tg", auth.RedirectToTelegram)                                   // redirect to tg bot
-	r.Post("/bot", bot.TelegramBotMessageReader)                                         // entrypoint to tg bot
-	r.Post("/auth/sign-in", auth.Login)                                                  // jwt-auth
-	r.Route("/miau", func(r chi.Router) {
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) }) //root
+	r.Post("/bot", bot.TelegramBotMessageReader)                                          // entrypoint to tg bot
+	r.Get("/auth/sign-up/tg", auth.RedirectToTelegram)                                    // redirect to tg bot
+	r.Post("/auth/sign-in", auth.Login)                                                   // jwt-auth
+
+	// user methods
+	r.Route("/dreams", func(r chi.Router) {
 		r.Use(auth.JWT)
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("strange")) })
+		//r.GET("/", dream.GetAllUserDreams)
+		//r.POST("/", dream.CreateDream)
+		//r.Get("/{dreamId}", dream.GetUserDreamById)
+		//r.Put("/{{dreamId}", dream.UpdateUserDreamById)
+		//r.Delete("/{{dreamId}", dream.DeleteUserDreamById)
+		r.Route("/{dreamId}/tasks", func(r chi.Router) {
+			//r.Get("/", dream.GetAllUserDreamTasks)
+			//r.Get("/{taskId}", dream.GetUserDreamTaskById)
+		})
+
 	})
 
 	// HTTP Server

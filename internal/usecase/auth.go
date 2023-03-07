@@ -75,7 +75,7 @@ func (auth *AuthUsecase) Login(username, password string) (token string, err err
 	return tokenString, nil
 }
 
-func (auth *AuthUsecase) ValidateJwtToken(tokenString string) (bool, error) {
+func (auth *AuthUsecase) ValidateJwtToken(tokenString string) (bool, jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -84,23 +84,13 @@ func (auth *AuthUsecase) ValidateJwtToken(tokenString string) (bool, error) {
 		return []byte(auth.signingKey), nil
 	})
 
+	if err != nil {
+		return false, nil, err
+	}
 	claims, ok := token.Claims.(jwt.MapClaims)
-	switch {
-	case ok && token.Valid:
-		// TODO check exp date and user
-		print(claims.GetSubject())
-		print(claims.GetExpirationTime())
-		return true, nil
-	case !ok || !token.Valid:
-		return false, nil
-	case err != nil:
-		return false, err
+	//print(claims.GetSubject())
+	if ok && token.Valid {
+		return true, claims, nil
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println(claims.GetSubject())
-		return true, nil
-	}
-
-	return false, nil
-
+	return false, nil, nil
 }

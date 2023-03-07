@@ -4,6 +4,7 @@ import (
 	"deepflower/internal/model"
 	"net/http"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )
@@ -16,6 +17,7 @@ type AuthController struct {
 type AuthUsecaseInterface interface {
 	RegistrationFromTg(tguser model.UserTelegram) (model.User, error)
 	Login(username, password string) (token string, err error)
+	ValidateJwtToken(tokenString string) (bool, jwt.MapClaims, error)
 }
 
 func NewAuthController(uc AuthUsecaseInterface, logger *zerolog.Logger) AuthController {
