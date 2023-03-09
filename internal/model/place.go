@@ -1,5 +1,5 @@
 package model
 
-type Place struct {
+type Location struct {
 	Name string
 }

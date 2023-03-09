@@ -9,8 +9,9 @@ type Dream struct {
 	CreatedAt time.Time
 	PublishAt time.Time
 	Publised  bool
-	Status    uint
+	Status    string
 	Creater   uint
 	Energy    uint64
+	Location  string
 	CountG    int
 }

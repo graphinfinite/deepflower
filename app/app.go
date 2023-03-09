@@ -52,10 +52,12 @@ func (app *App) Run(cfg config.Configuration) error {
 	auth := ctrl.NewAuthController(&authusecase, &zlog)
 	bot, _ := ctrl.NewBot(false, cfg.Telegram.Token, &client, &authusecase, &zlog)
 
+	dream := ctrl.NewDreamController(&zlog)
+	task := ctrl.NewTaskController(&zlog)
+
 	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://dfeb-5-187-87-224.eu.ngrok.io/bot
 
 	r := chi.NewRouter()
-
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) }) //root
 	r.Post("/bot", bot.TelegramBotMessageReader)                                          // entrypoint to tg bot
@@ -65,14 +67,24 @@ func (app *App) Run(cfg config.Configuration) error {
 	// user methods
 	r.Route("/dreams", func(r chi.Router) {
 		r.Use(auth.JWT)
-		//r.GET("/", dream.GetAllUserDreams)
-		//r.POST("/", dream.CreateDream)
-		//r.Get("/{dreamId}", dream.GetUserDreamById)
-		//r.Put("/{{dreamId}", dream.UpdateUserDreamById)
-		//r.Delete("/{{dreamId}", dream.DeleteUserDreamById)
+		r.Get("/", dream.GetAllUserDreams)
+		r.Get("/search", dream.SearchDreams) //json params for search
+		r.Post("/", dream.CreateDream)
+		r.Get("/{dreamId}", dream.GetUserDreamById)
+		r.Put("/{{dreamId}", dream.UpdateUserDreamById)
+		r.Delete("/{{dreamId}", dream.DeleteUserDreamById)
+
+		r.Post("/{dreamId}/push", dream.PushUserDreamById) // публикация, ограничение по задержке и по времени жизни
+
 		r.Route("/{dreamId}/tasks", func(r chi.Router) {
-			//r.Get("/", dream.GetAllUserDreamTasks)
-			//r.Get("/{taskId}", dream.GetUserDreamTaskById)
+			// создание связанного дерева задач
+			r.Get("/", task.GetAllUserDreamTasks)
+			r.Get("/search", task.SearchDreamTasks) //json params for search
+			r.Post("/", task.CreateUserDreamTask)
+			r.Get("/{taskId}", task.GetUserDreamTaskById)
+			r.Put("/{taskId}", task.UpdateUserDreamTaskById)
+			r.Delete("/{taskId}", task.DeleteUserDreamTaskById)
+
 		})
 
 	})

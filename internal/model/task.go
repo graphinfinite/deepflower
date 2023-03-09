@@ -13,6 +13,6 @@ type Task struct {
 	Creater      uint
 	Energy       uint64
 	TaskPrevious uint
-	TaskParent   uint
+	DreamId      uint
 	CountG       int
 }

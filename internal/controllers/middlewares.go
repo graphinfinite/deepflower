@@ -1,9 +1,14 @@
 package controllers
 
 import (
+	"context"
 	"net/http"
 	"strings"
 )
+
+type ContextKey string
+
+const ContextUserIdKey ContextKey = "userId"
 
 func (auth *AuthController) JWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -13,15 +18,18 @@ func (auth *AuthController) JWT(next http.Handler) http.Handler {
 			return
 		}
 		token := bearer[7:]
-		ok, _, err := auth.Uc.ValidateJwtToken(token)
+		ok, claims, err := auth.Uc.ValidateJwtToken(token)
 		if err != nil || !ok {
 			JSON(w, STATUS_ERROR, "token invalid")
 			return
 		}
-
-		//ctx := context.WithValue(r.Context(), some, claims)
-		//next.ServeHTTP(w, r.WithContext(ctx))
-		next.ServeHTTP(w, r)
+		userId, err := claims.GetSubject()
+		if err != nil {
+			JSON(w, STATUS_ERROR, "no subject in sub")
+		}
+		ctx := context.WithValue(r.Context(), ContextUserIdKey, userId)
+		next.ServeHTTP(w, r.WithContext(ctx))
+		//next.ServeHTTP(w, r)
 	})
 
 }

@@ -12,17 +12,17 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type UserStorageInterface interface {
+	CreateUser(u m.User) (int, error)
+	GetUserByTgId(tgId int) (m.User, error)
+	GetUserByUsername(username string) (m.User, error)
+}
+
 type AuthUsecase struct {
 	Rep            UserStorageInterface
 	hashSalt       int
 	signingKey     string
 	expireDuration time.Duration
-}
-
-type UserStorageInterface interface {
-	CreateUser(u m.User) (int, error)
-	GetUserByTgId(tgId int) (m.User, error)
-	GetUserByUsername(username string) (m.User, error)
 }
 
 func NewAuthUsecase(r UserStorageInterface, hashSalt int, signingKey string, expireDuration time.Duration) AuthUsecase {
@@ -55,6 +55,11 @@ func (auth *AuthUsecase) RegistrationFromTg(tguser m.UserTelegram) (m.User, erro
 	}
 }
 
+type CustomClaims struct {
+	X string `json:"foo"`
+	jwt.RegisteredClaims
+}
+
 func (auth *AuthUsecase) Login(username, password string) (token string, err error) {
 	user, err := auth.Rep.GetUserByUsername(username)
 	if err != nil {
@@ -63,11 +68,22 @@ func (auth *AuthUsecase) Login(username, password string) (token string, err err
 	if ok := h.ComparePasswords(user.HashedPassword, password); !ok {
 		return "", fmt.Errorf("password invalide")
 	}
-	jwttoken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": username,
-		"iat": time.Now().Unix(),
-		"exp": time.Now().Add(auth.expireDuration).Unix(),
-	})
+
+	claims := CustomClaims{
+		"x",
+		jwt.RegisteredClaims{
+			// A usual scenario is to set the expiration time relative to the current time
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(auth.expireDuration * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			Issuer:    "test",
+			Subject:   fmt.Sprint(user.ID),
+			ID:        "1",
+			Audience:  []string{"aud"},
+		},
+	}
+
+	jwttoken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := jwttoken.SignedString([]byte(auth.signingKey))
 	if err != nil {
 		return "", err

@@ -1,9 +1,7 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
-	"deepflower/internal/model"
 
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
@@ -22,7 +20,21 @@ func MigrateDb(dbPool *sql.DB) error {
 		tgUserName VARCHAR(64),
 	 	tgFirstName VARCHAR(64) NOT NULL,
 	    tgLastName VARCHAR(64) NOT NULL, 
-	  	tgLanguageCode VARCHAR(64) NOT NULL);`
+	  	tgLanguageCode VARCHAR(64) NOT NULL);
+		
+		CREATE TABLE IF NOT EXIST "dream" (
+		name VARCHAR(64) UNIQUE NOT NULL,
+		info TEXT,
+		createdAt timestamp DEFAULT current_timestamp NOT NULL,
+		publishAt timestamp DEFAULT current_timestamp NOT NULL,
+		published BOOLEAN NOT NULL,
+		status integer NOT NULL,
+		creater integer NOT NULL,
+		energy integer NOT NULL,
+		location VARCHAR(64),
+		countG integer NOT NULL);
+		
+		`
 	_, errDb := dbPool.Exec(q)
 	if errDb != nil {
 		return errDb
@@ -54,11 +66,4 @@ func NewPostgresPool(dsn string) (*sql.DB, error) {
 		return nil, err
 	}
 	return db, nil
-}
-
-type UserStorageInteface interface {
-	CreateUser() error
-	GetUserByTgId(ctx context.Context, tgId string) (model.User, error)
-	UpdateUser() (model.User, error)
-	DeleteUser() error
 }
