@@ -14,6 +14,8 @@
         <hr />
         <button type="submit">Login</button>
       </form>
+      <hr />
+      <a href="http://t.me/DeepFlowerbot">SignUpTelegram</a>
     </div>
   </template>
   
