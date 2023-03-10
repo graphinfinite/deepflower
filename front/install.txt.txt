@@ -1,2 +1,6 @@
 install node.js and npm
 npm install -g @vue/cli
+
+TypeScript Vue Plugin (Volar)
+npm install --save-dev sass
+
