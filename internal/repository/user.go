@@ -7,14 +7,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 type UserStorage struct {
-	Db *sql.DB
+	Db *sqlx.DB
 }
 
-func NewUserStorage(dbpool *sql.DB) UserStorage {
+func NewUserStorage(dbpool *sqlx.DB) UserStorage {
 	return UserStorage{Db: dbpool}
 }
 
@@ -73,7 +74,7 @@ func (s *UserStorage) GetUserByUsername(username string) (model.User, error) {
 }
 
 // return user id(int)
-func (s *UserStorage) CreateUser(u model.User) (int, error) {
+func (s *UserStorage) CreateUser(u model.User) (userId int, e error) {
 	var id int
 	fmt.Printf("USER  %#v \n", u)
 	query := `INSERT INTO users (tgId, tgChatId, tgUserName, tgFirstName, tgLastName, tgLanguageCode, hashedPassword, username, active, createdAt) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) returning id`

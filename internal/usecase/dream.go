@@ -2,12 +2,16 @@ package usecase
 
 import "deepflower/internal/model"
 
-type DreamStorageInterface interface {
-	CreateDream(name, info, location, creater string) (model.Dream, error)
-}
-
 type DreamUsecase struct {
 	Rep DreamStorageInterface
+}
+
+func NewDreamUsecase(s DreamStorageInterface) DreamUsecase {
+	return DreamUsecase{Rep: s}
+}
+
+type DreamStorageInterface interface {
+	CreateDream(name, info, location, creater string) (model.Dream, error)
 }
 
 func (d *DreamUsecase) CreateDream(name, info, location, creater string) (model.Dream, error) {

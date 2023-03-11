@@ -1,13 +1,12 @@
 package repository
 
 import (
-	"database/sql"
-
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-func MigrateDb(dbPool *sql.DB) error {
+func MigrateDb(dbPool *sqlx.DB) error {
 	q := `CREATE TABLE IF NOT EXISTS "users" (
 		id serial PRIMARY KEY,
 		createdAt timestamp DEFAULT current_timestamp NOT NULL,
@@ -25,13 +24,13 @@ func MigrateDb(dbPool *sql.DB) error {
 		CREATE TABLE IF NOT EXIST "dream" (
 		name VARCHAR(64) UNIQUE NOT NULL,
 		info TEXT,
-		createdAt timestamp DEFAULT current_timestamp NOT NULL,
-		publishAt timestamp DEFAULT current_timestamp NOT NULL,
+		createdAt timestamp NOT NULL,
+		publishAt timestamp NOT NULL,
 		published BOOLEAN NOT NULL,
-		status integer NOT NULL,
+		status VARCHAR(32) NOT NULL,
 		creater integer NOT NULL,
 		energy integer NOT NULL,
-		location VARCHAR(64),
+		location VARCHAR(128),
 		countG integer NOT NULL);
 		
 		`
@@ -57,8 +56,8 @@ func MigrateDb(dbPool *sql.DB) error {
 	*/
 }
 
-func NewPostgresPool(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", dsn)
+func NewPostgresPool(dsn string) (*sqlx.DB, error) {
+	db, err := sqlx.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
