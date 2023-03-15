@@ -66,6 +66,7 @@ func (app *App) Run(cfg config.Configuration) error {
 	r.Post("/auth/sign-in", auth.Login)                                                   // jwt-auth
 
 	// user methods
+	//
 	r.Route("/dreams", func(r chi.Router) {
 		r.Use(auth.JWT)
 		r.Get("/", dream.GetAllUserDreams)
