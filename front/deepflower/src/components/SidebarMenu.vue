@@ -47,7 +47,6 @@ function toggleSidebar() {
         </li>
         <li>
           <router-link to="/team">
-            <IconEmployeeGroup />
             <Transition name="fade">
               <span v-show="isSidebarOpen">Team</span>
             </Transition>
@@ -55,7 +54,6 @@ function toggleSidebar() {
         </li>
         <li>
           <router-link to="/contact">
-            <IconEmail />
             <Transition name="fade">
               <span v-show="isSidebarOpen">Contact</span>
             </Transition>

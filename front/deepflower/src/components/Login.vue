@@ -15,6 +15,12 @@
           <input :type="passwordFieldType" id="password" v-model="password" placeholder=".">
 
           <button type="submit">->...</button> 
+
+          <div class="form-group">
+          <div v-if="message" class="alert alert-danger" role="alert">
+            {{ messageErr }}
+          </div>
+        </div>
         </form>
         <br><br>
         <a id="signup" href="http://t.me/DeepFlowerbot">signup</a>
@@ -26,6 +32,10 @@
 
 <script setup>
   import { computed, ref } from "vue";
+  import AuthService from "@/modules/auth"
+
+
+  const messageErr = ref("ooo")
 
   const username = ref("");
   const hidePassword = ref(true);
@@ -33,8 +43,7 @@
 
   const passwordFieldIcon = computed(() => hidePassword.value ? "fa-eye" : "fa-eye-slash");
   const passwordFieldType = computed(() => hidePassword.value ? "password" : "text");
-
-  const doLogin = () => alert("Not implemented yet :O");
+  const doLogin = () => AuthService.login(username,password)
 </script>
 
 <style scoped>

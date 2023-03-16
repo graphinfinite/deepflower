@@ -11,7 +11,7 @@ import Login from '@/components/Login.vue'
   <div id="root">
     <SidebarMenu class="sidebar"/>
 
-    <div v-if="isAuthorazed"><RouterView class="router-view" /></div>
+    <div v-if="isAuthorazed"><RouterView class="router-view"/></div>
     <div v-else><Login/></div>
 
   </div>

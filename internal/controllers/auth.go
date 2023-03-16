@@ -31,8 +31,8 @@ func (auth *AuthController) RedirectToTelegram(w http.ResponseWriter, r *http.Re
 
 // Login ----->
 type loginUser struct {
-	Username string
-	Password string
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 type signInResponse struct {
 	Token string `json:"token,omitempty"`
