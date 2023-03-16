@@ -41,6 +41,8 @@ func (app *App) Run(cfg config.Configuration) error {
 	if err := repository.MigrateDb(dbPool); err != nil {
 		return err
 	}
+
+	// auth
 	client := http.Client{Timeout: time.Second * 10}
 	userstore := repository.NewUserStorage(dbPool)
 	authusecase := usecase.NewAuthUsecase(
@@ -51,9 +53,10 @@ func (app *App) Run(cfg config.Configuration) error {
 	auth := ctrl.NewAuthController(&authusecase, &zlog)
 	bot, _ := ctrl.NewBot(false, cfg.Telegram.Token, &client, &authusecase, &zlog)
 
+	// dream
 	ds := repository.NewDreamStorage(dbPool)
-	dreamusecase := usecase.NewDreamUsecase(ds)
-	dream := ctrl.NewDreamController(dreamusecase, &zlog)
+	dreamusecase := usecase.NewDreamUsecase(&ds)
+	dream := ctrl.NewDreamController(&dreamusecase, &zlog)
 	task := ctrl.NewTaskController(&zlog)
 
 	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://dfeb-5-187-87-224.eu.ngrok.io/bot

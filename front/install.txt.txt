@@ -1,5 +1,11 @@
 install node.js and npm
-npm install -g @vue/cli
+npm install create-vue@3.6.1
+npm install vite
+npm install vue-router@4
+
+npm i the-new-css-reset
+
+
 
 TypeScript Vue Plugin (Volar)
 npm install --save-dev sass

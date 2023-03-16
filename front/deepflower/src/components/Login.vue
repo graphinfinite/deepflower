@@ -1,51 +1,143 @@
 <template>
 
-  <div id="left" > </div>
-    <div id="right">
+    <div id="login">
+      <div id="description">
+        <h1>***</h1>
+        <p> Glory to the goats!</p>
+      </div>
+      <div id="form">
+        <form @submit.prevent="doLogin">
+          <label for="username">username</label>
+          <input type="text" id="username" v-model="username" placeholder="." autocomplete="off">
+          <label for="password">password</label>&nbsp;
+          <i class="fas" :class="[passwordFieldIcon]" @click="hidePassword = !hidePassword"></i>
+          <input :type="passwordFieldType" id="password" v-model="password" placeholder=".">
 
-      <form class="login-form" @submit.prevent="login">
-        <h2>Sign in</h2>
-        <hr>
-        <label>Username </label>
-        <input required v-model="username" type="text" placeholder="..." />
-        <hr>
-        <label> Password </label>
-        <input
-          required
-          v-model="password"
-          type="password"
-          placeholder="..."
-        />
-
-        <button type="submit">Login</button>
-      </form>
-      <a href="http://t.me/DeepFlowerbot">SignUpTelegram</a>
+          <button type="submit">->...</button> 
+        </form>
+        <br><br>
+        <a id="signup" href="http://t.me/DeepFlowerbot">signup</a>
+        
+        
+      </div>
     </div>
-  </template>
-  
-<style scoped lang="scss">
-@use '@/assets/scss/_colors' as clr;
+</template>
 
-#left { position: absolute; left: 0; top: 0; width: 20%; }
-#right { position: absolute; right: 0; top: 0; width: 70%; }
-  </style>
-  
-  <script  lang="ts">
-  export default {
-    name: "login-form",
-    data() {
-      return {
-        username: "",
-        password: ""
-      };
-    },
-    methods: {
-      login: function() {
-        const { username, password } = this;
-       // this.$store.dispatch("/auth/login", { username, password }).then(() => {
-        //  this.$router.push("/");
-       // });
-      }
-    }
-  };
-  </script>
+<script setup>
+  import { computed, ref } from "vue";
+
+  const username = ref("");
+  const hidePassword = ref(true);
+  const password = ref("");
+
+  const passwordFieldIcon = computed(() => hidePassword.value ? "fa-eye" : "fa-eye-slash");
+  const passwordFieldType = computed(() => hidePassword.value ? "password" : "text");
+
+  const doLogin = () => alert("Not implemented yet :O");
+</script>
+
+<style>
+
+div#login {
+  font-family: Verdana, sans-serif;
+  align-items: center;
+  background-color: #15042b;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+div#login div#description {
+  background-color: #ffffff;
+  width: 200px;
+  padding: 35px;
+}
+
+div#login div#description h1,
+div#login div#description p {
+  margin: 0;
+}
+
+div#login div#description p {
+  font-size: 0.8em;
+  color: #210b3f;
+  margin-top: 10px;
+}
+
+div#login div#form {
+  background-color: #000000;
+  border-radius: 5px;
+  box-shadow: 0px 0px 30px 0px #666;
+  color: #7740f7;
+  width: 260px;
+  padding: 35px;
+}
+
+
+
+div#login div#form label,
+div#login div#form input {
+  outline: none;
+  width: 100%;
+}
+
+div#login div#form label {
+  color: #6e5c7c;
+  font-size: 1em;
+
+}
+
+div#login div#form input {
+  background-color: transparent;
+  color: #ffffff;
+  font-size: 1em;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+div#login div#form ::placeholder {
+  color: #ecf0f1;
+  opacity: 1;
+}
+
+div#login div#form button {
+  background-color: #130227;
+  cursor: pointer;
+  border: none;
+  padding: 10px;
+  transition: background-color 1.5s ease-in-out;
+  width: 100%;
+}
+
+div#login div#form button:hover {
+  background-color: #000000;
+}
+
+@media screen and (max-width: 600px) {
+  div#login {
+    align-items: unset;
+    background-color: unset;
+    display: unset;
+    justify-content: unset;
+  }
+
+  div#login div#description {
+    margin: 0 auto;
+    max-width: 350px;
+    width: 100%;
+  }
+
+  div#login div#form {
+    border-radius: unset;
+    box-shadow: unset;
+    width: 100%;
+  }
+
+  div#login div#form form {
+    margin: 0 auto;
+    max-width: 280px;
+    width: 100%;
+  }
+}
+</style>

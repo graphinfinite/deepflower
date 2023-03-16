@@ -17,7 +17,7 @@ function toggleSidebar() {
     <aside :vue:is-open="isSidebarOpen">
       <ul class="sidebar-head">
         <li>
-          <img src="@/assets/logo.png" alt="logo" width="32" height="32">
+          <img src="@/assets/goat_animal_icon.png" alt="logo" width="32" height="32">
         </li>
         <li>
           <button class="sidebar-toggle" :class="isSidebarOpen ? 'toggle-button' : ''">
@@ -120,7 +120,7 @@ li {
 }
 .sidebar-head {
   position: relative;
-  // padding-block-end: 4rem;
+ padding-block-end: 4rem;
 }
 .sidebar-toggle {
   padding-inline-start: $sidebar-padding-inline-start;

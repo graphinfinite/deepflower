@@ -1,5 +1,8 @@
 import type { RouteRecordRaw } from "vue-router"
 import Home from "@/views/Home.vue"
+import About from "@/views/About.vue"
+
+
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -8,7 +11,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/about',
-    component: () => import('@/views/About.vue'),
+    component: About,
   },
 ]
 
