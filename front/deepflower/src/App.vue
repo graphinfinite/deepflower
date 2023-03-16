@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts">
 
 import { RouterView } from 'vue-router'
 import SidebarMenu from '@/components/SidebarMenu.vue';
@@ -9,24 +9,20 @@ import Login from '@/components/Login.vue'
 
 <template>
   <div id="root">
-    <SidebarMenu class="sidebar" />
+    <SidebarMenu class="sidebar"/>
+
     <div v-if="isAuthorazed"><RouterView class="router-view" /></div>
     <div v-else><Login/></div>
 
-    
   </div>
 </template>
 
 
-<script lang="ts">
-export default {
-  data() {
-    return {
-      isAuthorazed: false
-    }
+<script setup lang="ts">
+import {ref} from "vue"
 
-}
-}
+const isAuthorazed = ref(false);
+
 </script>
 
 <style scoped lang="scss">

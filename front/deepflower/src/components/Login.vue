@@ -2,7 +2,8 @@
 
     <div id="login">
       <div id="description">
-        <h1>***</h1>
+        <img src="@/assets/goat_animal_icon.png" alt="goatlogo" width="32" height="32">
+        <p> Welcome</p>
         <p> Glory to the goats!</p>
       </div>
       <div id="form">
@@ -10,7 +11,7 @@
           <label for="username">username</label>
           <input type="text" id="username" v-model="username" placeholder="." autocomplete="off">
           <label for="password">password</label>&nbsp;
-          <i class="fas" :class="[passwordFieldIcon]" @click="hidePassword = !hidePassword"></i>
+          <i class="fas" :class="[passwordFieldIcon]" @click="hidePassword = !hidePassword">*</i>
           <input :type="passwordFieldType" id="password" v-model="password" placeholder=".">
 
           <button type="submit">->...</button> 
@@ -36,7 +37,7 @@
   const doLogin = () => alert("Not implemented yet :O");
 </script>
 
-<style>
+<style scoped>
 
 div#login {
   font-family: Verdana, sans-serif;
