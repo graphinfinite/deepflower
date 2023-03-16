@@ -9,9 +9,11 @@ import Login from '@/components/Login.vue'
 
 <template>
   <div id="root">
-    <div v-if="notAuth"><Login/></div>
     <SidebarMenu class="sidebar" />
-    <RouterView class="router-view" />
+    <div v-if="isAuthorazed"><RouterView class="router-view" /></div>
+    <div v-else><Login/></div>
+
+    
   </div>
 </template>
 
@@ -20,7 +22,7 @@ import Login from '@/components/Login.vue'
 export default {
   data() {
     return {
-      notAuth: false
+      isAuthorazed: false
     }
 
 }
