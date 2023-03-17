@@ -21,7 +21,7 @@ func MigrateDb(dbPool *sqlx.DB) error {
 	    tgLastName VARCHAR(64) NOT NULL, 
 	  	tgLanguageCode VARCHAR(64) NOT NULL);
 		
-		CREATE TABLE IF NOT EXIST "dream" (
+		CREATE TABLE IF NOT EXISTS "dream" (
 		name VARCHAR(64) UNIQUE NOT NULL,
 		info TEXT,
 		createdAt timestamp NOT NULL,

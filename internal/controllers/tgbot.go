@@ -50,6 +50,8 @@ func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Re
 		case errors.As(err, &ErrAuthUserAlreadyExist):
 			message = fmt.Sprintf("Glad to see you here again, %s!", usepas.Username)
 		case err != nil:
+
+			fmt.Print(err)
 			message = "I'm broke. Sorry"
 		default:
 			message = fmt.Sprintf("Success registration!\n Username: %s \nPassword: %s", usepas.Username, usepas.Password)

@@ -1,25 +1,31 @@
-import axios from 'axios'
+import axios, { AxiosHeaders } from 'axios'
+
+axios.defaults.baseURL = 'http://127.0.0.1:8787';
+
+axios.interceptors.request.use((request) => {
+  request.headers.set('Content-Type', "application/json");
+  return request;
+});
 
 
-
-const API_URL = 'http://localhost:8080/auth/';
-
-interface UserLogin {
-    username: string,
-    password: string
-}
 
 class AuthService {
   login(username:string, password:string) {
-    return axios.post(API_URL + 'sign-in', {
-        username: username,
-        password: password
-      })
-      .then(response => {
+    let userLogin = JSON.stringify({
+      username: username,
+      password: password
+    })
+
+    console.log(userLogin)
+
+    return axios.post('auth/sign-in', userLogin).then(response => {
         console.log(response.data)
         if (response.data.status === "ok") {
-            localStorage.setItem('tokenAccess', JSON.stringify(response.data.token));
-        }
+
+            console.log(response.data.data)
+            localStorage.setItem('tokenAccess', JSON.stringify(response.data.data.token));
+            location.reload()
+        } 
         return response.data;
       });
   }

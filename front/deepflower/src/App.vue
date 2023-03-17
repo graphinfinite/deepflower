@@ -21,7 +21,11 @@ import Login from '@/components/Login.vue'
 <script setup lang="ts">
 import {ref} from "vue"
 
-const isAuthorazed = ref(false);
+//import { useLocalStorage } from '@vueuse/core'
+console.log(localStorage.getItem("tokenAccess"))
+const isAuthorazed = ref(Boolean(localStorage.getItem("tokenAccess")))
+
+
 
 </script>
 

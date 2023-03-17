@@ -20,13 +20,13 @@ type UserStorageInterface interface {
 
 type AuthUsecase struct {
 	Rep            UserStorageInterface
-	hashSalt       int
+	cost           int
 	signingKey     string
 	expireDuration time.Duration
 }
 
-func NewAuthUsecase(r UserStorageInterface, hashSalt int, signingKey string, expireDuration time.Duration) AuthUsecase {
-	return AuthUsecase{Rep: r, hashSalt: hashSalt, signingKey: signingKey, expireDuration: expireDuration}
+func NewAuthUsecase(r UserStorageInterface, cost int, signingKey string, expireDuration time.Duration) AuthUsecase {
+	return AuthUsecase{Rep: r, cost: cost, signingKey: signingKey, expireDuration: expireDuration}
 }
 
 // generate new username and password. save new user data.
@@ -39,7 +39,7 @@ func (auth *AuthUsecase) RegistrationFromTg(tguser m.UserTelegram) (m.User, erro
 	case errors.As(err, &ErrUserNotFound):
 		newusername := h.GenUserName()
 		newpassword := h.GenNewPassword()
-		hash, err := h.HashAndSalt([]byte(newpassword), auth.hashSalt)
+		hash, err := h.HashAndSalt([]byte(newpassword), auth.cost)
 		if err != nil {
 			return m.User{}, err
 		}

@@ -21,8 +21,9 @@ func GenNewPassword() string {
 	return fmt.Sprint(r.Uint64())
 
 }
-func HashAndSalt(password []byte, hashSalt int) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword(password, hashSalt)
+func HashAndSalt(password []byte, cost int) (string, error) {
+
+	hash, err := bcrypt.GenerateFromPassword(password, cost)
 	if err != nil {
 		return "", err
 	}

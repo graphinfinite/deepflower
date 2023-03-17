@@ -3,7 +3,7 @@ port: 8787
 project_name: "deepflower"
 
 auth:
-  hash_salt: 1234
+  cost: 1  # (2 ^ cost)time =  4-31
   signing_key: "somekey"
   token_ttl: 7777 #min
 

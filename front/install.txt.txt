@@ -6,6 +6,8 @@ npm install vue-router@4
 npm i the-new-css-reset
 npm i --save axios
 
+npm i @vueuse/core
+
 
 
 TypeScript Vue Plugin (Volar)

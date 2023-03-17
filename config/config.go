@@ -14,7 +14,7 @@ type Configuration struct {
 }
 
 type AuthConfig struct {
-	Hash_salt   int
+	Cost        int
 	Signing_key string
 	Token_ttl   int
 }
@@ -64,7 +64,7 @@ func Init() (Configuration, error) {
 		dbconf.Dbname)
 
 	authconf := AuthConfig{
-		Hash_salt:   viper.GetInt("auth.hash_salt"),
+		Cost:        viper.GetInt("auth.cost"),
 		Signing_key: viper.GetString("auth.signing_key"),
 		Token_ttl:   viper.GetInt("auth.token_ttl")}
 

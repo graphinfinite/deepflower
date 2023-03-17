@@ -17,7 +17,7 @@
           <button type="submit">->...</button> 
 
           <div class="form-group">
-          <div v-if="message" class="alert alert-danger" role="alert">
+          <div v-if="messageErr" class="alert alert-danger" role="alert">
             {{ messageErr }}
           </div>
         </div>
@@ -35,15 +35,18 @@
   import AuthService from "@/modules/auth"
 
 
-  const messageErr = ref("ooo")
+  const messageErr = ref("")
 
   const username = ref("");
   const hidePassword = ref(true);
   const password = ref("");
 
+  const isAuthorazed = ref(false)
+
   const passwordFieldIcon = computed(() => hidePassword.value ? "fa-eye" : "fa-eye-slash");
   const passwordFieldType = computed(() => hidePassword.value ? "password" : "text");
-  const doLogin = () => AuthService.login(username,password)
+  const doLogin = () => AuthService.login(username.value,password.value)
+
 </script>
 
 <style scoped>

@@ -15,6 +15,8 @@ function toggleSidebar() {
 <template>
   <div class="wrapper">
     <aside :vue:is-open="isSidebarOpen">
+
+      <h4 :transparent="!isSidebarOpen">Open</h4>
       <ul class="sidebar-head">
         <li>
           <img src="@/assets/goat_animal_icon.png" alt="logo" width="32" height="32">
@@ -25,8 +27,6 @@ function toggleSidebar() {
           </button>
         </li>
       </ul>
-
-      <h4 :transparent="!isSidebarOpen">Menu</h4>
 
       <ul>
         <li>
@@ -42,20 +42,6 @@ function toggleSidebar() {
             <IconExclamation />
             <Transition name="fade">
               <span v-show="isSidebarOpen">About</span>
-            </Transition>
-          </router-link>
-        </li>
-        <li>
-          <router-link to="/team">
-            <Transition name="fade">
-              <span v-show="isSidebarOpen">Team</span>
-            </Transition>
-          </router-link>
-        </li>
-        <li>
-          <router-link to="/contact">
-            <Transition name="fade">
-              <span v-show="isSidebarOpen">Contact</span>
             </Transition>
           </router-link>
         </li>
