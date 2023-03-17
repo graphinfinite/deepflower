@@ -1,8 +1,9 @@
-Information.
+# DeepFlower
+Task manager
 
-
-
-- docker-compose or
+### Docker-compose
+- TODO
+### Local testing
 - docker run --name myPostgresDb -p 32768:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgrespw -e POSTGRES_DB=deepflower -d postgres  (config/config.yaml)
 - go run cmd/deepflower/main.go
 - front: npm run dev
