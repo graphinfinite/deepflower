@@ -12,12 +12,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type UserStorageInterface interface {
-	CreateUser(u m.User) (int, error)
-	GetUserByTgId(tgId int) (m.User, error)
-	GetUserByUsername(username string) (m.User, error)
-}
-
 type AuthUsecase struct {
 	Rep            UserStorageInterface
 	cost           int

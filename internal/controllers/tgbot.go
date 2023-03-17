@@ -14,10 +14,10 @@ import (
 type TelegramBot struct {
 	Bot         *tgbotapi.BotAPI
 	Logger      *zerolog.Logger
-	Authusecase AuthUsecaseInterface
+	Authusecase AuthUCInterface
 }
 
-func NewBot(debug bool, token string, client *http.Client, authusecase AuthUsecaseInterface, logger *zerolog.Logger) (TelegramBot, error) {
+func NewBot(debug bool, token string, client *http.Client, authusecase AuthUCInterface, logger *zerolog.Logger) (TelegramBot, error) {
 	bot, err := tgbotapi.NewBotAPIWithClient(token, client)
 	bot.Debug = debug
 	if err != nil {

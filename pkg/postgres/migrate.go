@@ -1,10 +1,6 @@
-package repository
+package postgres
 
-import (
-	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
-)
+import "github.com/jmoiron/sqlx"
 
 func MigrateDb(dbPool *sqlx.DB) error {
 	q := `CREATE TABLE IF NOT EXISTS "users" (
@@ -54,15 +50,4 @@ func MigrateDb(dbPool *sqlx.DB) error {
 		m.Up()
 		return nil
 	*/
-}
-
-func NewPostgresPool(dsn string) (*sqlx.DB, error) {
-	db, err := sqlx.Open("postgres", dsn)
-	if err != nil {
-		return nil, err
-	}
-	if err = db.Ping(); err != nil {
-		return nil, err
-	}
-	return db, nil
 }

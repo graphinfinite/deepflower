@@ -10,9 +10,6 @@ type TaskController struct {
 	L *zerolog.Logger
 }
 
-type TaskUsecaseInterface interface {
-}
-
 func NewTaskController(logger *zerolog.Logger) TaskController {
 	return TaskController{L: logger}
 

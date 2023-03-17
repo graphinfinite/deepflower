@@ -4,19 +4,22 @@ import "time"
 
 type User struct {
 	UserTelegram
-	ID             uint
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	Username       string
-	Password       string
+	ID             uint      `db:"id"`
+	CreatedAt      time.Time `db:"createdAt"`
+	UpdatedAt      time.Time `db:"updatedAt"`
+	Username       string    `db:"username"`
+	Password       string    `db:"password"`
 	HashedPassword string
-	Active         bool
-	Status         uint
-	Energy         uint64
+	Active         bool   `db:"active"`
+	Status         uint   `db:"status"`
+	Energy         uint64 `db:"energy"`
 }
 
 type UserTelegram struct {
-	TgId                                                int
-	TgChatId                                            int64
-	TgUserName, TgFirstName, TgLastName, TgLanguageCode string
+	TgId           int    `db:"tgId"`
+	TgChatId       int64  `db:"tgChatId"`
+	TgUserName     string `db:"tgUserName"`
+	TgFirstName    string `db:"tgFirstName"`
+	TgLastName     string `db:"tgLastName"`
+	TgLanguageCode string `db:"tgLanguageCode"`
 }

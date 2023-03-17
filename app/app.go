@@ -6,6 +6,7 @@ import (
 	ctrl "deepflower/internal/controllers"
 	"deepflower/internal/repository"
 	"deepflower/internal/usecase"
+	"deepflower/pkg/postgres"
 	"fmt"
 	"net"
 	"net/http"
@@ -34,26 +35,28 @@ func (app *App) Run(cfg config.Configuration) error {
 
 	zlog.Info().Msgf("configurate %+v", cfg)
 	zlog.Info().Msgf("connect to db...")
-	dbPool, err := repository.NewPostgresPool(cfg.Db.Psql)
+	dbPool, err := postgres.NewPostgresPool(cfg.Db.Psql)
 	if err != nil {
 		return err
 	}
 	defer dbPool.Close()
 	zlog.Info().Msgf("migrate... ")
-	if err := repository.MigrateDb(dbPool); err != nil {
+	if err := postgres.MigrateDb(dbPool); err != nil {
 		return err
 	}
 
-	// auth
 	client := http.Client{Timeout: time.Second * 10}
+	// auth
 	userstore := repository.NewUserStorage(dbPool)
-	authusecase := usecase.NewAuthUsecase(
+	authUC := usecase.NewAuthUsecase(
 		&userstore,
 		cfg.Auth.Cost,
 		cfg.Auth.Signing_key,
 		time.Duration(cfg.Auth.Token_ttl)*time.Minute)
-	auth := ctrl.NewAuthController(&authusecase, &zlog)
-	bot, _ := ctrl.NewBot(false, cfg.Telegram.Token, &client, &authusecase, &zlog)
+	auth := ctrl.NewAuthController(&authUC, &zlog)
+	bot, _ := ctrl.NewBot(false, cfg.Telegram.Token, &client, &authUC, &zlog)
+
+	//user
 
 	// dream
 	//ds := repository.NewDreamStorage(dbPool)
@@ -79,11 +82,11 @@ func (app *App) Run(cfg config.Configuration) error {
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) }) //root
 	r.Post("/bot", bot.TelegramBotMessageReader)                                          // entrypoint to tg bot
-	r.Get("/auth/sign-up/tg", auth.RedirectToTelegram)                                    // redirect to tg bot
 	r.Post("/auth/sign-in", auth.Login)                                                   // jwt-auth
 	r.Route("/user", func(r chi.Router) {
+		r.Use(auth.JWT)
 
-		//r.Get("/", GetUser)
+		//r.Get("/", user.GetUserInfo)
 	})
 
 	// user methods

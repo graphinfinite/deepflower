@@ -1,32 +1,19 @@
 package controllers
 
 import (
-	"deepflower/internal/model"
 	"net/http"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/rs/zerolog"
-	"github.com/spf13/viper"
 )
 
 type AuthController struct {
-	Uc AuthUsecaseInterface
+	Uc AuthUCInterface
 	L  *zerolog.Logger
 }
 
-type AuthUsecaseInterface interface {
-	RegistrationFromTg(tguser model.UserTelegram) (model.User, error)
-	Login(username, password string) (token string, err error)
-	ValidateJwtToken(tokenString string) (bool, jwt.MapClaims, error)
-}
-
-func NewAuthController(uc AuthUsecaseInterface, logger *zerolog.Logger) AuthController {
+func NewAuthController(uc AuthUCInterface, logger *zerolog.Logger) AuthController {
 	return AuthController{Uc: uc, L: logger}
 
-}
-
-func (auth *AuthController) RedirectToTelegram(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, viper.GetString("telegram.boturl"), http.StatusPermanentRedirect)
 }
 
 // Login ----->

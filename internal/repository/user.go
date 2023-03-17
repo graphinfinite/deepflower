@@ -22,21 +22,9 @@ func NewUserStorage(dbpool *sqlx.DB) UserStorage {
 // return user
 // if user not found -> UserNotFoundStorageError
 func (s *UserStorage) GetUserByTgId(tgId int) (model.User, error) {
+	q := `SELECT * FROM users WHERE tgId = $1`
 	user := model.User{}
-	err := s.Db.QueryRow(`SELECT id,createdAt,updatedAt,username,hashedPassword,active,tgId,tgChatId,tgUserName,tgFirstName,tgLastName,tgLanguageCode FROM users WHERE tgId = $1`, tgId).Scan(
-		&user.ID,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-		&user.Username,
-		&user.HashedPassword,
-		&user.Active,
-		&user.TgId,
-		&user.TgChatId,
-		&user.TgUserName,
-		&user.TgFirstName,
-		&user.TgLastName,
-		&user.TgLanguageCode,
-	)
+	err := s.Db.Get(&user, q, tgId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return user, NewErrUserNotFound(fmt.Sprintf("user with telegramm id: %d not found", tgId), err)
@@ -48,21 +36,9 @@ func (s *UserStorage) GetUserByTgId(tgId int) (model.User, error) {
 }
 
 func (s *UserStorage) GetUserByUsername(username string) (model.User, error) {
+	q := `SELECT * FROM users WHERE username = $1`
 	user := model.User{}
-	err := s.Db.QueryRow(`SELECT id,createdAt,updatedAt,username, hashedPassword,active,tgId,tgChatId,tgUserName,tgFirstName,tgLastName,tgLanguageCode FROM users WHERE username = $1`, username).Scan(
-		&user.ID,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-		&user.Username,
-		&user.HashedPassword,
-		&user.Active,
-		&user.TgId,
-		&user.TgChatId,
-		&user.TgUserName,
-		&user.TgFirstName,
-		&user.TgLastName,
-		&user.TgLanguageCode,
-	)
+	err := s.Db.Get(&user, q, username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return user, NewErrUserNotFound(fmt.Sprintf("user with username: %s not found", username), err)
@@ -73,7 +49,26 @@ func (s *UserStorage) GetUserByUsername(username string) (model.User, error) {
 	return user, nil
 }
 
-// return user id(int)
+func (s *UserStorage) UpdateUser(m model.User) (model.User, error) {
+	//q := `UPDATE users SET username = $1`
+
+	return model.User{}, nil
+}
+
+func (s *UserStorage) GetUserById(id string) (model.User, error) {
+	q := `SELECT * FROM users WHERE id = $1`
+	user := model.User{}
+	err := s.Db.Get(&user, q, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return user, NewErrUserNotFound(fmt.Sprintf("user with username: %s not found", id), err)
+		} else {
+			return user, err
+		}
+	}
+	return user, nil
+}
+
 func (s *UserStorage) CreateUser(u model.User) (userId int, e error) {
 	var id int
 	fmt.Printf("USER  %#v \n", u)
@@ -83,5 +78,4 @@ func (s *UserStorage) CreateUser(u model.User) (userId int, e error) {
 		return 0, err
 	}
 	return id, nil
-
 }
