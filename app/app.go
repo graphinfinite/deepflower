@@ -17,6 +17,8 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog"
+
+	"github.com/go-chi/cors"
 )
 
 type App struct {
@@ -47,52 +49,70 @@ func (app *App) Run(cfg config.Configuration) error {
 	userstore := repository.NewUserStorage(dbPool)
 	authusecase := usecase.NewAuthUsecase(
 		&userstore,
-		cfg.Auth.Hash_salt,
+		cfg.Auth.Cost,
 		cfg.Auth.Signing_key,
 		time.Duration(cfg.Auth.Token_ttl)*time.Minute)
 	auth := ctrl.NewAuthController(&authusecase, &zlog)
 	bot, _ := ctrl.NewBot(false, cfg.Telegram.Token, &client, &authusecase, &zlog)
 
 	// dream
-	ds := repository.NewDreamStorage(dbPool)
-	dreamusecase := usecase.NewDreamUsecase(&ds)
-	dream := ctrl.NewDreamController(&dreamusecase, &zlog)
-	task := ctrl.NewTaskController(&zlog)
+	//ds := repository.NewDreamStorage(dbPool)
+	//dreamusecase := usecase.NewDreamUsecase(&ds)
+	//dream := ctrl.NewDreamController(&dreamusecase, &zlog)
+	//task := ctrl.NewTaskController(&zlog)
 
-	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://dfeb-5-187-87-224.eu.ngrok.io/bot
+	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://32a5-178-176-65-121.eu.ngrok.io/bot
 	//
 	r := chi.NewRouter()
+
+	r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"https://*", "http://*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		//ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) }) //root
 	r.Post("/bot", bot.TelegramBotMessageReader)                                          // entrypoint to tg bot
 	r.Get("/auth/sign-up/tg", auth.RedirectToTelegram)                                    // redirect to tg bot
 	r.Post("/auth/sign-in", auth.Login)                                                   // jwt-auth
+	r.Route("/user", func(r chi.Router) {
+
+		//r.Get("/", GetUser)
+	})
 
 	// user methods
 
-	r.Route("/dreams", func(r chi.Router) {
-		r.Use(auth.JWT)
-		r.Get("/", dream.GetAllUserDreams)
-		r.Get("/search", dream.SearchDreams) //json params for search
-		r.Post("/", dream.CreateDream)
-		r.Get("/{dreamId}", dream.GetUserDreamById)
-		r.Put("/{{dreamId}", dream.UpdateUserDreamById)
-		r.Delete("/{{dreamId}", dream.DeleteUserDreamById)
+	/*
 
-		r.Post("/{dreamId}/push", dream.PushUserDreamById) // публикация, ограничение по задержке и по времени жизни
+		r.Route("/dreams", func(r chi.Router) {
+			r.Use(auth.JWT)
+			r.Get("/", dream.GetAllUserDreams)
+			r.Get("/search", dream.SearchDreams) //json params for search
+			r.Post("/", dream.CreateDream)
+			r.Get("/{dreamId}", dream.GetUserDreamById)
+			r.Put("/{{dreamId}", dream.UpdateUserDreamById)
+			r.Delete("/{{dreamId}", dream.DeleteUserDreamById)
 
-		r.Route("/{dreamId}/tasks", func(r chi.Router) {
-			// создание связанного дерева задач
-			r.Get("/", task.GetAllUserDreamTasks)
-			r.Get("/search", task.SearchDreamTasks) //json params for search
-			r.Post("/", task.CreateUserDreamTask)
-			r.Get("/{taskId}", task.GetUserDreamTaskById)
-			r.Put("/{taskId}", task.UpdateUserDreamTaskById)
-			r.Delete("/{taskId}", task.DeleteUserDreamTaskById)
+			r.Post("/{dreamId}/push", dream.PushUserDreamById) // публикация, ограничение по задержке и по времени жизни
 
+			r.Route("/{dreamId}/tasks", func(r chi.Router) {
+				// создание связанного дерева задач
+				r.Get("/", task.GetAllUserDreamTasks)
+				r.Get("/search", task.SearchDreamTasks) //json params for search
+				r.Post("/", task.CreateUserDreamTask)
+				r.Get("/{taskId}", task.GetUserDreamTaskById)
+				r.Put("/{taskId}", task.UpdateUserDreamTaskById)
+				r.Delete("/{taskId}", task.DeleteUserDreamTaskById)
+
+			})
 		})
-
-	})
+	*/
 
 	// HTTP Server
 	app.httpServer = &http.Server{
