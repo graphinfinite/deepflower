@@ -43,7 +43,9 @@ func (s *UserStorage) GetUserByUsername(username string) (model.User, error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return user, NewErrUserNotFound(fmt.Sprintf("user with username: %s not found", username), err)
 		} else {
+			fmt.Print(err)
 			return user, err
+
 		}
 	}
 	return user, nil

@@ -1,43 +1,92 @@
 nes (7 sloc)  136 Bytes
 
-<script setup lang="ts">
-
-
-  import { api } from "@/modules/api"
-
- const userdata = api.get("")
-</script>
-
 <template>
   <div class="wrapper">
+    <div class="data">
 
-    {{ userdata }}
-    
+      <div class="mainuserdate">
+        <ul>
 
+        <li>Username: {{ state.userData.Username }}</li>
+        <li>Energy: {{ state.userData.Energy }}</li>
+      </ul>
 
-
+      </div>
+      <div class="userdate">
+        <h1>User Data</h1><br>
+        <ul >
+          <li>ID: {{ state.userData.ID }}</li>
+          <li>Status: {{ state.userData.Status }}</li>
+          <li>Active: {{ state.userData.Active }}</li>
+          <li>CreatedAt: {{ state.userData.CreatedAt }}</li>
+          <li>UpdatedAt: {{ state.userData.UpdatedAt }}</li>
+        </ul>
+      <br>
+        <h1>Telegram User Data</h1><br>
+      <ul>
+        <li>TgId: {{ state.userData.TgId }}</li>
+        <li>TgUserName: {{ state.userData.TgUserName }}</li>
+        <li>TgFirstLastName: {{ state.userData.TgFirstName }} {{ state.userData.TgLastName }}</li>
+        <li>TgLanguageCode: {{ state.userData.TgLanguageCode }}</li>
+      </ul>
+      </div>
+    </div>
   </div>
 </template>
 
-<style scoped lang="scss">
-</style>
+<script setup lang="ts">
+import API from "@/modules/api"
+import { ref, reactive } from "vue"
 
-
-<script setup>
-import { computed, ref } from "vue";
-setup() {
-
-  const userData = ref({});
-  async function load() {
-        const url = "user";
-        let result = await api.get(url);
-        user = result.data
-    }
-    
-    return { userData };
+const state = reactive({
+  userData: {
+    Active: false,
+    CreatedAt: "",
+    Energy: 0,
+    HashedPassword: "",
+    ID: 0,
+    Password: "",
+    Status: 0,
+    TgChatId: 0,
+    TgFirstName: "",
+    TgId: 0,
+    TgLanguageCode: "",
+    TgLastName: "",
+    TgUserName: "",
+    UpdatedAt: "",
+    Username: ""
+  }
+})
+API.get("/user").then((response) => {
+  state.userData = response.data.data;
 }
+)
+</script>
 
+<style scoped lang="css">
+li{
+    padding:6px;
+}
+ li:before {
+    padding-right:10px;
+    font-weight: bold;
+    color: #d1ceff;
+    content: ".";
+    transition-duration: 0.5s;
+}
+ li:hover:before {
+    color: #000000;
+    content: ".";
+}    
 
-
-
-}</script>
+.mainuserdate{
+  color: azure;
+  padding: 20px;
+  background-color: #15042B;
+  margin-top: 30px;
+}
+.userdate{
+  padding: 20px;
+  margin-top: 30px;
+}
+</style>

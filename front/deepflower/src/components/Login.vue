@@ -3,7 +3,6 @@
     <div id="login">
       <div id="description">
         <img src="@/assets/goat_animal_icon.png" alt="goatlogo" width="32" height="32">
-        <p> Welcome</p>
         <p> Glory to the goats!</p>
       </div>
       <div id="form">
@@ -54,7 +53,7 @@
 div#login {
   font-family: Verdana, sans-serif;
   align-items: center;
-  background-color: #15042b;
+  background-color: #15042B;
   display: flex;
   justify-content: center;
   width: 100%;
@@ -74,7 +73,7 @@ div#login div#description p {
 
 div#login div#description p {
   font-size: 0.8em;
-  color: #210b3f;
+  color: #525252;
   margin-top: 10px;
 }
 

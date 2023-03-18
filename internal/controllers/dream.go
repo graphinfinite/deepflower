@@ -1,29 +1,29 @@
 package controllers
 
 import (
-	"deepflower/internal/model"
 	"net/http"
 
 	"github.com/rs/zerolog"
 )
 
 type DreamController struct {
-	Uc DreamUsecaseInterface
+	Uc DreamUCInterface
 	L  *zerolog.Logger
 }
 
-func NewDreamController(uc DreamUsecaseInterface, logger *zerolog.Logger) DreamController {
+func NewDreamController(uc DreamUCInterface, logger *zerolog.Logger) DreamController {
 	return DreamController{L: logger, Uc: uc}
 
 }
 
-type DreamUsecaseInterface interface {
-	CreateDream(name, info, location, creater string) (model.Dream, error)
-}
-
 func (c *DreamController) GetAllUserDreams(w http.ResponseWriter, r *http.Request) {
-	JSON(w, STATUS_OK, "")
-
+	userId, _ := r.Context().Value(ContextUserIdKey).(string)
+	dreams, err := c.Uc.GetAllUserDreams(userId)
+	if err != nil {
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	JSONstruct(w, STATUS_OK, "ок", dreams)
 }
 
 func (c *DreamController) SearchDreams(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +47,7 @@ func (c *DreamController) CreateDream(w http.ResponseWriter, r *http.Request) {
 	m, err := c.Uc.CreateDream(d.Name, d.Info, d.Location, userId)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
+		return
 	}
 	JSONstruct(w, STATUS_OK, "ок", m)
 }

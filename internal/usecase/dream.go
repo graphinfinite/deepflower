@@ -10,10 +10,6 @@ func NewDreamUsecase(s DreamStorageInterface) DreamUsecase {
 	return DreamUsecase{Rep: s}
 }
 
-type DreamStorageInterface interface {
-	CreateDream(name, info, location, creater string) (model.Dream, error)
-}
-
 func (d *DreamUsecase) CreateDream(name, info, location, creater string) (model.Dream, error) {
 	dream, err := d.Rep.CreateDream(name, info, location, creater)
 	if err != nil {
@@ -22,6 +18,15 @@ func (d *DreamUsecase) CreateDream(name, info, location, creater string) (model.
 	return dream, nil
 
 }
+
+func (d *DreamUsecase) GetAllUserDreams(userId string) ([]model.Dream, error) {
+	dreams, err := d.Rep.GetAllUserDreams(userId)
+	if err != nil {
+		return []model.Dream{}, err
+	}
+	return dreams, nil
+}
+
 func (d *DreamUsecase) GetUserDreamById() {
 
 }

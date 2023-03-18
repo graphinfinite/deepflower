@@ -45,6 +45,33 @@ function toggleSidebar() {
             </Transition>
           </router-link>
         </li>
+        <li>
+          <router-link to="/dreams">
+            <img src="@/assets/icons8-огонь-48.png" alt="logo" width="32" height="32">
+            
+            <Transition name="fade">
+              <span v-show="isSidebarOpen">Dreams</span>
+            </Transition>
+          </router-link>
+        </li>
+        <li>
+          <router-link to="/tasks">
+            <img src="@/assets/icons8-поделиться-2-50.png" alt="logo" width="32" height="32">
+            
+            <Transition name="fade">
+              <span v-show="isSidebarOpen">Tasks</span>
+            </Transition>
+          </router-link>
+        </li>
+        <li>
+          <router-link to="/settings">
+            <img src="@/assets/icons8-сервисы.gif" alt="logo" width="32" height="32">
+            
+            <Transition name="fade">
+              <span v-show="isSidebarOpen">Settings</span>
+            </Transition>
+          </router-link>
+        </li>
       </ul>
     </aside>
   </div>

@@ -5,8 +5,8 @@ import "time"
 type User struct {
 	UserTelegram
 	ID             uint      `db:"id"`
-	CreatedAt      time.Time `db:"createdAt"`
-	UpdatedAt      time.Time `db:"updatedAt"`
+	CreatedAt      time.Time `db:"createdat"`
+	UpdatedAt      time.Time `db:"updatedat"`
 	Username       string    `db:"username"`
 	Password       string    `db:"password"`
 	HashedPassword string
@@ -16,10 +16,10 @@ type User struct {
 }
 
 type UserTelegram struct {
-	TgId           int    `db:"tgId"`
-	TgChatId       int64  `db:"tgChatId"`
-	TgUserName     string `db:"tgUserName"`
-	TgFirstName    string `db:"tgFirstName"`
-	TgLastName     string `db:"tgLastName"`
-	TgLanguageCode string `db:"tgLanguageCode"`
+	TgId           int    `db:"tgid"`
+	TgChatId       int64  `db:"tgchatid"`
+	TgUserName     string `db:"tgusername"`
+	TgFirstName    string `db:"tgfirstname"`
+	TgLastName     string `db:"tglastname"`
+	TgLanguageCode string `db:"tglanguagecode"`
 }

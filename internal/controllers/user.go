@@ -23,7 +23,7 @@ func (u *UserController) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-	JSONstruct(w, STATUS_OK, "token successfully generated", user)
+	JSONstruct(w, STATUS_OK, "user info", user)
 }
 
 func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -32,10 +32,10 @@ func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-
 	userUpdated, err := u.Uc.UpdateUser(user)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
+		return
 	}
-	JSONstruct(w, STATUS_OK, "token successfully generated", userUpdated)
+	JSONstruct(w, STATUS_OK, "user successfully updated", userUpdated)
 }

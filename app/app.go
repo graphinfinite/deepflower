@@ -57,11 +57,13 @@ func (app *App) Run(cfg config.Configuration) error {
 	bot, _ := ctrl.NewBot(false, cfg.Telegram.Token, &client, &authUC, &zlog)
 
 	//user
+	userUC := usecase.NewUserUC(&userstore)
+	user := ctrl.NewUserController(&userUC, &zlog)
 
 	// dream
-	//ds := repository.NewDreamStorage(dbPool)
-	//dreamusecase := usecase.NewDreamUsecase(&ds)
-	//dream := ctrl.NewDreamController(&dreamusecase, &zlog)
+	dreamstore := repository.NewDreamStorage(dbPool)
+	dreamUC := usecase.NewDreamUsecase(&dreamstore)
+	dream := ctrl.NewDreamController(&dreamUC, &zlog)
 	//task := ctrl.NewTaskController(&zlog)
 
 	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://32a5-178-176-65-121.eu.ngrok.io/bot
@@ -85,15 +87,15 @@ func (app *App) Run(cfg config.Configuration) error {
 	r.Post("/auth/sign-in", auth.Login)                                                   // jwt-auth
 	r.Route("/user", func(r chi.Router) {
 		r.Use(auth.JWT)
-
-		//r.Get("/", user.GetUserInfo)
+		r.Get("/", user.GetUserInfo)
+	})
+	r.Route("/dreams", func(r chi.Router) {
+		r.Use(auth.JWT)
+		r.Post("/", dream.CreateDream)
+		r.Get("/", dream.GetAllUserDreams)
 	})
 
-	// user methods
-
 	/*
-
-		r.Route("/dreams", func(r chi.Router) {
 			r.Use(auth.JWT)
 			r.Get("/", dream.GetAllUserDreams)
 			r.Get("/search", dream.SearchDreams) //json params for search
@@ -115,8 +117,8 @@ func (app *App) Run(cfg config.Configuration) error {
 
 			})
 		})
-	*/
 
+	*/
 	// HTTP Server
 	app.httpServer = &http.Server{
 		Addr:           net.JoinHostPort(cfg.Server.Host, cfg.Server.Port),

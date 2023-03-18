@@ -1,13 +1,17 @@
 
 import axios from 'axios'
 
-const api = axios.create({
-    baseURL: `127.0.0.1:8787`
+const API = axios.create()
 
-})
-api.interceptors.request.use(function (config) {
+API.defaults.baseURL = 'http://127.0.0.1:8787';
+
+API.interceptors.request.use(function (config) {
     // Do something before request is sent
-    config.headers.setAuthorization(`Bearer ${localStorage.getItem("accessToken")}`)
+
+    console.log(`Bearer ${JSON.parse(localStorage.getItem("tokenAccess") || "")}`)
+
+    config.headers.set('Content-Type', "application/json");
+    config.headers.setAuthorization(`Bearer ${JSON.parse(localStorage.getItem("tokenAccess") || "")}`)
     return config;
   }, function (error) {
     // Do something with request error
@@ -16,10 +20,10 @@ api.interceptors.request.use(function (config) {
   });
 
 // Add a response interceptor
-axios.interceptors.response.use(function (response) {
+API.interceptors.response.use(function (response) {
     // Any status code that lie within the range of 2xx cause this function to trigger
     // Do something with response data
-    console.log(response.data.status) 
+    console.log(response.data) 
     return response;
   }, function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
@@ -27,4 +31,4 @@ axios.interceptors.response.use(function (response) {
     return Promise.reject(error);
   });
 
-export default api
+export default API

@@ -12,10 +12,15 @@ type (
 		Login(username, password string) (token string, err error)
 		ValidateJwtToken(tokenString string) (bool, jwt.MapClaims, error)
 	}
-	TaskUsecaseInterface interface {
-	}
 	UserUCInterface interface {
 		GetUserInfo(userId string) (user model.User, err error)
 		UpdateUser(model.User) (user model.User, err error)
+	}
+	DreamUCInterface interface {
+		CreateDream(name, info, location, creater string) (model.Dream, error)
+		GetAllUserDreams(userId string) ([]model.Dream, error)
+	}
+
+	TaskUsecaseInterface interface {
 	}
 )
