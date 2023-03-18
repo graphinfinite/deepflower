@@ -41,7 +41,7 @@ func (s *DreamStorage) GetAllUserDreams(userId string) ([]model.Dream, error) {
 	var dreams []model.Dream
 	q := `SELECT * FROM dream WHERE creater=$1;`
 
-	if err := s.Db.Select(dreams, q, userId); err != nil {
+	if err := s.Db.Select(&dreams, q, userId); err != nil {
 		return []model.Dream{}, err
 	}
 	return dreams, nil

@@ -7,6 +7,7 @@ npm i the-new-css-reset
 npm i --save axios
 
 npm i @vueuse/core
+npm install vue3-table-lite --save
 
 
 
