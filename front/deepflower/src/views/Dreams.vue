@@ -1,21 +1,22 @@
 
 <script lang="ts">
 import TableLite from "@/components/TableLite.vue"
+import FormNewDream from "@/components/FormNewDream.vue"
 </script>
 
 <template>
     <div class="wrapper">
-
         <div class="maindata">
-            <h1>Dreams</h1> 
+          <h1>Dreams</h1> 
         </div>
         <div class="tablelite">
-            <TableLite />
+          <TableLite />
         </div>
 
+        <div class="dreamform">
+          <FormNewDream />
+        </div>
     </div>
-
-
 </template>
 
 <style scoped lang="css">
@@ -24,8 +25,14 @@ import TableLite from "@/components/TableLite.vue"
 .maindata{
   color: azure;
   padding: 20px;
-  background-color: #15042B;
+  background-color: #192819;
   margin-bottom: 30px;
+}
+
+.dreamform {
+
+
+  padding:50px;
 }
 
 .wrapper{

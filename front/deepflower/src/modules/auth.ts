@@ -31,6 +31,7 @@ class AuthService {
   }
   logout() {
     localStorage.removeItem('tokenAccess');
+    location.reload();
   }
 }
 

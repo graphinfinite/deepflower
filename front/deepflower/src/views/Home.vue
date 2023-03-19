@@ -31,11 +31,18 @@ nes (7 sloc)  136 Bytes
       </ul>
       </div>
     </div>
+
+
+    <div class="logout">
+      Выхода нет
+      <button @click="doLogout">Logout</button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import API from "@/modules/api"
+import AuthService from "@/modules/auth"
 import { ref, reactive } from "vue"
 
 const state = reactive({
@@ -61,6 +68,11 @@ API.get("/user").then((response) => {
   state.userData = response.data.data;
 }
 )
+
+
+const doLogout = () =>  AuthService.logout()
+
+  
 </script>
 
 <style scoped lang="css">
@@ -89,4 +101,20 @@ li{
   padding: 20px;
   margin-top: 30px;
 }
+
+
+.logout button {
+  color:rgb(255, 255, 255);
+  padding: 10px;
+  border-radius: 50%;
+
+  background-color: #15042B;
+  transition: background-color 1.5s ease-in-out;
+}
+.logout button:hover {
+  background-color: #ffffff;
+
+
+}
+
 </style>
