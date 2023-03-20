@@ -5,7 +5,6 @@ import (
 	"deepflower/internal/model"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -57,13 +56,13 @@ func (s *UserStorage) UpdateUser(m model.User) (model.User, error) {
 	return model.User{}, nil
 }
 
-func (s *UserStorage) GetUserById(id string) (model.User, error) {
+func (s *UserStorage) GetUserById(userId string) (model.User, error) {
 	q := `SELECT * FROM users WHERE id = $1`
 	user := model.User{}
-	err := s.Db.Get(&user, q, id)
+	err := s.Db.Get(&user, q, userId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return user, NewErrUserNotFound(fmt.Sprintf("user with username: %s not found", id), err)
+			return user, NewErrUserNotFound(fmt.Sprintf("user with username: %s not found", userId), err)
 		} else {
 			return user, err
 		}
@@ -71,13 +70,13 @@ func (s *UserStorage) GetUserById(id string) (model.User, error) {
 	return user, nil
 }
 
-func (s *UserStorage) CreateUser(u model.User) (userId int, e error) {
-	var id int
+func (s *UserStorage) CreateUser(u model.User) (userId string, e error) {
+	var id string
 	fmt.Printf("USER  %#v \n", u)
-	query := `INSERT INTO users (tgId, tgChatId, tgUserName, tgFirstName, tgLastName, tgLanguageCode, hashedPassword, username, active, createdAt) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) returning id`
-	err := s.Db.QueryRow(query, u.TgId, u.TgChatId, u.TgUserName, u.TgFirstName, u.TgLastName, u.TgLanguageCode, u.HashedPassword, u.Username, false, time.Now()).Scan(&id)
+	query := `INSERT INTO users (tgId, tgChatId, tgUserName, tgFirstName, tgLastName, tgLanguageCode, hashedPassword, username, active) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id`
+	err := s.Db.QueryRow(query, u.TgId, u.TgChatId, u.TgUserName, u.TgFirstName, u.TgLastName, u.TgLanguageCode, u.HashedPassword, u.Username, false).Scan(&id)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	return id, nil
 }

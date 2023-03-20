@@ -1,6 +1,9 @@
 package usecase
 
-import "deepflower/internal/model"
+import (
+	"deepflower/internal/model"
+	"fmt"
+)
 
 type DreamUsecase struct {
 	Rep DreamStorageInterface
@@ -27,16 +30,42 @@ func (d *DreamUsecase) GetAllUserDreams(userId string) ([]model.Dream, error) {
 	return dreams, nil
 }
 
-func (d *DreamUsecase) GetUserDreamById() {
+func (d *DreamUsecase) UpdateUserDream(userId, dreamId string, patchDream map[string]interface{}) (model.Dream, error) {
+	dream, err := d.Rep.GetDreamById(dreamId)
+	if err != nil {
+		return model.Dream{}, err
+	}
+	if dream.Creater != userId || dream.Publised {
+		return model.Dream{}, fmt.Errorf("not available")
+	}
 
+	// Энергию нельзя забрать у мечты
+	energyNew, ok := patchDream["Energy"]
+	if ok {
+		energyNew, _ := energyNew.(uint64)
+		if energyNew-dream.Energy <= 0 {
+			return model.Dream{},
+				fmt.Errorf("the new energy must be greater than the original")
+		}
+	}
+
+	dreamUpdated, err := d.Rep.UpdateUserDream(dreamId, patchDream)
+	if err != nil {
+		return model.Dream{}, err
+	}
+	return dreamUpdated, nil
 }
-func (d *DreamUsecase) UpdateUserDreamById() {
-
-}
-func (d *DreamUsecase) DeleteUserDreamById() {
-
-}
-
-func (d *DreamUsecase) PushUserDreamById() {
-
+func (d *DreamUsecase) DeleteUserDream(userId, dreamId string) error {
+	dream, err := d.Rep.GetDreamById(dreamId)
+	if err != nil {
+		return err
+	}
+	if dream.Creater != userId || dream.Publised {
+		// TODO
+		return fmt.Errorf("not available")
+	}
+	if err := d.Rep.DeleteUserDream(dreamId); err != nil {
+		return err
+	}
+	return nil
 }

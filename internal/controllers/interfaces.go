@@ -17,8 +17,10 @@ type (
 		UpdateUser(model.User) (user model.User, err error)
 	}
 	DreamUCInterface interface {
-		CreateDream(name, info, location, creater string) (model.Dream, error)
+		CreateDream(name, info, location string, creater string) (model.Dream, error)
 		GetAllUserDreams(userId string) ([]model.Dream, error)
+		UpdateUserDream(userId, dreamId string, dream map[string]interface{}) (model.Dream, error)
+		DeleteUserDream(userId string, dreamId string) error
 	}
 
 	TaskUsecaseInterface interface {

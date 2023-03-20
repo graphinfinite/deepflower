@@ -34,7 +34,6 @@ nes (7 sloc)  136 Bytes
 
 
     <div class="logout">
-      Выхода нет
       <button @click="doLogout">Logout</button>
     </div>
   </div>
@@ -106,13 +105,13 @@ li{
 .logout button {
   color:rgb(255, 255, 255);
   padding: 10px;
-  border-radius: 50%;
+  border-radius: 5%;
 
   background-color: #15042B;
-  transition: background-color 1.5s ease-in-out;
+  transition: background-color 1s ease-in-out;
 }
 .logout button:hover {
-  background-color: #ffffff;
+  background-color: #390e75;
 
 
 }

@@ -4,7 +4,7 @@ import "time"
 
 type User struct {
 	UserTelegram
-	ID             uint      `db:"id"`
+	ID             string    `db:"id"`
 	CreatedAt      time.Time `db:"createdat"`
 	UpdatedAt      time.Time `db:"updatedat"`
 	Username       string    `db:"username"`

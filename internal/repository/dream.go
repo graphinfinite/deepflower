@@ -2,7 +2,8 @@ package repository
 
 import (
 	"deepflower/internal/model"
-	"time"
+	"fmt"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -21,11 +22,11 @@ func (s *DreamStorage) CreateDream(name, info, location, creater string) (model.
 	tx := s.Db.MustBegin()
 
 	q := `
-	INSERT INTO dream (name, info, createdAt, publishAt,published, status, creater, energy, location, countG) 
-	VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) 
+	INSERT INTO dream (name, info,published, status, creater, energy, location, countG) 
+	VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) 
 	returning *;
 	`
-	err := tx.QueryRowx(q, name, info, time.Now(), time.Now(), false, "created", creater, 0, location, 0).StructScan(&m)
+	err := tx.QueryRowx(q, name, info, false, "CREATE", creater, 0, location, 0).StructScan(&m)
 	if err != nil {
 		tx.Rollback()
 		return model.Dream{}, err
@@ -45,4 +46,54 @@ func (s *DreamStorage) GetAllUserDreams(userId string) ([]model.Dream, error) {
 		return []model.Dream{}, err
 	}
 	return dreams, nil
+}
+
+func (s *DreamStorage) GetDreamById(dreamId string) (model.Dream, error) {
+	var dream model.Dream
+	q := `SELECT * FROM dream WHERE dreamid=$1;`
+
+	if err := s.Db.Select(&dream, q, dreamId); err != nil {
+		return model.Dream{}, err
+	}
+	return dream, nil
+}
+
+func (s *DreamStorage) DeleteUserDream(dreamId string) error {
+	q := `DELETE * FROM dream WHERE dreamid=$1;`
+	result, err := s.Db.Exec(q, dreamId)
+	if err != nil {
+		return err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count != 1 {
+		return fmt.Errorf("count != 1")
+	}
+	return nil
+}
+
+func (s *DreamStorage) UpdateUserDream(dreamId string, patchDream map[string]interface{}) (model.Dream, error) {
+	// TODO
+	var dream model.Dream
+	sqlSet := `UPDATE dream SET`
+	for key := range patchDream {
+		sqlSet += fmt.Sprintf(" %s=:%s,", strings.ToLower(key), key)
+	}
+	sqlSet = strings.TrimSuffix(sqlSet, ",")
+	sqlSet += fmt.Sprintf(` WHERE dreamid=%s returning *;`, dreamId)
+
+	rows, err := s.Db.NamedQuery(sqlSet, patchDream)
+	if err != nil {
+		return model.Dream{}, err
+	}
+
+	for rows.Next() {
+		err := rows.StructScan(&dream)
+		if err != nil {
+			return model.Dream{}, err
+		}
+	}
+	return dream, nil
 }

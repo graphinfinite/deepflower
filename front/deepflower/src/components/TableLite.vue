@@ -106,22 +106,67 @@ doSearch();
 
 const rowDream = reactive({
 CountG: 0,
-CreatedAt: "Error",
+CreatedAt: "",
 Creater: 0,
 Energy: 0,
 ID: 0,
-Info: "Error",
-Location: "Error",
-Name: "Error",
+Info: "",
+Location: "",
+Name: "",
 Publised: false,
-PublishAt: "Error",
-Status: "Error",
+PublishAt: "",
+Status: "",
 })
 
 const rowClicked = (row) => {
   console.log("Row clicked!", toRaw(row));
   Object.assign(rowDream,toRaw(row) );
 };
+
+
+
+const deleteDream = () => {
+  if (rowDream.Name ==="") {
+    console.log("noRow")
+    return
+  }
+  console.log("deleteDream")
+  let url = '/dreams';
+  let json = {
+    dreamId: rowDream.ID
+  }
+  API.delete(url, json).then((response) => {
+    //table.rows = response.data.data;
+    //table.totalRecordCount = response.count;
+    //table.sortable.order = order;
+    //table.sortable.sort = sort;
+});
+
+}
+
+
+const publishDream = () => {
+  if (rowDream.Name ==="") {
+    console.log("noRow")
+    return
+  }
+  console.log("publishDream")
+  let url = '/dreams/'+rowDream.ID;
+  let json = {
+    Publised: true,
+    
+  }
+  API.patch(url, json).then((response) => {
+    //table.rows = response.data.data;
+    //table.totalRecordCount = response.count;
+    //table.sortable.order = order;
+    //table.sortable.sort = sort;
+});
+
+}
+
+
+
 
 // return {
 // table,
@@ -149,52 +194,50 @@ const rowClicked = (row) => {
 @row-clicked="rowClicked"
 />
 
-<div id="dreamrow">
-  <div class="row-name">  Name: {{ rowDream.Name }}</div>
-  <div class="row-published">  Published: {{ rowDream.Publised }}</div>
-  <div class="row-location">Location: {{ rowDream.Location }}</div>
-  <div class="row-creater">Creater: {{ rowDream.Creater }}</div>
-  <div class="row-energy">Energy: {{ rowDream.Energy }}</div>
+<div v-if='rowDream.Name !==""'>
+  <div id="dreamrow">
+    <div class="row-name">  Name: {{ rowDream.Name }}</div>
+    <div class="row-published">  Published: {{ rowDream.Publised }}</div>
+    <div class="row-location">Location: {{ rowDream.Location }}</div>
+    <div class="row-creater">Creater: {{ rowDream.Creater }}</div>
+    <div class="row-energy">Energy: {{ rowDream.Energy }}</div>
 
-  <div class="row-other">
-    ID: {{ rowDream.ID }}
-    PublishAt: {{ rowDream.PublishAt }}
-    CreatedAt: {{ rowDream.CreatedAt }}
-    Status: {{ rowDream.Status }}
-    G: {{ rowDream.CountG }}
+    <div class="row-other">
+      ID: {{ rowDream.ID }} PublishAt: {{ rowDream.PublishAt }} CreatedAt: {{ rowDream.CreatedAt }} Status: {{ rowDream.Status }} G: {{ rowDream.CountG }}
+    </div>
+
+    <div class="row-info">
+      <div class="i-label">
+        Information
+      </div>
+      <div class="i-data">
+        {{ rowDream.Info }}
+      </div>
+    </div>
+
+
   </div>
 
-  <div class="row-info">
-    <div class="i-label">
-      Information
-    </div>
-    <div class="i-data">
-      {{ rowDream.Info }}
-    </div>
+  <div class="control-dream-panel">
+        <h1>Панель взаимодействия c мечтой</h1>  
+
+        <div>
+          <p>После публикации мечту нельзя будет изменить!</p> 
+          <p>На публикацию расходуется 1ед энергии.</p>
+          <button @click="deleteDream">Delete Dream</button>
+          <button @click="publishDream">Publish Dream</button>
+          
+        </div>
+
+
+
+        <div>
+          <p>Вы тратите свою личную энергию на мечту!</p>
+          <input type="number" id="energe-input" v-model="EnergyToDream"> {{ EnergyToDream }}
+          <button @click="addEnergyToDream">+Energy</button>
+        </div>
+
   </div>
-
-
-</div>
-
-<div class="control-dream-panel">
-      <h1>Панель взаимодействия c мечтой</h1>  
-
-      <div>
-        <p>После публикации мечту нельзя будет изменить!</p> 
-        <p>На публикацию расходуется 1ед энергии.</p>
-        <button @click="deleteDream">Delete Dream</button>
-        <button @click="publishDream">Publish Dream</button>
-        
-      </div>
-
-
-
-      <div>
-        <p>Вы тратите свою личную энергию на мечту!</p>
-        <input type="number" id="energe-input" v-model="EnergyToDream"> {{ EnergyToDream }}
-        <button @click="addEnergyToDream">+Energy</button>
-      </div>
-
 </div>
 
 </div>
@@ -274,23 +317,23 @@ background-color: #F8F7FA;
 
 .control-dream-panel button {
   color: azure;
-  background-color: #99caf8;
+  background-color: #2C4928;
   cursor: pointer;
-  border: 1px solid #6294c2;
+  border: 1px solid #CBE368;
   padding: 10px;
-  transition: background-color 1.5s ease-in-out;
+  transition: background-color 0.5s ease-in-out;
 
   margin-top: 30px;
   width: 20%;
 }
 .control-dream-panel button:hover {
-  background-color: #ffcaa4;
+  background-color: #CBE368;
 }
 
 .control-dream-panel #energe-input{
   padding: 10px;
 
-  border: 1px solid #FD781A;
+  border: 1px solid #CBE368;
 }
 
 </style>

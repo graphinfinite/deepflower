@@ -66,7 +66,7 @@ func (app *App) Run(cfg config.Configuration) error {
 	dream := ctrl.NewDreamController(&dreamUC, &zlog)
 	//task := ctrl.NewTaskController(&zlog)
 
-	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://32a5-178-176-65-121.eu.ngrok.io/bot
+	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://2698-178-176-65-121.eu.ngrok.io/bot
 	//
 	r := chi.NewRouter()
 
@@ -74,7 +74,7 @@ func (app *App) Run(cfg config.Configuration) error {
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"https://*", "http://*"},
 		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		//ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
@@ -93,6 +93,8 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Use(auth.JWT)
 		r.Post("/", dream.CreateDream)
 		r.Get("/", dream.GetAllUserDreams)
+		r.Patch("/{dreamId}", dream.UpdateUserDream)
+		r.Delete("/{dreamId}", dream.DeleteUserDream)
 	})
 
 	/*
