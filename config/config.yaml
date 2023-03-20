@@ -15,5 +15,5 @@ postgres:
     dbname: "deepflower"
 
 telegram:
-  token: "6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro"
+  token: ""
   boturl: "http://t.me/DeepFlowerbot"

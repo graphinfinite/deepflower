@@ -66,8 +66,6 @@ func (app *App) Run(cfg config.Configuration) error {
 	dreamUC := usecase.NewDreamUsecase(&dreamstore)
 	dream := ctrl.NewDreamController(&dreamUC, &zlog)
 	//task := ctrl.NewTaskController(&zlog)
-
-	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://a76e-178-176-65-121.eu.ngrok.io/bot
 	//
 	r := chi.NewRouter()
 
@@ -98,30 +96,6 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Delete("/{dreamId}", dream.DeleteUserDream)
 	})
 
-	/*
-			r.Use(auth.JWT)
-			r.Get("/", dream.GetAllUserDreams)
-			r.Get("/search", dream.SearchDreams) //json params for search
-			r.Post("/", dream.CreateDream)
-			r.Get("/{dreamId}", dream.GetUserDreamById)
-			r.Put("/{{dreamId}", dream.UpdateUserDreamById)
-			r.Delete("/{{dreamId}", dream.DeleteUserDreamById)
-
-			r.Post("/{dreamId}/push", dream.PushUserDreamById) // публикация, ограничение по задержке и по времени жизни
-
-			r.Route("/{dreamId}/tasks", func(r chi.Router) {
-				// создание связанного дерева задач
-				r.Get("/", task.GetAllUserDreamTasks)
-				r.Get("/search", task.SearchDreamTasks) //json params for search
-				r.Post("/", task.CreateUserDreamTask)
-				r.Get("/{taskId}", task.GetUserDreamTaskById)
-				r.Put("/{taskId}", task.UpdateUserDreamTaskById)
-				r.Delete("/{taskId}", task.DeleteUserDreamTaskById)
-
-			})
-		})
-
-	*/
 	// HTTP Server
 	app.httpServer = &http.Server{
 		Addr:           net.JoinHostPort(cfg.Server.Host, cfg.Server.Port),
