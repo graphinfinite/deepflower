@@ -38,7 +38,7 @@ func (auth *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-	token, err := auth.Uc.Login(u.Username, u.Password)
+	token, err := auth.Uc.Login(r.Context(), u.Username, u.Password)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return

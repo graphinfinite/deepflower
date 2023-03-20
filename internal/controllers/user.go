@@ -18,7 +18,7 @@ func NewUserController(uc UserUCInterface, logger *zerolog.Logger) UserControlle
 
 func (u *UserController) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(ContextUserIdKey).(string)
-	user, err := u.Uc.GetUserInfo(userId)
+	user, err := u.Uc.GetUserInfo(r.Context(), userId)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
@@ -32,7 +32,7 @@ func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-	userUpdated, err := u.Uc.UpdateUser(user)
+	userUpdated, err := u.Uc.UpdateUser(r.Context(), user)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return

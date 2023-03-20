@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"deepflower/internal/model"
 	"errors"
@@ -20,7 +21,7 @@ func NewUserStorage(dbpool *sqlx.DB) UserStorage {
 
 // return user
 // if user not found -> UserNotFoundStorageError
-func (s *UserStorage) GetUserByTgId(tgId int) (model.User, error) {
+func (s *UserStorage) GetUserByTgId(ctx context.Context, tgId int) (model.User, error) {
 	q := `SELECT * FROM users WHERE tgId = $1`
 	user := model.User{}
 	err := s.Db.Get(&user, q, tgId)
@@ -34,7 +35,7 @@ func (s *UserStorage) GetUserByTgId(tgId int) (model.User, error) {
 	return user, nil
 }
 
-func (s *UserStorage) GetUserByUsername(username string) (model.User, error) {
+func (s *UserStorage) GetUserByUsername(ctx context.Context, username string) (model.User, error) {
 	q := `SELECT * FROM users WHERE username = $1`
 	user := model.User{}
 	err := s.Db.Get(&user, q, username)
@@ -50,13 +51,13 @@ func (s *UserStorage) GetUserByUsername(username string) (model.User, error) {
 	return user, nil
 }
 
-func (s *UserStorage) UpdateUser(m model.User) (model.User, error) {
+func (s *UserStorage) UpdateUser(ctx context.Context, m model.User) (model.User, error) {
 	//q := `UPDATE users SET username = $1`
 
 	return model.User{}, nil
 }
 
-func (s *UserStorage) GetUserById(userId string) (model.User, error) {
+func (s *UserStorage) GetUserById(ctx context.Context, userId string) (model.User, error) {
 	q := `SELECT * FROM users WHERE id = $1`
 	user := model.User{}
 	err := s.Db.Get(&user, q, userId)
@@ -70,7 +71,7 @@ func (s *UserStorage) GetUserById(userId string) (model.User, error) {
 	return user, nil
 }
 
-func (s *UserStorage) CreateUser(u model.User) (userId string, e error) {
+func (s *UserStorage) CreateUser(ctx context.Context, u model.User) (userId string, e error) {
 	var id string
 	fmt.Printf("USER  %#v \n", u)
 	query := `INSERT INTO users (tgId, tgChatId, tgUserName, tgFirstName, tgLastName, tgLanguageCode, hashedPassword, username, active) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id`

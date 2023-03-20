@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"deepflower/internal/repository"
 	"errors"
 	"fmt"
@@ -26,9 +27,9 @@ func NewAuthUsecase(r UserStorageInterface, cost int, signingKey string, expireD
 // generate new username and password. save new user data.
 // return user model with Username, Password.
 // if user with tgId already exist -> ErrAuthUserAlreadyExist (and update chatId, userName, firstName, lastName, languageCode)
-func (auth *AuthUsecase) RegistrationFromTg(tguser m.UserTelegram) (m.User, error) {
+func (auth *AuthUsecase) RegistrationFromTg(ctx context.Context, tguser m.UserTelegram) (m.User, error) {
 	var ErrUserNotFound *repository.ErrStoreUserNotFound
-	_, err := auth.Rep.GetUserByTgId(tguser.TgId)
+	_, err := auth.Rep.GetUserByTgId(ctx, tguser.TgId)
 	switch {
 	case errors.As(err, &ErrUserNotFound):
 		newusername := h.GenUserName()
@@ -37,7 +38,7 @@ func (auth *AuthUsecase) RegistrationFromTg(tguser m.UserTelegram) (m.User, erro
 		if err != nil {
 			return m.User{}, err
 		}
-		_, err = auth.Rep.CreateUser(m.User{UserTelegram: tguser, HashedPassword: hash, Username: newusername})
+		_, err = auth.Rep.CreateUser(ctx, m.User{UserTelegram: tguser, HashedPassword: hash, Username: newusername})
 		if err != nil {
 			return m.User{}, err
 		}
@@ -54,8 +55,8 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (auth *AuthUsecase) Login(username, password string) (token string, err error) {
-	user, err := auth.Rep.GetUserByUsername(username)
+func (auth *AuthUsecase) Login(ctx context.Context, username, password string) (token string, err error) {
+	user, err := auth.Rep.GetUserByUsername(ctx, username)
 	if err != nil {
 		return "", err
 	}
@@ -85,7 +86,7 @@ func (auth *AuthUsecase) Login(username, password string) (token string, err err
 	return tokenString, nil
 }
 
-func (auth *AuthUsecase) ValidateJwtToken(tokenString string) (bool, jwt.MapClaims, error) {
+func (auth *AuthUsecase) ValidateJwtToken(ctx context.Context, tokenString string) (bool, jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

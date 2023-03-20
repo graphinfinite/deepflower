@@ -2,11 +2,8 @@
 
 import { RouterView } from 'vue-router'
 import SidebarMenu from '@/components/SidebarMenu.vue';
-
 import Login from '@/components/Login.vue'
-
 </script>
-
 <template>
   <div id="root">
     <SidebarMenu class="sidebar"/>
@@ -17,18 +14,13 @@ import Login from '@/components/Login.vue'
   </div>
 </template>
 
-
 <script setup lang="ts">
 import {ref} from "vue"
 
-//import { useLocalStorage } from '@vueuse/core'
 console.log(localStorage.getItem("tokenAccess"))
 const isAuthorazed = ref(Boolean(localStorage.getItem("tokenAccess")))
 
-
-
 </script>
-
 <style scoped lang="scss">
 #root {
    display: grid;

@@ -20,7 +20,7 @@ func NewDreamController(uc DreamUCInterface, logger *zerolog.Logger) DreamContro
 
 func (c *DreamController) GetAllUserDreams(w http.ResponseWriter, r *http.Request) {
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	dreams, err := c.Uc.GetAllUserDreams(userId)
+	dreams, err := c.Uc.GetAllUserDreams(r.Context(), userId)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
@@ -46,7 +46,7 @@ func (c *DreamController) CreateDream(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	m, err := c.Uc.CreateDream(d.Name, d.Info, d.Location, userId)
+	m, err := c.Uc.CreateDream(r.Context(), d.Name, d.Info, d.Location, userId)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
@@ -62,7 +62,7 @@ func (c *DreamController) UpdateUserDream(w http.ResponseWriter, r *http.Request
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-	// validate patch
+	// TODO validate patch
 	errorMsg := ""
 	for key, value := range dreamPatch {
 		switch key {
@@ -93,7 +93,7 @@ func (c *DreamController) UpdateUserDream(w http.ResponseWriter, r *http.Request
 	}
 	// end validate patch
 
-	updatedDream, err := c.Uc.UpdateUserDream(userId, dreamId, dreamPatch)
+	updatedDream, err := c.Uc.UpdateUserDream(r.Context(), userId, dreamId, dreamPatch)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
@@ -103,7 +103,7 @@ func (c *DreamController) UpdateUserDream(w http.ResponseWriter, r *http.Request
 func (c *DreamController) DeleteUserDream(w http.ResponseWriter, r *http.Request) {
 	dreamId := chi.URLParam(r, "dreamId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	if err := c.Uc.DeleteUserDream(userId, dreamId); err != nil {
+	if err := c.Uc.DeleteUserDream(r.Context(), userId, dreamId); err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}

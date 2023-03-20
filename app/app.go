@@ -41,6 +41,7 @@ func (app *App) Run(cfg config.Configuration) error {
 	}
 	defer dbPool.Close()
 	zlog.Info().Msgf("migrate... ")
+	//TODO temporary
 	if err := postgres.MigrateDb(dbPool); err != nil {
 		return err
 	}
@@ -66,7 +67,7 @@ func (app *App) Run(cfg config.Configuration) error {
 	dream := ctrl.NewDreamController(&dreamUC, &zlog)
 	//task := ctrl.NewTaskController(&zlog)
 
-	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://2698-178-176-65-121.eu.ngrok.io/bot
+	// https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/setWebhook?url=https://a76e-178-176-65-121.eu.ngrok.io/bot
 	//
 	r := chi.NewRouter()
 

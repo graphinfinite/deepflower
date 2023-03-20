@@ -3,7 +3,7 @@ import TableLite from "vue3-table-lite";
 
 import { reactive, ref, toRaw } from "vue"
 import API from "@/modules/api"
-  // Init Your table settings
+  // init table settings
 const table = reactive({
 isLoading: false,
 columns: [
@@ -78,19 +78,20 @@ sortable: {
 },
 });
 
- // offset, limit, order, sort
-const doSearch = () => {
+ // 
+const doSearch = (offset, limit, order, sort) => {
 table.isLoading = true;
-  
-// Start use axios to get data from Server
 let url = '/dreams';
 API.get(url)
 .then((response) => {
+table.isLoading = false;
+
 // refresh table rows
 table.rows = response.data.data;
 //table.totalRecordCount = response.count;
-//table.sortable.order = order;
-//table.sortable.sort = sort;
+table.sortable.order = order;
+table.sortable.sort = sort;
+
 });
         // End use axios to get data from Server
 };
@@ -98,12 +99,11 @@ table.rows = response.data.data;
 /**
  * Table search finished event
  */
-const tableLoadingFinish = (elements) => {
-table.isLoading = false;
-};
-// Get data first
-doSearch();
+ const tableLoadingFinish = (elements) => {
+ table.isLoading = false;
+ };
 
+doSearch();
 const rowDream = reactive({
 CountG: 0,
 CreatedAt: "",
@@ -124,26 +124,22 @@ const rowClicked = (row) => {
 };
 
 
-
 const deleteDream = () => {
   if (rowDream.Name ==="") {
     console.log("noRow")
     return
   }
   console.log("deleteDream")
-  let url = '/dreams';
-  let json = {
-    dreamId: rowDream.ID
-  }
-  API.delete(url, json).then((response) => {
-    //table.rows = response.data.data;
-    //table.totalRecordCount = response.count;
-    //table.sortable.order = order;
-    //table.sortable.sort = sort;
+  let url = '/dreams/'+rowDream.ID;
+  API.delete(url).then((response) => {
+
+    if (response.data.status == "ok") {
+      rowDream.Name = "";
+      //table.rows = response.data.data;
+    }
 });
 
 }
-
 
 const publishDream = () => {
   if (rowDream.Name ==="") {
@@ -164,18 +160,6 @@ const publishDream = () => {
 });
 
 }
-
-
-
-
-// return {
-// table,
-// doSearch,
-// tableLoadingFinish,
-// };
-
-
-
 </script>
 
 <template>
@@ -220,23 +204,18 @@ const publishDream = () => {
 
   <div class="control-dream-panel">
         <h1>Панель взаимодействия c мечтой</h1>  
-
         <div>
           <p>После публикации мечту нельзя будет изменить!</p> 
           <p>На публикацию расходуется 1ед энергии.</p>
           <button @click="deleteDream">Delete Dream</button>
           <button @click="publishDream">Publish Dream</button>
-          
         </div>
-
-
-
+        
         <div>
           <p>Вы тратите свою личную энергию на мечту!</p>
           <input type="number" id="energe-input" v-model="EnergyToDream"> {{ EnergyToDream }}
           <button @click="addEnergyToDream">+Energy</button>
         </div>
-
   </div>
 </div>
 
@@ -245,15 +224,10 @@ const publishDream = () => {
 
 </template>
 
-
 <style scoped>
-
 .dreamroot {
   font-family: Verdana, sans-serif;
-
-
 }
-
 
 
 ::v-deep(.vtl-table .vtl-thead .vtl-thead-th) {
@@ -264,7 +238,6 @@ const publishDream = () => {
 ::v-deep(.vtl-table td),
 ::v-deep(.vtl-table tr) {
   border: none;
-
 }
 ::v-deep(.vtl-paging-info) {
   color: #2C4928;
@@ -278,18 +251,15 @@ const publishDream = () => {
 }
 
 
-
 #dreamrow {
   display: flex;
   width: 100%;
   flex-direction: column;
   border: 1px solid #ebe8f0;
   padding: 20px;
-
 }
 
 #dreamrow div {
-
   padding-top: 10px;
 }
 
@@ -306,14 +276,10 @@ background-color: #F8F7FA;
   padding: 20px;
 }
 .control-dream-panel div {
-
-
   padding-top: 15px;
   padding-bottom: 15px;
   border-top: 2px solid #192819;
 }
-
-
 
 .control-dream-panel button {
   color: azure;
@@ -332,7 +298,6 @@ background-color: #F8F7FA;
 
 .control-dream-panel #energe-input{
   padding: 10px;
-
   border: 1px solid #CBE368;
 }
 

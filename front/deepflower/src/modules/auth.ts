@@ -7,17 +7,13 @@ axios.interceptors.request.use((request) => {
   return request;
 });
 
-
-
 class AuthService {
   login(username:string, password:string) {
     let userLogin = JSON.stringify({
       username: username,
       password: password
     })
-
     console.log(userLogin)
-
     return axios.post('auth/sign-in', userLogin).then(response => {
         console.log(response.data)
         if (response.data.status === "ok") {

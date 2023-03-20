@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"deepflower/internal/model"
 	"fmt"
 )
@@ -13,8 +14,8 @@ func NewDreamUsecase(s DreamStorageInterface) DreamUsecase {
 	return DreamUsecase{Rep: s}
 }
 
-func (d *DreamUsecase) CreateDream(name, info, location, creater string) (model.Dream, error) {
-	dream, err := d.Rep.CreateDream(name, info, location, creater)
+func (d *DreamUsecase) CreateDream(ctx context.Context, name, info, location, creater string) (model.Dream, error) {
+	dream, err := d.Rep.CreateDream(ctx, name, info, location, creater)
 	if err != nil {
 		return model.Dream{}, err
 	}
@@ -22,16 +23,16 @@ func (d *DreamUsecase) CreateDream(name, info, location, creater string) (model.
 
 }
 
-func (d *DreamUsecase) GetAllUserDreams(userId string) ([]model.Dream, error) {
-	dreams, err := d.Rep.GetAllUserDreams(userId)
+func (d *DreamUsecase) GetAllUserDreams(ctx context.Context, userId string) ([]model.Dream, error) {
+	dreams, err := d.Rep.GetAllUserDreams(ctx, userId)
 	if err != nil {
 		return []model.Dream{}, err
 	}
 	return dreams, nil
 }
 
-func (d *DreamUsecase) UpdateUserDream(userId, dreamId string, patchDream map[string]interface{}) (model.Dream, error) {
-	dream, err := d.Rep.GetDreamById(dreamId)
+func (d *DreamUsecase) UpdateUserDream(ctx context.Context, userId, dreamId string, patchDream map[string]interface{}) (model.Dream, error) {
+	dream, err := d.Rep.GetDreamById(ctx, dreamId)
 	if err != nil {
 		return model.Dream{}, err
 	}
@@ -49,14 +50,14 @@ func (d *DreamUsecase) UpdateUserDream(userId, dreamId string, patchDream map[st
 		}
 	}
 
-	dreamUpdated, err := d.Rep.UpdateUserDream(dreamId, patchDream)
+	dreamUpdated, err := d.Rep.UpdateUserDream(ctx, dreamId, patchDream)
 	if err != nil {
 		return model.Dream{}, err
 	}
 	return dreamUpdated, nil
 }
-func (d *DreamUsecase) DeleteUserDream(userId, dreamId string) error {
-	dream, err := d.Rep.GetDreamById(dreamId)
+func (d *DreamUsecase) DeleteUserDream(ctx context.Context, userId, dreamId string) error {
+	dream, err := d.Rep.GetDreamById(ctx, dreamId)
 	if err != nil {
 		return err
 	}
@@ -64,7 +65,7 @@ func (d *DreamUsecase) DeleteUserDream(userId, dreamId string) error {
 		// TODO
 		return fmt.Errorf("not available")
 	}
-	if err := d.Rep.DeleteUserDream(dreamId); err != nil {
+	if err := d.Rep.DeleteUserDream(ctx, dreamId); err != nil {
 		return err
 	}
 	return nil

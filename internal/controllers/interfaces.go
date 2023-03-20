@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"deepflower/internal/model"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -8,19 +9,19 @@ import (
 
 type (
 	AuthUCInterface interface {
-		RegistrationFromTg(tguser model.UserTelegram) (model.User, error)
-		Login(username, password string) (token string, err error)
-		ValidateJwtToken(tokenString string) (bool, jwt.MapClaims, error)
+		RegistrationFromTg(ctx context.Context, tguser model.UserTelegram) (model.User, error)
+		Login(ctx context.Context, username, password string) (token string, err error)
+		ValidateJwtToken(ctx context.Context, tokenString string) (bool, jwt.MapClaims, error)
 	}
 	UserUCInterface interface {
-		GetUserInfo(userId string) (user model.User, err error)
-		UpdateUser(model.User) (user model.User, err error)
+		GetUserInfo(ctx context.Context, userId string) (user model.User, err error)
+		UpdateUser(context.Context, model.User) (user model.User, err error)
 	}
 	DreamUCInterface interface {
-		CreateDream(name, info, location string, creater string) (model.Dream, error)
-		GetAllUserDreams(userId string) ([]model.Dream, error)
-		UpdateUserDream(userId, dreamId string, dream map[string]interface{}) (model.Dream, error)
-		DeleteUserDream(userId string, dreamId string) error
+		CreateDream(ctx context.Context, name, info, location string, creater string) (model.Dream, error)
+		GetAllUserDreams(ctx context.Context, userId string) ([]model.Dream, error)
+		UpdateUserDream(ctx context.Context, userId, dreamId string, dream map[string]interface{}) (model.Dream, error)
+		DeleteUserDream(ctx context.Context, userId string, dreamId string) error
 	}
 
 	TaskUsecaseInterface interface {

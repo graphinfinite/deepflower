@@ -48,7 +48,6 @@ func Init() (Configuration, error) {
 	}
 
 	viper.AutomaticEnv()
-
 	dbconf := DbConfig{
 		Host:     viper.GetString("postgres.host"),
 		Port:     viper.GetString("postgres.port"),

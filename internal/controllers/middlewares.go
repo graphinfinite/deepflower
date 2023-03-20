@@ -18,7 +18,7 @@ func (auth *AuthController) JWT(next http.Handler) http.Handler {
 			return
 		}
 		token := bearer[7:]
-		ok, claims, err := auth.Uc.ValidateJwtToken(token)
+		ok, claims, err := auth.Uc.ValidateJwtToken(r.Context(), token)
 		if err != nil || !ok {
 			JSON(w, STATUS_ERROR, "token invalid")
 			return

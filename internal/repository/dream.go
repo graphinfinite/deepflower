@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"deepflower/internal/model"
 	"fmt"
 	"strings"
@@ -16,17 +17,15 @@ func NewDreamStorage(dbpool *sqlx.DB) DreamStorage {
 	return DreamStorage{Db: dbpool}
 }
 
-func (s *DreamStorage) CreateDream(name, info, location, creater string) (model.Dream, error) {
+func (s *DreamStorage) CreateDream(ctx context.Context, name, info, location, creater string) (model.Dream, error) {
 	var m model.Dream
-
 	tx := s.Db.MustBegin()
-
 	q := `
 	INSERT INTO dream (name, info,published, status, creater, energy, location, countG) 
-	VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) 
+	VALUES ($1,$2,$3,$4,$5,$6,$7,$8) 
 	returning *;
 	`
-	err := tx.QueryRowx(q, name, info, false, "CREATE", creater, 0, location, 0).StructScan(&m)
+	err := tx.QueryRowContext(ctx, q, name, info, false, "CREATE", creater, 0, location, 0).Scan(&m)
 	if err != nil {
 		tx.Rollback()
 		return model.Dream{}, err
@@ -38,7 +37,7 @@ func (s *DreamStorage) CreateDream(name, info, location, creater string) (model.
 	return m, nil
 }
 
-func (s *DreamStorage) GetAllUserDreams(userId string) ([]model.Dream, error) {
+func (s *DreamStorage) GetAllUserDreams(ctx context.Context, userId string) ([]model.Dream, error) {
 	var dreams []model.Dream
 	q := `SELECT * FROM dream WHERE creater=$1;`
 
@@ -48,19 +47,18 @@ func (s *DreamStorage) GetAllUserDreams(userId string) ([]model.Dream, error) {
 	return dreams, nil
 }
 
-func (s *DreamStorage) GetDreamById(dreamId string) (model.Dream, error) {
+func (s *DreamStorage) GetDreamById(ctx context.Context, dreamId string) (model.Dream, error) {
 	var dream model.Dream
-	q := `SELECT * FROM dream WHERE dreamid=$1;`
-
-	if err := s.Db.Select(&dream, q, dreamId); err != nil {
+	q := `SELECT * FROM "dream" WHERE id=$1;`
+	if err := s.Db.GetContext(ctx, &dream, q, dreamId); err != nil {
 		return model.Dream{}, err
 	}
 	return dream, nil
 }
 
-func (s *DreamStorage) DeleteUserDream(dreamId string) error {
-	q := `DELETE * FROM dream WHERE dreamid=$1;`
-	result, err := s.Db.Exec(q, dreamId)
+func (s *DreamStorage) DeleteUserDream(ctx context.Context, dreamId string) error {
+	q := `DELETE FROM dream WHERE id=$1;`
+	result, err := s.Db.ExecContext(ctx, q, dreamId)
 	if err != nil {
 		return err
 	}
@@ -74,7 +72,7 @@ func (s *DreamStorage) DeleteUserDream(dreamId string) error {
 	return nil
 }
 
-func (s *DreamStorage) UpdateUserDream(dreamId string, patchDream map[string]interface{}) (model.Dream, error) {
+func (s *DreamStorage) UpdateUserDream(ctx context.Context, dreamId string, patchDream map[string]interface{}) (model.Dream, error) {
 	// TODO
 	var dream model.Dream
 	sqlSet := `UPDATE dream SET`
@@ -84,7 +82,7 @@ func (s *DreamStorage) UpdateUserDream(dreamId string, patchDream map[string]int
 	sqlSet = strings.TrimSuffix(sqlSet, ",")
 	sqlSet += fmt.Sprintf(` WHERE dreamid=%s returning *;`, dreamId)
 
-	rows, err := s.Db.NamedQuery(sqlSet, patchDream)
+	rows, err := s.Db.NamedQueryContext(ctx, sqlSet, patchDream)
 	if err != nil {
 		return model.Dream{}, err
 	}

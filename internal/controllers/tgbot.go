@@ -45,7 +45,7 @@ func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Re
 	if upd.Message.Text == "/start" {
 		var message string
 		var ErrAuthUserAlreadyExist *usecase.ErrAuthUserAlreadyExist
-		usepas, err := t.Authusecase.RegistrationFromTg(u)
+		usepas, err := t.Authusecase.RegistrationFromTg(r.Context(), u)
 		switch {
 		case errors.As(err, &ErrAuthUserAlreadyExist):
 			message = fmt.Sprintf("Glad to see you here again, %s!", usepas.Username)
