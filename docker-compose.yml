@@ -15,7 +15,6 @@ services:
     build:
       context: ./goback
       dockerfile: Dockerfile
-    env_file: .env
     depends_on:
       - dbpostgres
     networks:
@@ -30,8 +29,6 @@ services:
       - goserver
     ports:
       - "5173:5173"
-    networks:
-      - network-backend
 volumes:
   data:
 
