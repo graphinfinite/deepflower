@@ -81,9 +81,9 @@ func (app *App) Run(cfg config.Configuration) error {
 	}))
 
 	r.Use(middleware.Timeout(60 * time.Second))
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) }) //root
-	r.Post("/bot", bot.TelegramBotMessageReader)                                          // entrypoint to tg bot
-	r.Post("/auth/sign-in", auth.Login)                                                   // jwt-auth
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
+	r.Post("/bot", bot.TelegramBotMessageReader)
+	r.Post("/auth/sign-in", auth.Login)
 	r.Route("/user", func(r chi.Router) {
 		r.Use(auth.JWT)
 		r.Get("/", user.GetUserInfo)
