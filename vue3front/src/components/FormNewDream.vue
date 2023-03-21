@@ -20,10 +20,10 @@
 
 </template>
 
-<script setup>
+<script lang="ts" setup>
   import { computed, ref, reactive } from "vue";
 
-  import API from "@/modules/api.ts"
+  import API from "@/modules/api"
   const messageErr = ref("")
   const dreamname = ref("");
   const dreaminfo = ref("");
