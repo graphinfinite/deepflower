@@ -29,7 +29,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, ref } from "vue";
   import AuthService from "@/modules/auth"
 

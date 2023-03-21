@@ -1,9 +1,9 @@
 <script lang="ts">
-
 import { RouterView } from 'vue-router'
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import Login from '@/components/Login.vue'
 </script>
+
 <template>
   <div id="root">
     <SidebarMenu class="sidebar"/>
