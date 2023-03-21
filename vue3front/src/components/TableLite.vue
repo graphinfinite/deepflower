@@ -47,7 +47,7 @@ columns: [
     },
     {
     label: "Pub",
-    field: "Publised",
+    field: "Published",
     width: "3%",
     sortable: true,
     },
@@ -134,7 +134,7 @@ const rowDream = reactive({
       Info: "",
       Location: "",
       Name: "",
-      Publised: false,
+      Published: false,
       PublishAt: "",
       Status: "",
 })
@@ -169,14 +169,16 @@ const publishDream = () => {
   console.log("publishDream")
   let url = '/dreams/'+rowDream.ID;
   let json = {
-    Publised: true,
+    Published: true,
     
   }
   API.patch(url, json).then((response) => {
-    //table.rows = response.data.data;
-    //table.totalRecordCount = response.count;
-    //table.sortable.order = order;
-    //table.sortable.sort = sort;
+    if (response.data.status == "ok") {
+      table.rows = table.rows.forEach(function(elem) {
+          if (elem.ID == rowDream.ID) { elem.Publised = true}
+      });
+      rowDream.Published = true;
+    }
   });
 };
 
@@ -215,7 +217,7 @@ const doSend = () => API.post("/dreams", JSON.stringify(newdream))
 <div v-if='rowDream.Name !==""'>
   <div id="dreamrow">
     <div class="row-name">  Name: {{ rowDream.Name }}</div>
-    <div class="row-published">  Published: {{ rowDream.Publised }}</div>
+    <div class="row-published">  Published: {{ rowDream.Published }}</div>
     <div class="row-location">Location: {{ rowDream.Location }}</div>
     <div class="row-creater">Creater: {{ rowDream.Creater }}</div>
     <div class="row-energy">Energy: {{ rowDream.Energy }}</div>

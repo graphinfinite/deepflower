@@ -25,11 +25,11 @@ func (c *DreamController) GetAllUserDreams(w http.ResponseWriter, r *http.Reques
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
+
 	JSONstruct(w, STATUS_OK, "ок", dreams)
 }
 
 func (c *DreamController) SearchDreams(w http.ResponseWriter, r *http.Request) {
-
 	JSON(w, STATUS_OK, "")
 }
 

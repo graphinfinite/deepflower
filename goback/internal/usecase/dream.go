@@ -36,7 +36,7 @@ func (d *DreamUsecase) UpdateUserDream(ctx context.Context, userId, dreamId stri
 	if err != nil {
 		return model.Dream{}, err
 	}
-	if dream.Creater != userId || dream.Publised {
+	if dream.Creater != userId || dream.Published {
 		return model.Dream{}, fmt.Errorf("not available")
 	}
 
@@ -61,7 +61,7 @@ func (d *DreamUsecase) DeleteUserDream(ctx context.Context, userId, dreamId stri
 	if err != nil {
 		return err
 	}
-	if dream.Creater != userId || dream.Publised {
+	if dream.Creater != userId || dream.Published {
 		// TODO
 		return fmt.Errorf("not available")
 	}

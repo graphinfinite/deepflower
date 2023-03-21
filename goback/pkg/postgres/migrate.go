@@ -28,7 +28,7 @@ func MigrateDb(dbPool *sqlx.DB) error {
 		createdAt timestamp DEFAULT current_timestamp NOT NULL,
 		updatedAt timestamp DEFAULT current_timestamp NOT NULL,
 		publishAt timestamp NOT NULL DEFAULT current_timestamp ,
-		published BOOLEAN NOT NULL,
+		published BOOLEAN NOT NULL DEFAULT false,
 		status VARCHAR(32) NOT NULL,
 		creater uuid NOT NULL,
 		energy bigint NOT NULL,

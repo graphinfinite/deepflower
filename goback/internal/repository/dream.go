@@ -40,7 +40,6 @@ func (s *DreamStorage) CreateDream(ctx context.Context, name, info, location, cr
 func (s *DreamStorage) GetAllUserDreams(ctx context.Context, userId string) ([]model.Dream, error) {
 	var dreams []model.Dream
 	q := `SELECT * FROM dream WHERE creater=$1;`
-
 	if err := s.Db.Select(&dreams, q, userId); err != nil {
 		return []model.Dream{}, err
 	}
@@ -80,7 +79,9 @@ func (s *DreamStorage) UpdateUserDream(ctx context.Context, dreamId string, patc
 		sqlSet += fmt.Sprintf(" %s=:%s,", strings.ToLower(key), key)
 	}
 	sqlSet = strings.TrimSuffix(sqlSet, ",")
-	sqlSet += fmt.Sprintf(` WHERE dreamid=%s returning *;`, dreamId)
+	sqlSet += fmt.Sprintf(` WHERE id::text='%s' returning *;`, dreamId)
+
+	fmt.Print(sqlSet)
 
 	rows, err := s.Db.NamedQueryContext(ctx, sqlSet, patchDream)
 	if err != nil {
