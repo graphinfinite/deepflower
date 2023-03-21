@@ -16,6 +16,6 @@ WORKDIR /root/
 COPY --from=builder ./temp/.bin/deepflower .
 COPY --from=builder ./temp/config config/
 
-EXPOSE 8787 8787
+EXPOSE 8787
 
 CMD ["./deepflower"]

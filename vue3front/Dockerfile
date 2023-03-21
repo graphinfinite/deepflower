@@ -15,5 +15,5 @@ COPY . .
 # собираем приложение
 RUN npm run build
 
-EXPOSE 8080
+EXPOSE 5432 
 CMD [ "http-server", "dist" ]
