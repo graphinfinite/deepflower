@@ -1,7 +1,6 @@
 
 <script lang="ts">
 import TableLite from "@/components/TableLite.vue"
-import FormNewDream from "@/components/FormNewDream.vue"
 </script>
 
 <template>
@@ -12,10 +11,6 @@ import FormNewDream from "@/components/FormNewDream.vue"
         <div class="tablelite">
           <TableLite />
         </div>
-
-        <div class="dreamform">
-          <FormNewDream />
-        </div>
     </div>
 </template>
 
@@ -25,15 +20,10 @@ import FormNewDream from "@/components/FormNewDream.vue"
 .maindata{
   color: azure;
   padding: 20px;
-  background-color: #192819;
-  margin-bottom: 30px;
+  background-color: #172025;
 }
 
-.dreamform {
 
-
-  padding:50px;
-}
 
 .wrapper{
   padding: 20px;

@@ -1,4 +1,4 @@
-host: 0.0.0.0 #"127.0.0.1"
+host: 127.0.0.1 #0.0.0.0
 port: 8787
 project_name: "deepflower"
 
@@ -8,8 +8,8 @@ auth:
   token_ttl: 7777 #min
 
 postgres: 
-    host: dbpostgres #host.docker.internal
-    port: 5432 #32768
+    host: host.docker.internal #dbpostgres(compose) #host.docker.internal
+    port: 32768 # 5432(compose) 32768(some)
     user: "postgres"
     password: "postgrespw"
     dbname: "deepflower"

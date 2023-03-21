@@ -25,7 +25,7 @@ func (s *DreamStorage) CreateDream(ctx context.Context, name, info, location, cr
 	VALUES ($1,$2,$3,$4,$5,$6,$7,$8) 
 	returning *;
 	`
-	err := tx.QueryRowContext(ctx, q, name, info, false, "CREATE", creater, 0, location, 0).Scan(&m)
+	err := tx.GetContext(ctx, &m, q, name, info, false, "CREATE", creater, 0, location, 0)
 	if err != nil {
 		tx.Rollback()
 		return model.Dream{}, err

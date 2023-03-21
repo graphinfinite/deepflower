@@ -1,7 +1,5 @@
 <script setup>
 import TableLite from "vue3-table-lite";
-
-
 import { reactive, ref, toRaw } from "vue"
 import API from "@/modules/api"
   // init table settings
@@ -11,8 +9,8 @@ columns: [
     {
     label: "ID",
     field: "ID",
-    width: "1%",
-    sortable: true,
+    width: "5%",
+    sortable: false,
     isKey: true,
     },
     {
@@ -20,12 +18,32 @@ columns: [
     field: "Name",
     width: "20%",
     sortable: true,
+    display: (row) => {
+        if (row.Name) {
+          if (row.Name.length>15) {
+            return (row.Name.slice(0, 15)+"...")
+          };
+          return (row.Name);
+        } else {
+          return ("Empty")
+        };
+},
     },
     {
     label: "Information",
     field: "Info",
-    width: "40%",
-    sortable: true,
+    width: "30%",
+    sortable: false,
+    display: (row) => {
+        if (row.Info) {
+          if (row.Info.length>30) {
+            return (row.Info.slice(0, 31)+"...")
+          };
+          return (row.Info);
+        } else {
+          return ("<b>Empty</b>")
+        };
+},
     },
     {
     label: "Pub",
@@ -38,6 +56,13 @@ columns: [
     field: "PublishAt",
     width: "3%",
     sortable: true,
+    display: (row) => {
+        if (row.PublishAt) {
+          return (row.PublishAt.slice(0, 19));
+        } else {
+          return ("Empty")
+        };
+},
     },
     {
     label: "E",
@@ -50,26 +75,23 @@ columns: [
     field: "Location",
     width: "1%",
     sortable: true,
+    display: (row) => {
+        if (row.Location) {
+          if (row.Location.length>30) {
+            return (row.Info.slice(0, 31)+"...")
+          };
+          return (row.Location);
+        } else {
+          return ("<b>Empty</b>")
+        };
+},
     },
     {
     label: "S",
     field: "Status",
     width: "1%",
-    sortable: true,
+    sortable: false,
     },
-    {
-          label: "",
-          field: "quick",
-          width: "10%",
-          display: function (row) {
-            return (
-              '<button type="button" data-id="' +
-              row.id +
-              '" class="is-rows-el quick-btn">Look</button>'
-            );
-          },
-
-    }
 ],
 rows: [],
 totalRecordCount: 0,
@@ -81,20 +103,17 @@ sortable: {
 
  // 
 const doSearch = (offset, limit, order, sort) => {
-table.isLoading = true;
-let url = '/dreams';
-API.get(url)
-.then((response) => {
-table.isLoading = false;
-
-// refresh table rows
-table.rows = response.data.data;
-//table.totalRecordCount = response.count;
-table.sortable.order = order;
-table.sortable.sort = sort;
-
-});
-        // End use axios to get data from Server
+  table.isLoading = true;
+  let url = '/dreams';
+  API.get(url)
+  .then((response) => {
+      table.isLoading = false;
+      // refresh table rows
+      table.rows = response.data.data;
+      //table.totalRecordCount = response.count;
+      table.sortable.order = order;
+      table.sortable.sort = sort;
+  }); 
 };
   
 /**
@@ -105,18 +124,19 @@ table.sortable.sort = sort;
  };
 
 doSearch();
+
 const rowDream = reactive({
-CountG: 0,
-CreatedAt: "",
-Creater: 0,
-Energy: 0,
-ID: 0,
-Info: "",
-Location: "",
-Name: "",
-Publised: false,
-PublishAt: "",
-Status: "",
+      CountG: 0,
+      CreatedAt: "",
+      Creater: 0,
+      Energy: 0,
+      ID: 0,
+      Info: "",
+      Location: "",
+      Name: "",
+      Publised: false,
+      PublishAt: "",
+      Status: "",
 })
 
 const rowClicked = (row) => {
@@ -127,20 +147,19 @@ const rowClicked = (row) => {
 
 const deleteDream = () => {
   if (rowDream.Name ==="") {
-    console.log("noRow")
+    console.log("no row to delete")
     return
   }
-  console.log("deleteDream")
   let url = '/dreams/'+rowDream.ID;
   API.delete(url).then((response) => {
-
     if (response.data.status == "ok") {
+      table.rows = table.rows.filter(function(elem) {
+          if (elem.Name == rowDream.Name) {return false;} else {return true;}
+      });
       rowDream.Name = "";
-      //table.rows = response.data.data;
     }
-});
-
-}
+  });
+};
 
 const publishDream = () => {
   if (rowDream.Name ==="") {
@@ -158,26 +177,40 @@ const publishDream = () => {
     //table.totalRecordCount = response.count;
     //table.sortable.order = order;
     //table.sortable.sort = sort;
-});
+  });
+};
 
-}
+
+
+const messageErr = ref("")
+const dreamname = ref("");
+const dreaminfo = ref("");
+const location = ref("");
+
+
+const newdream = reactive({
+    Name: dreamname,
+    Info: dreaminfo,
+    Location:location
+})
+const doSend = () => API.post("/dreams", JSON.stringify(newdream))
+
 </script>
 
 <template>
-
 <div class="dreamroot">
-<table-lite
-:has-checkbox="true"
-:is-loading="table.isLoading"
-:columns="table.columns"
-:rows="table.rows"
-:total="table.totalRecordCount"
-:sortable="table.sortable"
-:messages="table.messages"
-@do-search="doSearch"
-@is-finished="table.isLoading = false"
-@row-clicked="rowClicked"
-/>
+  <table-lite
+  :max-width=300
+  :is-loading="table.isLoading"
+  :columns="table.columns"
+  :rows="table.rows"
+  :total="table.totalRecordCount"
+  :sortable="table.sortable"
+  :messages="table.messages"
+  @do-search="doSearch"
+  @is-finished="table.isLoading = false"
+  @row-clicked="rowClicked"
+  />
 
 <div v-if='rowDream.Name !==""'>
   <div id="dreamrow">
@@ -199,10 +232,7 @@ const publishDream = () => {
         {{ rowDream.Info }}
       </div>
     </div>
-
-
   </div>
-
   <div class="control-dream-panel">
         <h1>Панель взаимодействия c мечтой</h1>  
         <div>
@@ -220,9 +250,26 @@ const publishDream = () => {
   </div>
 </div>
 
+
+<div id="dreaminput">
+        <h1>Create new dream!</h1>
+        <form @submit.prevent="doSend">
+          <label for="dreamname">Dream name</label>
+          <input type="text" id="dreamname" v-model="dreamname" placeholder="..." autocomplete="off">
+          <label for="dreaminfo">Dream info</label>&nbsp;
+          <textarea id="dreaminfo" v-model="dreaminfo" placeholder="..."></textarea>
+          <label for="location">Location</label>&nbsp;
+          <input  id="location" v-model="location" placeholder="...">
+          <button type="submit">->...</button> 
+          <div class="form-group">
+          <div v-if="messageErr" class="alert alert-danger" role="alert">
+            {{ messageErr }}
+          </div>
+        </div>
+        </form>
+      </div>
+
 </div>
-
-
 </template>
 
 <style scoped>
@@ -230,25 +277,24 @@ const publishDream = () => {
   font-family: Verdana, sans-serif;
 }
 
-
 ::v-deep(.vtl-table .vtl-thead .vtl-thead-th) {
-  color: #fff;
-  background-color: #2C4928;
-  border-color: #2C4928;
+  color: whitesmoke;
+  background-color: #365778;
+  border-color: #172025;
 }
 ::v-deep(.vtl-table td),
 ::v-deep(.vtl-table tr) {
-  border: none;
+  border: 1px solid whitesmoke;
 }
 ::v-deep(.vtl-paging-info) {
-  color: #2C4928;
+  color: #17324d;
 }
 ::v-deep(.vtl-paging-count-label),
 ::v-deep(.vtl-paging-page-label) {
-  color: #2C4928;
+  color: #17324d;
 }
 ::v-deep(.vtl-paging-pagination-page-link) {
-  border: none;
+  border: 1px solid whitesmoke;
 }
 
 
@@ -256,7 +302,7 @@ const publishDream = () => {
   display: flex;
   width: 100%;
   flex-direction: column;
-  border: 1px solid #ebe8f0;
+  border: 1px solid whitesmoke;
   padding: 20px;
 }
 
@@ -265,7 +311,7 @@ const publishDream = () => {
 }
 
 #dreamrow .row-info .i-data{
-background-color: #F8F7FA;
+background-color: #ffffff;
 }
 
 
@@ -273,33 +319,80 @@ background-color: #F8F7FA;
   display: flex;
   width: 100%;
   flex-direction: column;
-  border: 1px solid #ebe8f0;
+  border: 1px solid whitesmoke;
   padding: 20px;
 }
 .control-dream-panel div {
   padding-top: 15px;
   padding-bottom: 15px;
-  border-top: 2px solid #192819;
+  border-top: 1px solid whitesmoke;
 }
 
 .control-dream-panel button {
   color: azure;
-  background-color: #2C4928;
+  background-color: #172025;
   cursor: pointer;
-  border: 1px solid #CBE368;
+  border: 1px solid #add8d8;
   padding: 10px;
-  transition: background-color 0.5s ease-in-out;
+  transition: background-color 5s ease-in-out;
 
   margin-top: 30px;
   width: 20%;
 }
 .control-dream-panel button:hover {
-  background-color: #CBE368;
+  background-color: #bdf750;
 }
 
 .control-dream-panel #energe-input{
   padding: 10px;
-  border: 1px solid #CBE368;
+  border: 1px solid rgb(233, 229, 229);
+}
+
+
+#dreaminput {
+    padding: 20px;
+    border: 1px solid whitesmoke;
+}
+
+#dreaminput h1 {
+    margin-bottom: 30px;
+    margin-top: 30px;
+    color:#2C5662;
+}
+
+#dreaminput form {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+}
+
+#dreaminput form label {
+    margin-top: 20px;
+
+}
+
+#dreaminput form input, textarea {
+background-color: rgb(250, 249, 253);
+width: 100%;
+padding: 20px 20px;
+border: 1px solid whitesmoke;
+border-radius: 4px;
+}
+
+
+#dreaminput form button {
+  color: azure;
+  background-color: #172025;
+  cursor: pointer;
+  border: none;
+  padding: 10px;
+  transition: background-color 5s ease-in-out;
+
+  margin-top: 30px;
+  width: 10%;
+}
+#dreaminput form button:hover {
+  background-color: #bdf750;
 }
 
 </style>
