@@ -1,7 +1,7 @@
 FROM node:lts-alpine
 
 # устанавливаем простой HTTP-сервер для статики
-RUN npm install -g http-server
+#RUN npm install -g http-server
 
 WORKDIR /app
 
@@ -15,5 +15,6 @@ COPY . .
 # собираем приложение
 RUN npm run build
 
-EXPOSE 5432 
-CMD [ "http-server", "dist" ]
+EXPOSE 5173
+
+CMD ["npm", "run", "preview"]

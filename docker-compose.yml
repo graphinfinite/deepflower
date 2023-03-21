@@ -2,13 +2,14 @@ version: "3.7"
 services:
   dbpostgres:
     image: postgres:latest
-    restart: always
+    #restart: always
+    #network_mode: 
     environment:
       - POSTGRES_PASSWORD=postgrespw
       - POSTGRES_USER=postgres
       - POSTGRES_DB=deepflower
     ports:
-      - "5432:5432"
+      - 5432:5432
     volumes:
       - data:/var/lib/postgresql/data
   goserver:
@@ -17,10 +18,8 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - dbpostgres
-    networks:
-      - default
     ports:
-    - "8787:8787"
+    - 8787:8787
   web:
     build:
       context: ./vue3front
@@ -28,7 +27,7 @@ services:
     depends_on:
       - goserver
     ports:
-      - "5173:5173"
+      - 5173:5173
 volumes:
   data:
 
