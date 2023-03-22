@@ -54,6 +54,38 @@ func (c *DreamController) CreateDream(w http.ResponseWriter, r *http.Request) {
 	JSONstruct(w, STATUS_OK, "ок", m)
 }
 
+func (c *DreamController) PublishDream(w http.ResponseWriter, r *http.Request) {
+	dreamId := chi.URLParam(r, "dreamId")
+	userId, _ := r.Context().Value(ContextUserIdKey).(string)
+
+	if err := c.Uc.PublishDream(r.Context(), dreamId, userId); err != nil {
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	JSON(w, STATUS_OK, "dream was published")
+}
+
+type EnergyToDream struct {
+	Energy uint64 `json:"Energy,omitempty"`
+}
+
+func (c *DreamController) AddEnergyToDream(w http.ResponseWriter, r *http.Request) {
+	dreamId := chi.URLParam(r, "dreamId")
+	userId, _ := r.Context().Value(ContextUserIdKey).(string)
+	var e EnergyToDream
+
+	if err := DecodeJSONBody(w, r, &e); err != nil {
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	err := c.Uc.AddEnergyToDream(r.Context(), dreamId, userId, e.Energy)
+	if err != nil {
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	JSON(w, STATUS_OK, "dream energy updated")
+}
+
 func (c *DreamController) UpdateUserDream(w http.ResponseWriter, r *http.Request) {
 	dreamId := chi.URLParam(r, "dreamId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
@@ -66,20 +98,8 @@ func (c *DreamController) UpdateUserDream(w http.ResponseWriter, r *http.Request
 	errorMsg := ""
 	for key, value := range dreamPatch {
 		switch key {
-		case "Name", "Info":
+		case "Name", "Info", "Location":
 			_, ok := value.(string)
-			if !ok {
-				errorMsg += fmt.Sprintf("%s: not valid type ", key)
-			}
-
-		case "Published":
-			_, ok := value.(bool)
-			if !ok {
-				errorMsg += fmt.Sprintf("%s: not valid type ", key)
-			}
-
-		case "Energy":
-			_, ok := value.(uint64)
 			if !ok {
 				errorMsg += fmt.Sprintf("%s: not valid type ", key)
 			}

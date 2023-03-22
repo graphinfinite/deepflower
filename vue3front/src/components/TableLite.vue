@@ -103,25 +103,28 @@ sortable: {
 
  // 
 const doSearch = (offset, limit, order, sort) => {
-  table.isLoading = true;
+  //table.isLoading = true;
   let url = '/dreams';
-  API.get(url)
-  .then((response) => {
-      table.isLoading = false;
-      // refresh table rows
-      table.rows = response.data.data;
-      //table.totalRecordCount = response.count;
-      table.sortable.order = order;
-      table.sortable.sort = sort;
+  API.get(url).then((response) => {
+      if (response.data.status === "ok") {
+        table.isLoading = false;
+        // refresh table rows
+        table.rows = response.data.data;
+        //table.totalRecordCount = response.count;
+        //table.sortable.order = order;
+        //table.sortable.sort = sort;
+        return
+      } 
+      window.alert(response.data.message);
   }); 
 };
   
 /**
  * Table search finished event
  */
- const tableLoadingFinish = (elements) => {
- table.isLoading = false;
- };
+const tableLoadingFinish = (elements) => {
+table.isLoading = false;
+};
 
 doSearch();
 
@@ -147,7 +150,7 @@ const rowClicked = (row) => {
 
 const deleteDream = () => {
   if (rowDream.Name ==="") {
-    console.log("no row to delete")
+    window.alert("Error: Row is empty!");
     return
   }
   let url = '/dreams/'+rowDream.ID;
@@ -158,27 +161,35 @@ const deleteDream = () => {
       });
       rowDream.Name = "";
     }
+    window.alert(response.data.message);
+
   });
 };
 
 const publishDream = () => {
   if (rowDream.Name ==="") {
-    console.log("noRow")
+    window.alert("Error: Row is empty!");
     return
   }
   console.log("publishDream")
   let url = '/dreams/'+rowDream.ID;
   let json = {
     Published: true,
-    
   }
   API.patch(url, json).then((response) => {
-    if (response.data.status == "ok") {
-      table.rows = table.rows.forEach(function(elem) {
-          if (elem.ID == rowDream.ID) { elem.Publised = true}
+    if (response.data.status === "ok") {
+
+      // TODO - optim
+      table.rows.forEach(function(elem, i, rows) {
+          if (elem.ID === rowDream.ID) { 
+            rows[i].Publised = true
+            table.rows = rows;
+          doSearch() }
       });
+
       rowDream.Published = true;
     }
+    window.alert(response.data.message);
   });
 };
 
@@ -188,14 +199,18 @@ const messageErr = ref("")
 const dreamname = ref("");
 const dreaminfo = ref("");
 const location = ref("");
-
-
 const newdream = reactive({
     Name: dreamname,
     Info: dreaminfo,
     Location:location
 })
-const doSend = () => API.post("/dreams", JSON.stringify(newdream))
+const doSend = () => API.post("/dreams", JSON.stringify(newdream)).then((response) => {
+    if (response.data.status === "ok") {
+      doSearch()
+    }
+    window.alert(response.data.message)
+
+})
 
 </script>
 
@@ -210,7 +225,7 @@ const doSend = () => API.post("/dreams", JSON.stringify(newdream))
   :sortable="table.sortable"
   :messages="table.messages"
   @do-search="doSearch"
-  @is-finished="table.isLoading = false"
+  @is-finished="tableLoadingFinish"
   @row-clicked="rowClicked"
   />
 

@@ -94,6 +94,8 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Get("/", dream.GetAllUserDreams)
 		r.Patch("/{dreamId}", dream.UpdateUserDream)
 		r.Delete("/{dreamId}", dream.DeleteUserDream)
+		r.Post("/{dreamId}/publish", dream.PublishDream)
+		r.Post("/{dreamId}/energy", dream.AddEnergyToDream)
 	})
 
 	// HTTP Server

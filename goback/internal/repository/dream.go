@@ -71,23 +71,19 @@ func (s *DreamStorage) DeleteUserDream(ctx context.Context, dreamId string) erro
 	return nil
 }
 
+// dangerous method. strictly check the input data to patch
 func (s *DreamStorage) UpdateUserDream(ctx context.Context, dreamId string, patchDream map[string]interface{}) (model.Dream, error) {
-	// TODO
 	var dream model.Dream
 	sqlSet := `UPDATE dream SET`
 	for key := range patchDream {
-		sqlSet += fmt.Sprintf(" %s=:%s,", strings.ToLower(key), key)
+		sqlSet += fmt.Sprintf(` %s=:%s,`, strings.ToLower(key), key)
 	}
 	sqlSet = strings.TrimSuffix(sqlSet, ",")
-	sqlSet += fmt.Sprintf(` WHERE id::text='%s' returning *;`, dreamId)
-
-	fmt.Print(sqlSet)
-
+	sqlSet += fmt.Sprintf(` WHERE id='%s' returning *;`, dreamId)
 	rows, err := s.Db.NamedQueryContext(ctx, sqlSet, patchDream)
 	if err != nil {
 		return model.Dream{}, err
 	}
-
 	for rows.Next() {
 		err := rows.StructScan(&dream)
 		if err != nil {
@@ -95,4 +91,25 @@ func (s *DreamStorage) UpdateUserDream(ctx context.Context, dreamId string, patc
 		}
 	}
 	return dream, nil
+}
+
+func (s *DreamStorage) EnergyTxUserToDream(ctx context.Context, userId, dreamId string, energy uint64) error {
+	tx := s.Db.MustBegin()
+	query1 := `UPDATE users SET energy=energy-$1 WHERE id='$2';`
+	query2 := `UPDATE dream SET energy=energy+$1 WHERE id='$2';`
+
+	_, err := tx.ExecContext(ctx, query1, energy, userId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	_, err = tx.ExecContext(ctx, query2, energy, dreamId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
 }

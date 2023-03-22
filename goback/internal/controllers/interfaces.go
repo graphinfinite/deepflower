@@ -22,6 +22,8 @@ type (
 		GetAllUserDreams(ctx context.Context, userId string) ([]model.Dream, error)
 		UpdateUserDream(ctx context.Context, userId, dreamId string, dream map[string]interface{}) (model.Dream, error)
 		DeleteUserDream(ctx context.Context, userId string, dreamId string) error
+		AddEnergyToDream(ctx context.Context, dreamId, userId string, energy uint64) error
+		PublishDream(ctx context.Context, dreamId, userId string) error
 	}
 
 	TaskUsecaseInterface interface {

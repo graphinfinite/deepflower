@@ -31,25 +31,47 @@ func (d *DreamUsecase) GetAllUserDreams(ctx context.Context, userId string) ([]m
 	return dreams, nil
 }
 
+const EnergyForPublish uint64 = 1
+
+func (d *DreamUsecase) PublishDream(ctx context.Context, userId, dreamId string) error {
+	dream, err := d.Rep.GetDreamById(ctx, dreamId)
+	if err != nil {
+		return err
+	}
+	if dream.Creater != userId {
+		return fmt.Errorf("error: not available for user: %s", userId)
+	}
+	if dream.Published {
+		return fmt.Errorf("error: dream has already been published")
+	}
+	if err := d.Rep.EnergyTxUserToDream(ctx, userId, dreamId, EnergyForPublish); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *DreamUsecase) AddEnergyToDream(ctx context.Context, userId, dreamId string, energy uint64) error {
+	_, err := d.Rep.GetDreamById(ctx, dreamId)
+	if err != nil {
+		return err
+	}
+	if err := d.Rep.EnergyTxUserToDream(ctx, userId, dreamId, energy); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (d *DreamUsecase) UpdateUserDream(ctx context.Context, userId, dreamId string, patchDream map[string]interface{}) (model.Dream, error) {
 	dream, err := d.Rep.GetDreamById(ctx, dreamId)
 	if err != nil {
 		return model.Dream{}, err
 	}
-	if dream.Creater != userId || dream.Published {
-		return model.Dream{}, fmt.Errorf("not available")
+	if dream.Creater != userId {
+		return model.Dream{}, fmt.Errorf("error: not available for user: %s", userId)
 	}
-
-	// Энергию нельзя забрать у мечты
-	energyNew, ok := patchDream["Energy"]
-	if ok {
-		energyNew, _ := energyNew.(uint64)
-		if energyNew-dream.Energy <= 0 {
-			return model.Dream{},
-				fmt.Errorf("the new energy must be greater than the original")
-		}
+	if dream.Published {
+		return model.Dream{}, fmt.Errorf("you can't edit a published dream")
 	}
-
 	dreamUpdated, err := d.Rep.UpdateUserDream(ctx, dreamId, patchDream)
 	if err != nil {
 		return model.Dream{}, err
