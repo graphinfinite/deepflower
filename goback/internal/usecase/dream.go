@@ -34,19 +34,30 @@ func (d *DreamUsecase) GetAllUserDreams(ctx context.Context, userId string) ([]m
 const EnergyForPublish uint64 = 1
 
 func (d *DreamUsecase) PublishDream(ctx context.Context, userId, dreamId string) error {
+
+	print("1")
 	dream, err := d.Rep.GetDreamById(ctx, dreamId)
 	if err != nil {
 		return err
 	}
+	print("2")
 	if dream.Creater != userId {
 		return fmt.Errorf("error: not available for user: %s", userId)
 	}
+	print("3")
 	if dream.Published {
 		return fmt.Errorf("error: dream has already been published")
 	}
+	print("4")
 	if err := d.Rep.EnergyTxUserToDream(ctx, userId, dreamId, EnergyForPublish); err != nil {
 		return err
 	}
+	print("5")
+	if _, err := d.Rep.UpdateUserDream(ctx, dreamId, map[string]interface{}{"Published": true}); err != nil {
+		return err
+	}
+	print("6")
+
 	return nil
 }
 

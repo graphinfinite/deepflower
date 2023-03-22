@@ -171,23 +171,14 @@ const publishDream = () => {
     window.alert("Error: Row is empty!");
     return
   }
-  console.log("publishDream")
-  let url = '/dreams/'+rowDream.ID;
-  let json = {
-    Published: true,
-  }
-  API.patch(url, json).then((response) => {
+  
+  let url = '/dreams/'+rowDream.ID+ '/publish';
+
+  console.log(url)
+  API.post(url).then((response) => {
     if (response.data.status === "ok") {
-
-      // TODO - optim
-      table.rows.forEach(function(elem, i, rows) {
-          if (elem.ID === rowDream.ID) { 
-            rows[i].Publised = true
-            table.rows = rows;
-          doSearch() }
-      });
-
       rowDream.Published = true;
+      doSearch() 
     }
     window.alert(response.data.message);
   });

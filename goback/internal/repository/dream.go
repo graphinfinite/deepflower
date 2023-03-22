@@ -48,7 +48,7 @@ func (s *DreamStorage) GetAllUserDreams(ctx context.Context, userId string) ([]m
 
 func (s *DreamStorage) GetDreamById(ctx context.Context, dreamId string) (model.Dream, error) {
 	var dream model.Dream
-	q := `SELECT * FROM "dream" WHERE id=$1;`
+	q := `SELECT * FROM dream WHERE id=$1;`
 	if err := s.Db.GetContext(ctx, &dream, q, dreamId); err != nil {
 		return model.Dream{}, err
 	}
@@ -95,8 +95,8 @@ func (s *DreamStorage) UpdateUserDream(ctx context.Context, dreamId string, patc
 
 func (s *DreamStorage) EnergyTxUserToDream(ctx context.Context, userId, dreamId string, energy uint64) error {
 	tx := s.Db.MustBegin()
-	query1 := `UPDATE users SET energy=energy-$1 WHERE id='$2';`
-	query2 := `UPDATE dream SET energy=energy+$1 WHERE id='$2';`
+	query1 := `UPDATE users SET energy=energy-$1 WHERE id=$2;`
+	query2 := `UPDATE dream SET energy=energy+$1 WHERE id=$2;`
 
 	_, err := tx.ExecContext(ctx, query1, energy, userId)
 	if err != nil {

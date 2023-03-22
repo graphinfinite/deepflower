@@ -12,6 +12,7 @@ func MigrateDb(dbPool *sqlx.DB) error {
 		createdAt timestamp DEFAULT current_timestamp NOT NULL,
 		updatedAt timestamp DEFAULT current_timestamp NOT NULL,
 		username VARCHAR(64) UNIQUE NOT NULL,
+		energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
 		hashedPassword VARCHAR(128) NOT NULL,
 		active BOOLEAN NOT NULL,
 		tgId integer UNIQUE NOT NULL,
@@ -31,7 +32,7 @@ func MigrateDb(dbPool *sqlx.DB) error {
 		published BOOLEAN NOT NULL DEFAULT false,
 		status VARCHAR(32) NOT NULL,
 		creater uuid NOT NULL,
-		energy bigint NOT NULL,
+		energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
 		location VARCHAR(128) NOT NULL DEFAULT 'empty',
 		countG integer NOT NULL DEFAULT 0);
 		`

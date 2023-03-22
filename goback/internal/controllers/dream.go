@@ -58,7 +58,7 @@ func (c *DreamController) PublishDream(w http.ResponseWriter, r *http.Request) {
 	dreamId := chi.URLParam(r, "dreamId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
 
-	if err := c.Uc.PublishDream(r.Context(), dreamId, userId); err != nil {
+	if err := c.Uc.PublishDream(r.Context(), userId, dreamId); err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -78,7 +78,7 @@ func (c *DreamController) AddEnergyToDream(w http.ResponseWriter, r *http.Reques
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-	err := c.Uc.AddEnergyToDream(r.Context(), dreamId, userId, e.Energy)
+	err := c.Uc.AddEnergyToDream(r.Context(), userId, dreamId, e.Energy)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
