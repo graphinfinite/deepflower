@@ -20,4 +20,7 @@ type DreamStorageInterface interface {
 	DeleteUserDream(ctx context.Context, dreamId string) error
 	UpdateUserDream(ctx context.Context, dreamId string, patchDream map[string]interface{}) (model.Dream, error)
 	EnergyTxUserToDream(ctx context.Context, userId, dreamId string, energy uint64) error
+	SearchDreams(ctx context.Context, userId string,
+		limit uint64, offset uint64, onlyMyDreams bool, order string, searchTerm string,
+		sort string) ([]model.Dream, error)
 }

@@ -31,18 +31,17 @@ func (c *DreamController) GetAllUserDreams(w http.ResponseWriter, r *http.Reques
 }
 
 type SearchDreamsRequest struct {
-	Limit         uint64
-	Offset        uint64
-	OnlyMyDreams  bool
-	OnlyPublished bool
-	Order         string
-	SearchTerm    string
-	Sort          string
+	Limit        uint64
+	Offset       uint64
+	OnlyMyDreams bool
+	Order        string
+	SearchTerm   string
+	Sort         string
 }
 
 type SearchDreamsResponse struct {
 	Dreams           []model.Dream `json:"Dreams,omitempty"`
-	TotalRecordCount uint64        `json:"TotalRecordCount,omitempty"`
+	TotalRecordCount int           `json:"TotalRecordCount,omitempty"`
 }
 
 func (c *DreamController) SearchDreams(w http.ResponseWriter, r *http.Request) {
@@ -52,13 +51,11 @@ func (c *DreamController) SearchDreams(w http.ResponseWriter, r *http.Request) {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-
 	dreams, err := c.Uc.SearchDreams(r.Context(),
 		userId,
 		request.Limit,
 		request.Offset,
 		request.OnlyMyDreams,
-		request.OnlyPublished,
 		request.Order,
 		request.SearchTerm,
 		request.Sort)
@@ -67,8 +64,10 @@ func (c *DreamController) SearchDreams(w http.ResponseWriter, r *http.Request) {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-
-	JSONstruct(w, STATUS_OK, "")
+	var result SearchDreamsResponse
+	result.Dreams = dreams
+	result.TotalRecordCount = len(dreams)
+	JSONstruct(w, STATUS_OK, "", &result)
 }
 
 type CreateDreamRequest struct {

@@ -103,10 +103,7 @@ sortable: {
 });
 
 const onlyMyDreams = ref(true)
-const onlyPublished = ref(true)
 const searchTerm = ref("")
-
-
  // 
 const doSearch = (offset, limit, order, sort) => {
   var searchData = {
@@ -115,8 +112,7 @@ const doSearch = (offset, limit, order, sort) => {
     Order: order,
     Sort: sort,
     OnlyMyDreams: onlyMyDreams.value,
-    SearchTerm: searchTerm.value,
-    OnlyPublished: onlyPublished.value
+    SearchTerm: searchTerm.value
     }
   console.log(searchData)
   table.isLoading = true;
@@ -248,11 +244,6 @@ const addEnergyToDream = () => {
   <label for="checkbox1">Only my dreams: {{ onlyMyDreams }}</label>
   <input type="checkbox" id="checkbox1" v-model="onlyMyDreams" />
 
-  <label for="checkbox2">Only published: {{ onlyPublished }}</label>
-  <input type="checkbox" id="checkbox2" v-model="onlyPublished" />
-
-  
-
   <label for="filterInput">SearchBy:</label>
   <input id="filterInput" v-model="searchTerm" />
   <button @click="doSearch(0, 10, 'id', 'asc')">GO</button>
@@ -365,9 +356,6 @@ const addEnergyToDream = () => {
 }
 
 .searchBox #checkbox1:checked {
-  background-color: #365778;
-}
-.searchBox #checkbox2:checked {
   background-color: #365778;
 }
 

@@ -46,6 +46,27 @@ func (s *DreamStorage) GetAllUserDreams(ctx context.Context, userId string) ([]m
 	return dreams, nil
 }
 
+func (s *DreamStorage) SearchDreams(ctx context.Context, userId string,
+	limit uint64, offset uint64, onlyMyDreams bool, order string, searchTerm string,
+	sort string) ([]model.Dream, error) {
+	var dreams []model.Dream
+	var args []interface{}
+	var query string
+	// TODO поиск по тексту тоже добавить
+	if onlyMyDreams {
+		query = `SELECT * FROM dream WHERE name='%%$1%%', creater='$2' ORDER BY $3 $4 LIMIT $5 OFFSET $6;`
+		args = append(args, searchTerm, userId, order, sort, limit, offset)
+	} else {
+		query = `SELECT * FROM dream WHERE name='%%$1%%' ORDER BY $2 $3 LIMIT $4 OFFSET $5;`
+		args = append(args, searchTerm, order, sort, limit, offset)
+	}
+	if err := s.Db.SelectContext(ctx, dreams, query, args...); err != nil {
+
+		return []model.Dream{}, err
+	}
+	return dreams, nil
+}
+
 func (s *DreamStorage) GetDreamById(ctx context.Context, dreamId string) (model.Dream, error) {
 	var dream model.Dream
 	q := `SELECT * FROM dream WHERE id=$1;`
