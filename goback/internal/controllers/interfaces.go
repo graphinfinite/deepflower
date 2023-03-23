@@ -24,6 +24,10 @@ type (
 		DeleteUserDream(ctx context.Context, userId string, dreamId string) error
 		AddEnergyToDream(ctx context.Context, userId, dreamId string, energy uint64) error
 		PublishDream(ctx context.Context, userId, dreamId string) error
+		SearchDreams(ctx context.Context, userId string,
+			limit uint64, offset uint64, onlyMyDreams bool,
+			onlyPublished bool, order string, searchTerm string,
+			sort string) ([]model.Dream, error)
 	}
 
 	TaskUsecaseInterface interface {

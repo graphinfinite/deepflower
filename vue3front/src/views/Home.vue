@@ -86,19 +86,19 @@ li{
     transition-duration: 0.5s;
 }
  li:hover:before {
-    color: #000000;
+    color: #024C6F;
     content: ".";
 }    
 
 .mainuserdate{
   color: azure;
   padding: 20px;
-  background-color: #15042B;
-  margin-top: 30px;
+  background-color: #172025;
 }
 .userdate{
   padding: 20px;
-  margin-top: 30px;
+
+  border: 1px solid whitesmoke;
 }
 
 
@@ -106,8 +106,9 @@ li{
   color:rgb(255, 255, 255);
   padding: 10px;
   border-radius: 5%;
+  margin-top: 10px;
 
-  background-color: #15042B;
+  background-color: #172025;
   transition: background-color 1s ease-in-out;
 }
 .logout button:hover {

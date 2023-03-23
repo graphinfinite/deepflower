@@ -36,14 +36,6 @@ function toggleSidebar() {
           </router-link>
         </li>
         <li>
-          <router-link to="/about">
-            <IconExclamation />
-            <Transition name="fade">
-              <span v-show="isSidebarOpen">About</span>
-            </Transition>
-          </router-link>
-        </li>
-        <li>
           <router-link to="/dreams">
             <img src="@/assets/icons8-огонь-48.png" alt="logo" width="32" height="32">
             
@@ -67,6 +59,14 @@ function toggleSidebar() {
             
             <Transition name="fade">
               <span v-show="isSidebarOpen">Settings</span>
+            </Transition>
+          </router-link>
+        </li>
+        <li>
+          <router-link to="/about">
+            <IconExclamation />
+            <Transition name="fade">
+              <span v-show="isSidebarOpen">About</span>
             </Transition>
           </router-link>
         </li>

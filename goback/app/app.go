@@ -91,7 +91,7 @@ func (app *App) Run(cfg config.Configuration) error {
 	r.Route("/dreams", func(r chi.Router) {
 		r.Use(auth.JWT)
 		r.Post("/", dream.CreateDream)
-		r.Get("/", dream.GetAllUserDreams)
+		r.Get("/", dream.SearchDreams)
 		r.Patch("/{dreamId}", dream.UpdateUserDream)
 		r.Delete("/{dreamId}", dream.DeleteUserDream)
 		r.Post("/{dreamId}/publish", dream.PublishDream)

@@ -1,6 +1,6 @@
 <script setup>
 import TableLite from "vue3-table-lite";
-import { reactive, ref, toRaw } from "vue"
+import { reactive, ref, toRaw, computed } from "vue"
 import API from "@/modules/api"
   // init table settings
 const table = reactive({
@@ -95,24 +95,40 @@ columns: [
 ],
 rows: [],
 totalRecordCount: 0,
+
 sortable: {
     order: "id",
     sort: "asc",
 },
 });
 
+const onlyMyDreams = ref(true)
+const onlyPublished = ref(true)
+const searchTerm = ref("")
+
+
  // 
 const doSearch = (offset, limit, order, sort) => {
-  //table.isLoading = true;
+  var searchData = {
+    Offset: offset,
+    Limit: limit,
+    Order: order,
+    Sort: sort,
+    OnlyMyDreams: onlyMyDreams.value,
+    SearchTerm: searchTerm.value,
+    OnlyPublished: onlyPublished.value
+    }
+  console.log(searchData)
+  table.isLoading = true;
   let url = '/dreams';
   API.get(url).then((response) => {
       if (response.data.status === "ok") {
         table.isLoading = false;
         // refresh table rows
         table.rows = response.data.data;
-        //table.totalRecordCount = response.count;
-        //table.sortable.order = order;
-        //table.sortable.sort = sort;
+        table.totalRecordCount = 21;
+        table.sortable.order = order;
+        table.sortable.sort = sort;
         return
       } 
       window.alert(response.data.message);
@@ -126,7 +142,7 @@ const tableLoadingFinish = (elements) => {
 table.isLoading = false;
 };
 
-doSearch();
+doSearch(0, 10, "id", "asc");
 
 const rowDream = reactive({
       CountG: 0,
@@ -143,7 +159,6 @@ const rowDream = reactive({
 })
 
 const rowClicked = (row) => {
-  console.log("Row clicked!", toRaw(row));
   Object.assign(rowDream,toRaw(row) );
 };
 
@@ -197,15 +212,53 @@ const newdream = reactive({
 })
 const doSend = () => API.post("/dreams", JSON.stringify(newdream)).then((response) => {
     if (response.data.status === "ok") {
-      doSearch()
+      doSearch(0, 10, "id", "asc")
+      return
     }
     window.alert(response.data.message)
 
 })
 
+
+const energyToDream = ref(0)
+const addEnergyToDream = () => {
+  if (energyToDream.value === 0) {
+    window.alert("add zero energy???")
+    return
+  }
+  API.post("/dreams/"+rowDream.ID+"/energy", JSON.stringify({Energy: energyToDream.value})).then((response) => {
+    if (response.data.status === "ok") {
+      rowDream.Energy += energyToDream.value
+      doSearch(0, 10, "id", "asc")
+      return
+    }
+    window.alert(response.data.message)
+
+})
+}
+
+
+
 </script>
 
 <template>
+
+<div class="searchBox">
+
+  <label for="checkbox1">Only my dreams: {{ onlyMyDreams }}</label>
+  <input type="checkbox" id="checkbox1" v-model="onlyMyDreams" />
+
+  <label for="checkbox2">Only published: {{ onlyPublished }}</label>
+  <input type="checkbox" id="checkbox2" v-model="onlyPublished" />
+
+  
+
+  <label for="filterInput">SearchBy:</label>
+  <input id="filterInput" v-model="searchTerm" />
+  <button @click="doSearch(0, 10, 'id', 'asc')">GO</button>
+</div>
+
+
 <div class="dreamroot">
   <table-lite
   :max-width=300
@@ -252,8 +305,8 @@ const doSend = () => API.post("/dreams", JSON.stringify(newdream)).then((respons
         
         <div>
           <p>Вы тратите свою личную энергию на мечту!</p>
-          <input type="number" id="energe-input" v-model="EnergyToDream"> {{ EnergyToDream }}
-          <button @click="addEnergyToDream">+Energy</button>
+          <input type="number" id="energe-input" v-model="energyToDream">
+          <button @click="addEnergyToDream">+{{ energyToDream }} Energy</button>
         </div>
   </div>
 </div>
@@ -282,7 +335,56 @@ const doSend = () => API.post("/dreams", JSON.stringify(newdream)).then((respons
 
 <style scoped>
 .dreamroot {
-  font-family: Verdana, sans-serif;
+
+}
+
+
+.searchBox {
+
+  border: 1px solid white;
+  padding: 10px;
+  background-color:whitesmoke ;
+}
+
+
+
+.searchBox #checkbox1, #checkbox2 {
+  cursor:pointer;
+  border: 1px solid black;
+  padding: 5px;
+  background-color: blueviolet;
+  margin-left: 3px;
+  margin-right: 7px;
+}
+
+
+.searchBox label {
+  color: #365778;
+  padding-right: 5px;
+  cursor:default;
+}
+
+.searchBox #checkbox1:checked {
+  background-color: #365778;
+}
+.searchBox #checkbox2:checked {
+  background-color: #365778;
+}
+
+.searchBox #filterInput {
+  padding: 10px;
+  background-color: white;
+
+}
+
+.searchBox button {
+  color: azure;
+  background-color: #172025;
+  cursor: pointer;
+  border: 1px solid #add8d8;
+  padding: 10px;
+
+
 }
 
 ::v-deep(.vtl-table .vtl-thead .vtl-thead-th) {
@@ -342,7 +444,7 @@ background-color: #ffffff;
   cursor: pointer;
   border: 1px solid #add8d8;
   padding: 10px;
-  transition: background-color 5s ease-in-out;
+  transition: background-color 2s ease-in-out;
 
   margin-top: 30px;
   width: 20%;
@@ -394,7 +496,7 @@ border-radius: 4px;
   cursor: pointer;
   border: none;
   padding: 10px;
-  transition: background-color 5s ease-in-out;
+  transition: background-color 2s ease-in-out;
 
   margin-top: 30px;
   width: 10%;

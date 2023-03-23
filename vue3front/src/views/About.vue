@@ -25,7 +25,7 @@
 .maindata{
   color: azure;
   padding: 20px;
-  background-color: #15042B;
+  background-color: #172025;
 
   margin-bottom: 30px;
 }

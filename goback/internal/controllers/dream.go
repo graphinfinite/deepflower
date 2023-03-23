@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"deepflower/internal/model"
 	"fmt"
 	"net/http"
 
@@ -29,18 +30,55 @@ func (c *DreamController) GetAllUserDreams(w http.ResponseWriter, r *http.Reques
 	JSONstruct(w, STATUS_OK, "ок", dreams)
 }
 
-func (c *DreamController) SearchDreams(w http.ResponseWriter, r *http.Request) {
-	JSON(w, STATUS_OK, "")
+type SearchDreamsRequest struct {
+	Limit         uint64
+	Offset        uint64
+	OnlyMyDreams  bool
+	OnlyPublished bool
+	Order         string
+	SearchTerm    string
+	Sort          string
 }
 
-type dream struct {
+type SearchDreamsResponse struct {
+	Dreams           []model.Dream `json:"Dreams,omitempty"`
+	TotalRecordCount uint64        `json:"TotalRecordCount,omitempty"`
+}
+
+func (c *DreamController) SearchDreams(w http.ResponseWriter, r *http.Request) {
+	userId, _ := r.Context().Value(ContextUserIdKey).(string)
+	var request SearchDreamsRequest
+	if err := DecodeJSONBody(w, r, &request); err != nil {
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+
+	dreams, err := c.Uc.SearchDreams(r.Context(),
+		userId,
+		request.Limit,
+		request.Offset,
+		request.OnlyMyDreams,
+		request.OnlyPublished,
+		request.Order,
+		request.SearchTerm,
+		request.Sort)
+
+	if err != nil {
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+
+	JSONstruct(w, STATUS_OK, "")
+}
+
+type CreateDreamRequest struct {
 	Name     string
 	Info     string
 	Location string
 }
 
 func (c *DreamController) CreateDream(w http.ResponseWriter, r *http.Request) {
-	d := dream{}
+	var d CreateDreamRequest
 	if err := DecodeJSONBody(w, r, &d); err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
@@ -65,14 +103,14 @@ func (c *DreamController) PublishDream(w http.ResponseWriter, r *http.Request) {
 	JSON(w, STATUS_OK, "dream was published")
 }
 
-type EnergyToDream struct {
+type AddEnergyToDreamRequest struct {
 	Energy uint64 `json:"Energy,omitempty"`
 }
 
 func (c *DreamController) AddEnergyToDream(w http.ResponseWriter, r *http.Request) {
 	dreamId := chi.URLParam(r, "dreamId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	var e EnergyToDream
+	var e AddEnergyToDreamRequest
 
 	if err := DecodeJSONBody(w, r, &e); err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
