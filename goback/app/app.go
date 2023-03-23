@@ -98,6 +98,8 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Post("/{dreamId}/energy", dream.AddEnergyToDream)
 	})
 
+	// /dreams?Offset=0&Limit=10&Order=id&Sort=asc&OnlyMyDreams=true&SearchTerm= <nil>
+
 	// HTTP Server
 	app.httpServer = &http.Server{
 		Addr:           net.JoinHostPort(cfg.Server.Host, cfg.Server.Port),

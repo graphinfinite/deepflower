@@ -33,15 +33,14 @@ func (d *DreamUsecase) GetAllUserDreams(ctx context.Context, userId string) ([]m
 
 func (d *DreamUsecase) SearchDreams(ctx context.Context, userId string,
 	limit uint64, offset uint64, onlyMyDreams bool, order string, searchTerm string,
-	sort string) ([]model.Dream, error) {
-
+	sort string) ([]model.Dream, int, error) {
 	// search
-	dreams, err := d.Rep.SearchDreams(ctx, userId,
+	dreams, cnt, err := d.Rep.SearchDreams(ctx, userId,
 		limit, offset, onlyMyDreams, order, searchTerm, sort)
 	if err != nil {
-		return []model.Dream{}, err
+		return []model.Dream{}, 0, err
 	}
-	return dreams, nil
+	return dreams, cnt, nil
 }
 
 const EnergyForPublish uint64 = 1

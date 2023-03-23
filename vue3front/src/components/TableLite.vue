@@ -114,15 +114,16 @@ const doSearch = (offset, limit, order, sort) => {
     OnlyMyDreams: onlyMyDreams.value,
     SearchTerm: searchTerm.value
     }
-  console.log(searchData)
+  console.log(JSON.stringify(searchData))
   table.isLoading = true;
   let url = '/dreams';
-  API.get(url).then((response) => {
+  API.get(url, {params: searchData} ).then((response) => {
       if (response.data.status === "ok") {
         table.isLoading = false;
         // refresh table rows
-        table.rows = response.data.data;
-        table.totalRecordCount = 21;
+        table.rows = response.data.data.Dreams;
+        console.log(response.data.data)
+        table.totalRecordCount = response.data.data.TotalRecordCount;
         table.sortable.order = order;
         table.sortable.sort = sort;
         return

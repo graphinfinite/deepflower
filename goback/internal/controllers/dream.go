@@ -4,6 +4,7 @@ import (
 	"deepflower/internal/model"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
@@ -30,15 +31,6 @@ func (c *DreamController) GetAllUserDreams(w http.ResponseWriter, r *http.Reques
 	JSONstruct(w, STATUS_OK, "ок", dreams)
 }
 
-type SearchDreamsRequest struct {
-	Limit        uint64
-	Offset       uint64
-	OnlyMyDreams bool
-	Order        string
-	SearchTerm   string
-	Sort         string
-}
-
 type SearchDreamsResponse struct {
 	Dreams           []model.Dream `json:"Dreams,omitempty"`
 	TotalRecordCount int           `json:"TotalRecordCount,omitempty"`
@@ -46,27 +38,37 @@ type SearchDreamsResponse struct {
 
 func (c *DreamController) SearchDreams(w http.ResponseWriter, r *http.Request) {
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	var request SearchDreamsRequest
-	if err := DecodeJSONBody(w, r, &request); err != nil {
+
+	searchTerm := r.URL.Query().Get("SearchTerm")
+	sort := r.URL.Query().Get("Sort")
+	order := r.URL.Query().Get("Order")
+	limit, err := strconv.ParseUint(r.URL.Query().Get("Limit"), 0, 64)
+	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-	dreams, err := c.Uc.SearchDreams(r.Context(),
-		userId,
-		request.Limit,
-		request.Offset,
-		request.OnlyMyDreams,
-		request.Order,
-		request.SearchTerm,
-		request.Sort)
+	offset, err := strconv.ParseUint(r.URL.Query().Get("Offset"), 0, 64)
+	if err != nil {
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
 
+	onlyMyDreams, err := strconv.ParseBool(r.URL.Query().Get("OnlyMyDreams"))
+	if err != nil {
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	dreams, count, err := c.Uc.SearchDreams(r.Context(), userId, limit, offset,
+		onlyMyDreams, order, searchTerm, sort)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 	var result SearchDreamsResponse
 	result.Dreams = dreams
-	result.TotalRecordCount = len(dreams)
+
+	fmt.Println(count)
+	result.TotalRecordCount = count
 	JSONstruct(w, STATUS_OK, "", &result)
 }
 

@@ -27,7 +27,7 @@ type (
 		SearchDreams(ctx context.Context, userId string,
 			limit uint64, offset uint64, onlyMyDreams bool,
 			order string, searchTerm string,
-			sort string) ([]model.Dream, error)
+			sort string) ([]model.Dream, int, error)
 	}
 
 	TaskUsecaseInterface interface {

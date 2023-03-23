@@ -48,23 +48,42 @@ func (s *DreamStorage) GetAllUserDreams(ctx context.Context, userId string) ([]m
 
 func (s *DreamStorage) SearchDreams(ctx context.Context, userId string,
 	limit uint64, offset uint64, onlyMyDreams bool, order string, searchTerm string,
-	sort string) ([]model.Dream, error) {
+	sort string) ([]model.Dream, int, error) {
 	var dreams []model.Dream
 	var args []interface{}
 	var query string
-	// TODO поиск по тексту тоже добавить
-	if onlyMyDreams {
-		query = `SELECT * FROM dream WHERE name='%%$1%%', creater='$2' ORDER BY $3 $4 LIMIT $5 OFFSET $6;`
-		args = append(args, searchTerm, userId, order, sort, limit, offset)
-	} else {
-		query = `SELECT * FROM dream WHERE name='%%$1%%' ORDER BY $2 $3 LIMIT $4 OFFSET $5;`
-		args = append(args, searchTerm, order, sort, limit, offset)
-	}
-	if err := s.Db.SelectContext(ctx, dreams, query, args...); err != nil {
+	var queryCnt string
+	var count int
 
-		return []model.Dream{}, err
+	// TODO поиск по тексту тоже добавить
+	filter := fmt.Sprintf(` ORDER BY %s %s LIMIT %d OFFSET %d;`, order, sort, limit, offset)
+	switch {
+	case searchTerm != "" && onlyMyDreams:
+		query = `SELECT * FROM dream WHERE LOWER(name) LIKE CONCAT('%%',$1::text,'%%') AND creater=$2`
+		queryCnt = `SELECT count(id) FROM dream WHERE LOWER(name) LIKE CONCAT('%%',$1::text,'%%') AND creater=$2`
+		args = append(args, searchTerm, userId)
+	case searchTerm != "" && !onlyMyDreams:
+		query = `SELECT * FROM dream WHERE LOWER(name) LIKE CONCAT('%%',$1::text,'%%')`
+		queryCnt = `SELECT count(id) FROM dream WHERE LOWER(name) LIKE CONCAT('%%',$1::text,'%%')`
+		args = append(args, searchTerm)
+	case searchTerm == "" && onlyMyDreams:
+		query = `SELECT * FROM dream WHERE creater=$1`
+		queryCnt = `SELECT count(id) FROM dream WHERE creater=$1`
+		args = append(args, userId)
+	case searchTerm == "" && !onlyMyDreams:
+		query = `SELECT * FROM dream`
+		queryCnt = `SELECT count(id) FROM dream`
 	}
-	return dreams, nil
+	q := query + filter
+	fmt.Println(q)
+	fmt.Println(queryCnt)
+	fmt.Println(args...)
+
+	if err := s.Db.SelectContext(ctx, &dreams, q, args...); err != nil {
+		return []model.Dream{}, 0, err
+	}
+	s.Db.GetContext(ctx, &count, queryCnt, args...)
+	return dreams, count, nil
 }
 
 func (s *DreamStorage) GetDreamById(ctx context.Context, dreamId string) (model.Dream, error) {
