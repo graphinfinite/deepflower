@@ -122,7 +122,6 @@ const doSearch = (offset, limit, order, sort) => {
         table.isLoading = false;
         // refresh table rows
         table.rows = response.data.data.Dreams;
-        console.log(response.data.data)
         table.totalRecordCount = response.data.data.TotalRecordCount;
         table.sortable.order = order;
         table.sortable.sort = sort;
@@ -190,7 +189,7 @@ const publishDream = () => {
   API.post(url).then((response) => {
     if (response.data.status === "ok") {
       rowDream.Published = true;
-      doSearch() 
+      doSearch(0, 10, "id", "asc") 
     }
     window.alert(response.data.message);
   });
@@ -210,6 +209,7 @@ const newdream = reactive({
 const doSend = () => API.post("/dreams", JSON.stringify(newdream)).then((response) => {
     if (response.data.status === "ok") {
       doSearch(0, 10, "id", "asc")
+      window.alert(response.data.message)
       return
     }
     window.alert(response.data.message)
@@ -264,6 +264,7 @@ const addEnergyToDream = () => {
   @is-finished="tableLoadingFinish"
   @row-clicked="rowClicked"
   />
+  
 
 <div v-if='rowDream.Name !==""'>
   <div id="dreamrow">

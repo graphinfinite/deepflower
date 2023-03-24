@@ -6,7 +6,6 @@ func MigrateDb(dbPool *sqlx.DB) error {
 	q := `
 		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 	
-	
 		CREATE TABLE IF NOT EXISTS "users" (
 		id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 		createdAt timestamp DEFAULT current_timestamp NOT NULL,
@@ -35,6 +34,28 @@ func MigrateDb(dbPool *sqlx.DB) error {
 		energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
 		location VARCHAR(128) NOT NULL DEFAULT 'empty',
 		countG integer NOT NULL DEFAULT 0);
+		
+		
+		CREATE TABLE IF NOT EXISTS "location" (
+		id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+		name VARCHAR(64) UNIQUE NOT NULL DEFAULT 'empty',
+		info TEXT NOT NULL DEFAULT 'empty',
+		createdat timestamp DEFAULT current_timestamp NOT NULL,
+		updatedat timestamp DEFAULT current_timestamp NOT NULL,
+		creater uuid NOT NULL,
+		geolocation point,
+		radius bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
+		height bigint NOT NULL DEFAULT 0,
+		idfiles uuid DEFAULT '',
+		energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
+		bool BOOLEAN NOT NULL);	
+
+
+		CREATE TABLE IF NOT EXISTS "dream_location" (
+			id uuid PRIMARY KEY DEFAULT uuid_generate_v4()
+			locationid uuid NOT NULL,
+			dreamid uuid NOT NULL);
+		)
 		`
 	_, errDb := dbPool.Exec(q)
 	if errDb != nil {

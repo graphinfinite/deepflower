@@ -6,14 +6,32 @@
 
 
     <div class="maindata">
-      <h1> Козы приведут тебя в новый мир </h1> 
-
+      <div class="el">DEEPFLOWER</div><div class="el"> 
+      <a href="https://t.me/graphinfinit">graphinfinit</a></div> 
     </div>
 
-    
+    <div class="info">
     <p>Вы рождаетесь с некоторым запасом энергии.</p>
-    <p>Вы можете создавать мечты. Если они исполнятся - вы получите энергию</p>
-    <p>Вы можете выполнять задания и получать за них энергию</p>
+    <p>Можно создавать мечты и публиковать их.</p>
+    <p>Публикация расходует минимальное количество энергии</p>
+    <p>Можно добавлять энергию к своим и чужим опубликованым мечтам, расходуя свою энергию</p>
+    <p>К мечте можно указать местоположение 3мя способами:</p>
+    <ul> 
+        <li>-Tекстовое описание</li>
+        <li>-Kоординаты</li>
+        <li>-Прикрепить созданную ранее локацию</li>
+      </ul>
+    </div>
+
+
+
+
+
+
+    
+
+
+
 
   </div>
 
@@ -23,12 +41,31 @@
 <style scoped lang="css">
 
 .maindata{
+  display: flex;
+  flex-direction: row;
   color: azure;
   padding: 20px;
   background-color: #172025;
-
-  margin-bottom: 30px;
 }
+.maindata .el {
+  padding: 10px;
+}
+
+
+li{
+    padding:6px;
+}
+ li:before {
+    padding-right:10px;
+    font-weight: bold;
+    color: #d1ceff;
+    content: ".";
+    transition-duration: 0.5s;
+}
+ li:hover:before {
+    color: #024C6F;
+    content: ".";
+} 
 
 
 .wrapper{

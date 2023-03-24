@@ -54,6 +54,14 @@ function toggleSidebar() {
           </router-link>
         </li>
         <li>
+          <router-link to="/locations">
+            <img src="@/assets/9042874_planet_icon.png" alt="logo" width="32" height="32">
+            <Transition name="fade">
+              <span v-show="isSidebarOpen">Locations</span>
+            </Transition>
+          </router-link>
+        </li>
+        <li>
           <router-link to="/settings">
             <img src="@/assets/icons8-сервисы.gif" alt="logo" width="32" height="32">
             
