@@ -1,15 +1,15 @@
 
 <script lang="ts">
-import TableLiteDream from "@/components/TableLiteDream.vue"
+import TableLiteLocations from "@/components/TableLiteLocation.vue"
 </script>
 
 <template scoped>
     <div class="wrapper">
         <div class="maindata">
-          <h1>Dreams</h1> 
+          <h1>Locations</h1> 
         </div>
         <div class="tablelite">
-          <TableLiteDream /> 
+          <TableLiteLocations />
         </div>
     </div>
 </template>
@@ -33,14 +33,6 @@ import TableLiteDream from "@/components/TableLiteDream.vue"
 
 
 <script setup lang="ts">
-
-// import { reactive } from "vue"
-// const state = reactive({
-//   DreamForCreate: {
-//     Name :  "",
-//     Info  : "",
-//     Location: ""
-//   }
-// })
+//
 
 </script>

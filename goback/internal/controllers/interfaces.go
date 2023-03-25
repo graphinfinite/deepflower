@@ -30,6 +30,17 @@ type (
 			sort string) ([]model.Dream, int, error)
 	}
 
+	LocationUCInterface interface {
+		CreateLocation(ctx context.Context, creater string, Name string, info string, geolocation string, radius uint64, height uint64, idFiles string) (model.Location, error)
+		UpdateUserLocation(ctx context.Context, userId, locationId string, locationUpdate map[string]interface{}) (model.Location, error)
+		DeleteUserLocation(ctx context.Context, userId string, locationId string) error
+		AddEnergyToLocation(ctx context.Context, userId, locationId string, energy uint64) error
+		SearchLocations(ctx context.Context, userId string,
+			limit uint64, offset uint64, onlyMyLocations bool,
+			order string, searchTerm string,
+			sort string) ([]model.Location, int, error)
+	}
+
 	TaskUsecaseInterface interface {
 	}
 )

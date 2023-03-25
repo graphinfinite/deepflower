@@ -14,5 +14,5 @@ type Location struct {
 	Height      uint64    `db:"height" json:"Height"`
 	IdFiles     string    `db:"idfiles" json:"Idfiles,omitempty"`
 	Energy      uint64    `db:"energy" json:"Energy"`
-	Active      bool      `db:"active"`
+	Active      bool      `db:"active" json:"Active"`
 }

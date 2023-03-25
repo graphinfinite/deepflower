@@ -47,7 +47,8 @@ func (app *App) Run(cfg config.Configuration) error {
 	}
 
 	client := http.Client{Timeout: time.Second * 10}
-	// auth
+
+	// Auth
 	userstore := repository.NewUserStorage(dbPool)
 	authUC := usecase.NewAuthUsecase(
 		&userstore,
@@ -57,18 +58,21 @@ func (app *App) Run(cfg config.Configuration) error {
 	auth := ctrl.NewAuthController(&authUC, &zlog)
 	bot, _ := ctrl.NewBot(false, cfg.Telegram.Token, &client, &authUC, &zlog)
 
-	//user
+	// User
 	userUC := usecase.NewUserUC(&userstore)
 	user := ctrl.NewUserController(&userUC, &zlog)
 
-	// dream
+	// Dream
 	dreamstore := repository.NewDreamStorage(dbPool)
 	dreamUC := usecase.NewDreamUsecase(&dreamstore)
 	dream := ctrl.NewDreamController(&dreamUC, &zlog)
-	//task := ctrl.NewTaskController(&zlog)
-	//
-	r := chi.NewRouter()
 
+	// Location
+	locstore := repository.NewLocationStorage(dbPool)
+	locUC := usecase.NewLocationUsecase(&locstore)
+	loc := ctrl.NewLocationController(&locUC, &zlog)
+
+	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"https://*", "http://*"},
@@ -96,6 +100,16 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Delete("/{dreamId}", dream.DeleteUserDream)
 		r.Post("/{dreamId}/publish", dream.PublishDream)
 		r.Post("/{dreamId}/energy", dream.AddEnergyToDream)
+	})
+
+	r.Route("/locations", func(r chi.Router) {
+		r.Use(auth.JWT)
+		r.Post("/", loc.CreateLocation)
+		r.Get("/", loc.SearchLocations)
+		r.Patch("/{locationId}", loc.UpdateUserLocation)
+		r.Delete("/{locationId}", loc.DeleteUserLocation)
+		r.Post("/{locationId}/energy", loc.AddEnergyToLocation)
+
 	})
 
 	// /dreams?Offset=0&Limit=10&Order=id&Sort=asc&OnlyMyDreams=true&SearchTerm= <nil>

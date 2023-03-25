@@ -46,16 +46,15 @@ func MigrateDb(dbPool *sqlx.DB) error {
 		geolocation point,
 		radius bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
 		height bigint NOT NULL DEFAULT 0,
-		idfiles uuid DEFAULT '',
+		idfiles uuid,
 		energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
 		bool BOOLEAN NOT NULL);	
 
 
 		CREATE TABLE IF NOT EXISTS "dream_location" (
-			id uuid PRIMARY KEY DEFAULT uuid_generate_v4()
-			locationid uuid NOT NULL,
-			dreamid uuid NOT NULL);
-		)
+		id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+		locationid uuid NOT NULL,
+		dreamid uuid NOT NULL);
 		`
 	_, errDb := dbPool.Exec(q)
 	if errDb != nil {

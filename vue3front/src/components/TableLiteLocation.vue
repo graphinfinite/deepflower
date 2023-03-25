@@ -46,19 +46,13 @@ columns: [
 },
     },
     {
-    label: "Pub",
-    field: "Published",
-    width: "3%",
-    sortable: true,
-    },
-    {
-    label: "PubDate",
-    field: "PublishAt",
+    label: "UpdatedAt",
+    field: "UpdatedAt",
     width: "3%",
     sortable: true,
     display: (row) => {
-        if (row.PublishAt) {
-          return (row.PublishAt.slice(0, 19));
+        if (row.UpdatedAt) {
+          return (row.UpdatedAt.slice(0, 19));
         } else {
           return ("Empty")
         };
@@ -71,24 +65,36 @@ columns: [
     sortable: true,
     },
     {
-    label: "Loc",
-    field: "Location",
+    label: "Geo",
+    field: "Geolocation",
     width: "1%",
     sortable: true,
     display: (row) => {
-        if (row.Location) {
-          if (row.Location.length>30) {
+        if (row.Geolocation) {
+          if (row.Geolocation.length>30) {
             return (row.Info.slice(0, 31)+"...")
           };
-          return (row.Location);
+          return (row.Geolocation);
         } else {
           return ("<b>Empty</b>")
         };
 },
     },
     {
-    label: "S",
-    field: "Status",
+    label: "Active",
+    field: "Active",
+    width: "1%",
+    sortable: false,
+    },
+    {
+    label: "Radius",
+    field: "Radius",
+    width: "1%",
+    sortable: false,
+    },
+    {
+    label: "Height",
+    field: "Height",
     width: "1%",
     sortable: false,
     },
@@ -102,7 +108,7 @@ sortable: {
 },
 });
 
-const onlyMyDreams = ref(true)
+const onlyMyLocations = ref(true)
 const searchTerm = ref("")
  // 
 const doSearch = (offset, limit, order, sort) => {
@@ -111,17 +117,17 @@ const doSearch = (offset, limit, order, sort) => {
     Limit: limit,
     Order: order,
     Sort: sort,
-    OnlyMyDreams: onlyMyDreams.value,
+    onlyMyLocations: onlyMyLocations.value,
     SearchTerm: searchTerm.value
     }
   console.log(JSON.stringify(searchData))
   table.isLoading = true;
-  let url = '/dreams';
+  let url = '/locations';
   API.get(url, {params: searchData} ).then((response) => {
       if (response.data.status === "ok") {
         table.isLoading = false;
         // refresh table rows
-        table.rows = response.data.data.Dreams;
+        table.rows = response.data.data.Locations;
         table.totalRecordCount = response.data.data.TotalRecordCount;
         table.sortable.order = order;
         table.sortable.sort = sort;
@@ -138,75 +144,62 @@ const tableLoadingFinish = (elements) => {
 table.isLoading = false;
 };
 
-doSearch(0, 10, "id", "asc");
+//doSearch(0, 10, "id", "asc");
 
-const rowDream = reactive({
-      CountG: 0,
-      CreatedAt: "",
-      Creater: 0,
-      Energy: 0,
-      ID: 0,
-      Info: "",
-      Location: "",
-      Name: "",
-      Published: false,
-      PublishAt: "",
-      Status: "",
+const rowLocation = reactive({
+    IdFiles: "",
+    Height:0,
+    Radius: 0,
+    CreatedAt: "",
+    Creater: 0,
+    Energy: 0,
+    ID: 0,
+    Info: "",
+    Geolocation: "",
+    Name: "",
+    UpdatedAt: "",
+    Active: "",
 })
 
 const rowClicked = (row) => {
-  Object.assign(rowDream,toRaw(row) );
+  Object.assign(rowLocation,toRaw(row) );
 };
 
 
-const deleteDream = () => {
-  if (rowDream.Name ==="") {
+const deleteLocation = () => {
+  if (rowLocation.Name ==="") {
     window.alert("Error: Row is empty!");
     return
   }
-  let url = '/dreams/'+rowDream.ID;
+  let url = '/locations/'+rowLocation.ID;
   API.delete(url).then((response) => {
     if (response.data.status == "ok") {
       table.rows = table.rows.filter(function(elem) {
-          if (elem.Name == rowDream.Name) {return false;} else {return true;}
+          if (elem.Name == rowLocation.Name) {return false;} else {return true;}
       });
-      rowDream.Name = "";
+      rowLocation.Name = "";
     }
     window.alert(response.data.message);
 
   });
 };
-
-const publishDream = () => {
-  if (rowDream.Name ==="") {
-    window.alert("Error: Row is empty!");
-    return
-  }
-  
-  let url = '/dreams/'+rowDream.ID+ '/publish';
-
-  console.log(url)
-  API.post(url).then((response) => {
-    if (response.data.status === "ok") {
-      rowDream.Published = true;
-      doSearch(0, 10, "id", "asc") 
-    }
-    window.alert(response.data.message);
-  });
-};
-
-
 
 const messageErr = ref("")
-const dreamname = ref("");
-const dreaminfo = ref("");
-const location = ref("");
-const newdream = reactive({
-    Name: dreamname,
-    Info: dreaminfo,
-    Location:location
+const locationName = ref("");
+const locationInfo = ref("");
+const locationGeo = ref("");
+const locationHeight= ref("");
+const locationRadius= ref("");
+
+
+const newLocation = reactive({
+    Name: locationName,
+    Info: locationInfo,
+    Geolocation:locationGeo,
+    Height: locationHeight,
+    Radius:locationRadius
 })
-const doSend = () => API.post("/dreams", JSON.stringify(newdream)).then((response) => {
+const doSend = () => API.post("/locations", JSON.stringify(newLocation)).then((response) => {
     if (response.data.status === "ok") {
       doSearch(0, 10, "id", "asc")
       window.alert(response.data.message)
@@ -217,15 +210,15 @@ const doSend = () => API.post("/dreams", JSON.stringify(newdream)).then((respons
 })
 
 
-const energyToDream = ref(0)
-const addEnergyToDream = () => {
-  if (energyToDream.value === 0) {
+const energyToLocation = ref(0)
+const addEnergyToLocation = () => {
+  if (energyToLocation.value === 0) {
     window.alert("add zero energy???")
     return
   }
-  API.post("/dreams/"+rowDream.ID+"/energy", JSON.stringify({Energy: energyToDream.value})).then((response) => {
+  API.post("/locations/"+rowLocation.ID+"/energy", JSON.stringify({Energy: energyToLocation.value})).then((response) => {
     if (response.data.status === "ok") {
-      rowDream.Energy += energyToDream.value
+      rowLocation.Energy += energyToLocation.value
       doSearch(0, 10, "id", "asc")
       return
     }
@@ -235,15 +228,22 @@ const addEnergyToDream = () => {
 }
 
 
+const mapurl = ref("https://static-maps.yandex.ru/1.x/?ll=39.620070,53.753630&spn=0.002,0.002&size=300,300&l=map")
+const getMapImage = () => {
+
+  console.log("https://static-maps.yandex.ru/1.x/?ll=" + locationGeo.value+ "&spn=0.002,0.002&size=300,300&l=map")
+  mapurl.value = "https://static-maps.yandex.ru/1.x/?ll=" + locationGeo.value+ "&spn=0.02,0.02&size=300,300&l=map"
+  
+
+}
 
 </script>
 
-<template>
+<template scoped>
 
 <div class="searchBox">
-
-  <label for="checkbox1">Only my dreams: {{ onlyMyDreams }}</label>
-  <input type="checkbox" id="checkbox1" v-model="onlyMyDreams" />
+  <label for="checkbox1">Only my locations: {{ onlyMyLocations }}</label>
+  <input type="checkbox" id="checkbox1" v-model="onlyMyLocations" />
 
   <label for="filterInput">SearchBy:</label>
   <input id="filterInput" v-model="searchTerm" />
@@ -251,7 +251,7 @@ const addEnergyToDream = () => {
 </div>
 
 
-<div class="dreamroot">
+<div class="root">
   <table-lite
   :max-width=300
   :is-loading="table.isLoading"
@@ -264,57 +264,80 @@ const addEnergyToDream = () => {
   @is-finished="tableLoadingFinish"
   @row-clicked="rowClicked"
   />
+
+
+  
   
 
-<div v-if='rowDream.Name !==""'>
-  <div id="dreamrow">
-    <div class="row-name">  Name: {{ rowDream.Name }}</div>
-    <div class="row-published">  Published: {{ rowDream.Published }}</div>
-    <div class="row-location">Location: {{ rowDream.Location }}</div>
-    <div class="row-creater">Creater: {{ rowDream.Creater }}</div>
-    <div class="row-energy">Energy: {{ rowDream.Energy }}</div>
+<div v-if='rowLocation.Name !==""'>
+  <div id="locationrow">
+    <div class="row-name">  Name: {{ rowLocation.Name }}</div>
+    <div class="row-location">Geolocation: {{ rowLocation.Geolocation }}</div>
+    <div class="row-radiusr">Radius: {{ rowLocation.Radius }}</div>
+    <div class="row-height">Height: {{ rowLocation.Height }}</div>
+    <div class="row-creater">Creater: {{ rowLocation.Creater }}</div>
+    <div class="row-energy">Energy: {{ rowLocation.Energy }}</div>
 
     <div class="row-other">
-      ID: {{ rowDream.ID }} PublishAt: {{ rowDream.PublishAt }} CreatedAt: {{ rowDream.CreatedAt }} Status: {{ rowDream.Status }} G: {{ rowDream.CountG }}
+      ID: {{ rowLocation.ID }} UpdatedAt: {{ rowLocation.UpdatedAt }} CreatedAt: {{ rowLocation.CreatedAt }} Active: {{ rowLocation.Active }}
     </div>
 
     <div class="row-info">
       <div class="i-label">
         Information
       </div>
-      <div class="i-data">
-        {{ rowDream.Info }}
+      <div class="i-data" >
+        <span v-html="rowLocation.Info"></span>
+
       </div>
+
     </div>
   </div>
-  <div class="control-dream-panel">
-        <h1>Панель взаимодействия c мечтой</h1>  
+  <div class="control-location-panel">
+        <h1>Локация</h1>  
         <div>
-          <p>После публикации мечту нельзя будет изменить!</p> 
-          <p>На публикацию расходуется 1ед энергии.</p>
-          <button @click="deleteDream">Delete Dream</button>
-          <button @click="publishDream">Publish Dream</button>
+          <p>Удалить локацию.</p>
+          <button @click="deleteLocation">Delete Location</button>
         </div>
         
         <div>
-          <p>Вы тратите свою личную энергию на мечту!</p>
-          <input type="number" id="energe-input" v-model="energyToDream">
-          <button @click="addEnergyToDream">+{{ energyToDream }} Energy</button>
+          <p>Повысить энергетический статус локации</p>
+          <input type="number" id="energe-input" v-model="energyToLocation">
+          <button @click="addEnergyToLocation">+{{ energyToLocation }} Energy</button>
         </div>
   </div>
 </div>
 
-
-<div id="dreaminput">
-        <h1>Create new dream!</h1>
+<div id="locationinput">
+        <h1>Create new location!</h1>
         <form @submit.prevent="doSend">
-          <label for="dreamname">Dream name</label>
-          <input type="text" id="dreamname" v-model="dreamname" placeholder="..." autocomplete="off">
-          <label for="dreaminfo">Dream info</label>&nbsp;
-          <textarea id="dreaminfo" v-model="dreaminfo" placeholder="..."></textarea>
-          <label for="location">Location</label>&nbsp;
-          <input  id="location" v-model="location" placeholder="...">
+          <label for="locationName">Location name</label>
+          <input type="text" id="locationName" v-model="locationName" placeholder="..." autocomplete="off">
+          <label for="locationInfo">Location Info (Use simple html tags. No XSS Cross-Site Scripting)</label>&nbsp;
+          <textarea id="locationInfo" v-model="locationInfo" placeholder="..."></textarea>
+
+          <div class="geo">
+            <div>
+              <label for="locationGeo">Geolocation format: 39.620070,53.753630 
+                <button type="button" @click="getMapImage">check</button>
+              </label>
+              <input type="text" id="locationGeo" v-model="locationGeo" placeholder="..." autocomplete="off">
+            </div>
+          <img v-bind:src=mapurl>
+          </div>
+          
+
+          
+          <label for="locationHeight">Location Height (m)</label>
+          <input type="number" id="locationHeight" v-model="locationHeight" placeholder="..." autocomplete="off">
+          <label for="locationRadius">Location Radius (m)</label>
+          <input type="number" id="locationRadius" v-model="locationRadius" placeholder="..." autocomplete="off">
+
+
+
           <button type="submit">->...</button> 
+
+
           <div class="form-group">
           <div v-if="messageErr" class="alert alert-danger" role="alert">
             {{ messageErr }}
@@ -327,9 +350,16 @@ const addEnergyToDream = () => {
 </template>
 
 <style scoped>
-.dreamroot {
+
+
+.geo {
+  display: flex;
+flex-direction: row;
 
 }
+/* .locationroot {
+
+} */
 
 
 .searchBox {
@@ -398,7 +428,7 @@ const addEnergyToDream = () => {
 }
 
 
-#dreamrow {
+#locationrow {
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -406,29 +436,29 @@ const addEnergyToDream = () => {
   padding: 20px;
 }
 
-#dreamrow div {
+#locationrow div {
   padding-top: 10px;
 }
 
-#dreamrow .row-info .i-data{
+#locationrow .row-info .i-data{
 background-color: #ffffff;
 }
 
 
-.control-dream-panel {
+.control-location-panel {
   display: flex;
   width: 100%;
   flex-direction: column;
   border: 1px solid whitesmoke;
   padding: 20px;
 }
-.control-dream-panel div {
+.control-location-panel div {
   padding-top: 15px;
   padding-bottom: 15px;
   border-top: 1px solid whitesmoke;
 }
 
-.control-dream-panel button {
+.control-location-panel button {
   color: azure;
   background-color: #172025;
   cursor: pointer;
@@ -439,39 +469,39 @@ background-color: #ffffff;
   margin-top: 30px;
   width: 20%;
 }
-.control-dream-panel button:hover {
+.control-location-panel button:hover {
   background-color: #bdf750;
 }
 
-.control-dream-panel #energe-input{
+.control-location-panel #energe-input{
   padding: 10px;
   border: 1px solid rgb(233, 229, 229);
 }
 
 
-#dreaminput {
+#locationinput {
     padding: 20px;
     border: 1px solid whitesmoke;
 }
 
-#dreaminput h1 {
+#locationinput h1 {
     margin-bottom: 30px;
     margin-top: 30px;
     color:#2C5662;
 }
 
-#dreaminput form {
+#locationinput form {
     display: flex;
     width: 100%;
     flex-direction: column;
 }
 
-#dreaminput form label {
+#locationinput form label {
     margin-top: 20px;
 
 }
 
-#dreaminput form input, textarea {
+#locationinput form input, textarea {
 background-color: rgb(250, 249, 253);
 width: 100%;
 padding: 20px 20px;
@@ -480,7 +510,7 @@ border-radius: 4px;
 }
 
 
-#dreaminput form button {
+#locationinput form button {
   color: azure;
   background-color: #172025;
   cursor: pointer;
@@ -491,9 +521,8 @@ border-radius: 4px;
   margin-top: 30px;
   width: 10%;
 }
-#dreaminput form button:hover {
+#locationinput form button:hover {
   background-color: #bdf750;
 }
 
 </style>
-
