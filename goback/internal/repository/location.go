@@ -27,15 +27,15 @@ func NewLocationStorage(dbpool *sqlx.DB) LocationStorage {
 	return LocationStorage{Db: dbpool}
 }
 
-func (s *LocationStorage) CreateLocation(ctx context.Context, creater string, name string, info string, geolocation string, radius uint64, height uint64, idFiles string) (model.Location, error) {
+func (s *LocationStorage) CreateLocation(ctx context.Context, creater string, name string, info string, geolocation string, radius uint64, height uint64) (model.Location, error) {
 	var m model.Location
 	tx := s.Db.MustBegin()
 	q := `
-	INSERT INTO location (name, info, creater, energy, geolocation, radius, height, idFiles) 
-	VALUES ($1,$2,$3,$4,$5,$6,$7,$8) 
+	INSERT INTO location (name, info, creater, energy, geolocation, radius, height, active) 
+	VALUES ($1,$2,$3,$4,$5,$6,$7, $8) 
 	returning *;
 	`
-	err := tx.GetContext(ctx, &m, q, name, info, creater, 0, geolocation, radius, height, idFiles)
+	err := tx.GetContext(ctx, &m, q, name, info, creater, 0, geolocation, radius, height, true)
 	if err != nil {
 		tx.Rollback()
 		return model.Location{}, err

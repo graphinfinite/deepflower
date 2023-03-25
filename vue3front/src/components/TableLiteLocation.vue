@@ -117,7 +117,7 @@ const doSearch = (offset, limit, order, sort) => {
     Limit: limit,
     Order: order,
     Sort: sort,
-    onlyMyLocations: onlyMyLocations.value,
+    OnlyMyLocations: onlyMyLocations.value,
     SearchTerm: searchTerm.value
     }
   console.log(JSON.stringify(searchData))
@@ -144,7 +144,7 @@ const tableLoadingFinish = (elements) => {
 table.isLoading = false;
 };
 
-//doSearch(0, 10, "id", "asc");
+doSearch(0, 10, "id", "asc");
 
 const rowLocation = reactive({
     IdFiles: "",

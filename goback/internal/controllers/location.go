@@ -53,6 +53,8 @@ func (c *LocationController) SearchLocations(w http.ResponseWriter, r *http.Requ
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
+
+	fmt.Print(locations)
 	var result SearchLocationsResponse
 	result.Locations = locations
 
@@ -67,7 +69,6 @@ type CreateLocationRequest struct {
 	Geolocation string
 	Radius      uint64
 	Height      uint64
-	IdFiles     string
 }
 
 func (c *LocationController) CreateLocation(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +78,7 @@ func (c *LocationController) CreateLocation(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	m, err := c.Uc.CreateLocation(r.Context(), userId, l.Name, l.Info, l.Geolocation, l.Radius, l.Height, l.IdFiles)
+	m, err := c.Uc.CreateLocation(r.Context(), userId, l.Name, l.Info, l.Geolocation, l.Radius, l.Height)
 	if err != nil {
 		JSON(w, STATUS_ERROR, err.Error())
 		return

@@ -27,7 +27,7 @@ type (
 	}
 
 	LocationStorageInterface interface {
-		CreateLocation(ctx context.Context, creater string, name string, info string, geolocation string, radius uint64, height uint64, idFiles string) (model.Location, error)
+		CreateLocation(ctx context.Context, creater string, name string, info string, geolocation string, radius uint64, height uint64) (model.Location, error)
 		GetLocationById(ctx context.Context, locationId string) (model.Location, error)
 		DeleteUserLocation(ctx context.Context, locationId string) error
 		UpdateUserLocation(ctx context.Context, locationId string, locationUpdate map[string]interface{}) (model.Location, error)

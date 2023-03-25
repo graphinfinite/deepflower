@@ -46,9 +46,8 @@ func MigrateDb(dbPool *sqlx.DB) error {
 		geolocation point,
 		radius bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
 		height bigint NOT NULL DEFAULT 0,
-		idfiles uuid,
 		energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
-		bool BOOLEAN NOT NULL);	
+		active BOOLEAN NOT NULL);	
 
 
 		CREATE TABLE IF NOT EXISTS "dream_location" (

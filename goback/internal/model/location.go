@@ -12,7 +12,6 @@ type Location struct {
 	Geolocation string    `db:"geolocation" json:"Geolocation,omitempty"` //point
 	Radius      uint64    `db:"radius" json:"Radius"`
 	Height      uint64    `db:"height" json:"Height"`
-	IdFiles     string    `db:"idfiles" json:"Idfiles,omitempty"`
 	Energy      uint64    `db:"energy" json:"Energy"`
 	Active      bool      `db:"active" json:"Active"`
 }
