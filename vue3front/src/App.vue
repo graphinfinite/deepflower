@@ -27,6 +27,7 @@ const isAuthorazed = ref(Boolean(localStorage.getItem("tokenAccess")))
    grid-template-areas: 'sidebar router-view';
    grid-template-columns: auto 1fr;
    font-family: 'Times New Roman', Times, serif;
+
 }
  .sidebar {
    grid-area: 'sidebar';

@@ -18,7 +18,7 @@ import TableLiteDream from "@/components/TableLiteDream.vue"
 
 
 .maindata{
-  color: azure;
+  color: whitesmoke;
   padding: 20px;
   background-color: #172025;
 }

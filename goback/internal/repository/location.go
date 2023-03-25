@@ -88,6 +88,16 @@ func (s *LocationStorage) SearchLocations(ctx context.Context, userId string,
 	return locations, count, nil
 }
 
+func (s *LocationStorage) GetLocationDreams(ctx context.Context, locationId string) ([]model.Dream, error) {
+	var dreams []model.Dream
+	q := `SELECT * FROM dream WHERE id IN (SELECT dreamid FROM dream_location WHERE locationid=$1);`
+	if err := s.Db.SelectContext(ctx, &dreams, q, locationId); err != nil {
+		return []model.Dream{}, err
+	}
+	return dreams, nil
+
+}
+
 func (s *LocationStorage) GetLocationById(ctx context.Context, locationId string) (model.Location, error) {
 	var location model.Location
 	q := `SELECT * FROM location WHERE id=$1;`

@@ -12,7 +12,7 @@
 
 
 .maindata{
-  color: azure;
+  color: whitesmoke;
   padding: 20px;
   background-color: #15042B;
   margin-bottom: 30px;

@@ -20,16 +20,34 @@ func NewDreamStorage(dbpool *sqlx.DB) DreamStorage {
 func (s *DreamStorage) CreateDream(ctx context.Context, name, info, location, creater string) (model.Dream, error) {
 	var m model.Dream
 	tx := s.Db.MustBegin()
-	q := `
+	q1 := `
 	INSERT INTO dream (name, info,published, status, creater, energy, location, countG) 
 	VALUES ($1,$2,$3,$4,$5,$6,$7,$8) 
 	returning *;
 	`
-	err := tx.GetContext(ctx, &m, q, name, info, false, "CREATE", creater, 0, location, 0)
+	err := tx.GetContext(ctx, &m, q1, name, info, false, "S", creater, 0, location, 0)
 	if err != nil {
 		tx.Rollback()
 		return model.Dream{}, err
 	}
+	q2 := `INSERT INTO dream_location(dreamid, locationid) 
+	VALUES ($1, (SELECT id FROM location WHERE name=$2));
+	`
+	result, err := tx.ExecContext(ctx, q2, m.ID, location)
+	if err != nil {
+		tx.Rollback()
+		return model.Dream{}, err
+	}
+	n, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return model.Dream{}, err
+	}
+	if n == 0 {
+		tx.Rollback()
+		return model.Dream{}, fmt.Errorf("error: in dream_location no new row")
+	}
+
 	err = tx.Commit()
 	if err != nil {
 		return model.Dream{}, err

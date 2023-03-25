@@ -63,6 +63,27 @@ func (c *LocationController) SearchLocations(w http.ResponseWriter, r *http.Requ
 	JSONstruct(w, STATUS_OK, "", &result)
 }
 
+type GetLocationDreamsResponse struct {
+	LocationDreams []model.Dream
+}
+
+func (c *LocationController) GetLocationDreams(w http.ResponseWriter, r *http.Request) {
+	//userId, _ := r.Context().Value(ContextUserIdKey).(string)
+	locationId := chi.URLParam(r, "locationId")
+
+	var locdreams []model.Dream
+	locdreams, err := c.Uc.GetLocationDreams(r.Context(), locationId)
+	if err != nil {
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	var m = GetLocationDreamsResponse{
+		LocationDreams: locdreams,
+	}
+	JSONstruct(w, STATUS_OK, "ок", m)
+
+}
+
 type CreateLocationRequest struct {
 	Name        string
 	Info        string

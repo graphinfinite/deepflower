@@ -8,7 +8,7 @@ auth:
   token_ttl: 7777 #min
 
 postgres: 
-    host: host.docker.internal #dbpostgres(compose) #host.docker.internal
+    host: 127.0.0.1 #host.docker.internal #dbpostgres(compose)
     port: 32768 # 5432(compose) 32768(some)
     user: "postgres"
     password: "postgrespw"

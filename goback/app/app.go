@@ -109,10 +109,9 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Patch("/{locationId}", loc.UpdateUserLocation)
 		r.Delete("/{locationId}", loc.DeleteUserLocation)
 		r.Post("/{locationId}/energy", loc.AddEnergyToLocation)
+		r.Get("/{locationId}/dreams", loc.GetLocationDreams)
 
 	})
-
-	// /dreams?Offset=0&Limit=10&Order=id&Sort=asc&OnlyMyDreams=true&SearchTerm= <nil>
 
 	// HTTP Server
 	app.httpServer = &http.Server{

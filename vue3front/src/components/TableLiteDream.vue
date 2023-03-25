@@ -314,7 +314,7 @@ const addEnergyToDream = () => {
           <input type="text" id="dreamname" v-model="dreamname" placeholder="..." autocomplete="off">
           <label for="dreaminfo">Dream info (Use simple html tags. No XSS Cross-Site Scripting)</label>&nbsp;
           <textarea id="dreaminfo" v-model="dreaminfo" placeholder="..."></textarea>
-          <label for="location">Location</label>&nbsp;
+          <label for="location">Location name</label>&nbsp;
           <input  id="location" v-model="location" placeholder="...">
           <button type="submit">->...</button> 
           <div class="form-group">
@@ -329,22 +329,17 @@ const addEnergyToDream = () => {
 </template>
 
 
+
 <!-- .dreamroot {
 
 } -->
-
 <style scoped>
-
-
-
 .searchBox {
 
   border: 1px solid white;
   padding: 10px;
   background-color:whitesmoke ;
 }
-
-
 
 .searchBox #checkbox1, #checkbox2 {
   cursor:pointer;
@@ -354,7 +349,6 @@ const addEnergyToDream = () => {
   margin-left: 3px;
   margin-right: 7px;
 }
-
 
 .searchBox label {
   color: #365778;

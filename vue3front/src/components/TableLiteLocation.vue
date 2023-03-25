@@ -163,6 +163,8 @@ const rowLocation = reactive({
 
 const rowClicked = (row) => {
   Object.assign(rowLocation,toRaw(row) );
+  getRowMapImage()
+  showLocationDream()
 };
 
 
@@ -188,8 +190,8 @@ const messageErr = ref("")
 const locationName = ref("");
 const locationInfo = ref("");
 const locationGeo = ref("");
-const locationHeight= ref("");
-const locationRadius= ref("");
+const locationHeight= ref(0);
+const locationRadius= ref(0);
 
 
 const newLocation = reactive({
@@ -199,16 +201,41 @@ const newLocation = reactive({
     Height: locationHeight,
     Radius:locationRadius
 })
-const doSend = () => API.post("/locations", JSON.stringify(newLocation)).then((response) => {
-    if (response.data.status === "ok") {
-      doSearch(0, 10, "id", "asc")
-      window.alert(response.data.message)
+const doSend = () => {
+  if (locationGeo.value === "") {
+    locationGeo.value = "0,0"
+  }
+
+  if (locationGeo.value !== "") {
+    var arrayll = locationGeo.value.split(",", 2)
+    if (arrayll.length == 1) {
+      window.alert("no valid geodata")
       return
+    }  
+    if (
+      !isNaN(parseFloat(arrayll[0])) &&
+      !isNaN(parseFloat(arrayll[1])) &&
+      arrayll[0].length < 8 &&
+      arrayll[1].length < 8 &&
+      parseFloat(arrayll[0])<90 &&
+      parseFloat(arrayll[0])>-90 &&
+      parseFloat(arrayll[0])<180 &&
+      parseFloat(arrayll[0])>-180
+      ) 
+      {
+            API.post("/locations", JSON.stringify(newLocation)).then((response) => {
+            if (response.data.status === "ok") {
+              doSearch(0, 10, "id", "asc")
+              window.alert(response.data.message)
+              return
+            }
+            window.alert(response.data.messag)
+            })
+    } else {
+      window.alert("Неправильный формат локации")
     }
-    window.alert(response.data.message)
-
-})
-
+  }
+}
 
 const energyToLocation = ref(0)
 const addEnergyToLocation = () => {
@@ -226,21 +253,34 @@ const addEnergyToLocation = () => {
 
 })
 }
-
-
+const rowmapurl = ref("")
+const getRowMapImage = () => {
+  rowmapurl.value = "https://static-maps.yandex.ru/1.x/?ll=" + rowLocation.Geolocation.slice(1,-1)+ "&spn=0.02,0.02&size=300,300&l=map"
+}
 const mapurl = ref("https://static-maps.yandex.ru/1.x/?ll=39.620070,53.753630&spn=0.002,0.002&size=300,300&l=map")
 const getMapImage = () => {
-
   console.log("https://static-maps.yandex.ru/1.x/?ll=" + locationGeo.value+ "&spn=0.002,0.002&size=300,300&l=map")
   mapurl.value = "https://static-maps.yandex.ru/1.x/?ll=" + locationGeo.value+ "&spn=0.02,0.02&size=300,300&l=map"
-  
+}
+
+var dreams = ref(new Array())
+var isVisibleLocationDreams = ref(false)
+
+const showLocationDream = () => {
+  API.get("/locations/"+rowLocation.ID+"/dreams").then((response) => {
+    if (response.data.status === "ok") {
+      dreams.value = Array()
+      dreams.value.push(...response.data.data.LocationDreams)
+      return
+    }
+    window.alert(response.data.message)
+})
 
 }
 
 </script>
 
 <template scoped>
-
 <div class="searchBox">
   <label for="checkbox1">Only my locations: {{ onlyMyLocations }}</label>
   <input type="checkbox" id="checkbox1" v-model="onlyMyLocations" />
@@ -273,6 +313,9 @@ const getMapImage = () => {
   <div id="locationrow">
     <div class="row-name">  Name: {{ rowLocation.Name }}</div>
     <div class="row-location">Geolocation: {{ rowLocation.Geolocation }}</div>
+    <div v-if="rowLocation.Geolocation != '(0,0)'">
+      <img v-bind:src=rowmapurl alt="Геолокация не определена" width="300" height="300">
+    </div>
     <div class="row-radiusr">Radius: {{ rowLocation.Radius }}</div>
     <div class="row-height">Height: {{ rowLocation.Height }}</div>
     <div class="row-creater">Creater: {{ rowLocation.Creater }}</div>
@@ -288,11 +331,24 @@ const getMapImage = () => {
       </div>
       <div class="i-data" >
         <span v-html="rowLocation.Info"></span>
-
       </div>
-
     </div>
+    <button type="checkbox" id="checkbox3" v-on:click="() => {isVisibleLocationDreams=!isVisibleLocationDreams}">Dreams</button>
   </div>
+
+  <div v-if="isVisibleLocationDreams" class="location_dreams">
+    <ul>
+      <li v-for="dream in dreams" :key="dream.ID">
+      ID: {{ dream.ID }} <br>
+      Name: {{ dream.Name }} <br>
+      Energy: {{ dream.Energy }} <br>
+      Creater: {{ dream.Creater }}
+      </li>
+    </ul>
+  </div>
+
+
+
   <div class="control-location-panel">
         <h1>Локация</h1>  
         <div>
@@ -326,15 +382,10 @@ const getMapImage = () => {
           <img v-bind:src=mapurl>
           </div>
           
-
-          
           <label for="locationHeight">Location Height (m)</label>
           <input type="number" id="locationHeight" v-model="locationHeight" placeholder="..." autocomplete="off">
           <label for="locationRadius">Location Radius (m)</label>
           <input type="number" id="locationRadius" v-model="locationRadius" placeholder="..." autocomplete="off">
-
-
-
           <button type="submit">->...</button> 
 
 
@@ -371,7 +422,7 @@ flex-direction: row;
 
 
 
-.searchBox #checkbox1, #checkbox2 {
+.searchBox #checkbox1, #checkbox2  {
   cursor:pointer;
   border: 1px solid black;
   padding: 5px;
@@ -379,6 +430,8 @@ flex-direction: row;
   margin-left: 3px;
   margin-right: 7px;
 }
+
+
 
 
 .searchBox label {
@@ -390,6 +443,8 @@ flex-direction: row;
 .searchBox #checkbox1:checked {
   background-color: #365778;
 }
+
+
 
 .searchBox #filterInput {
   padding: 10px;
@@ -443,6 +498,30 @@ flex-direction: row;
 #locationrow .row-info .i-data{
 background-color: #ffffff;
 }
+
+
+
+#checkbox3 {
+  color:blueviolet;
+  cursor:pointer;
+  border: 1px solid whitesmoke;
+  padding: 10px;
+  margin-top: 30px;
+}
+.location_dreams {
+  width: 100%;
+  border: 1px solid whitesmoke;
+  padding: 20px;
+  background-color: whitesmoke;  /* aliceblue */
+}
+
+.location_dreams ul li{
+  background-color: white;
+  padding:15px;
+  border: 1px solid rgb(200, 205, 226);
+
+}
+
 
 
 .control-location-panel {

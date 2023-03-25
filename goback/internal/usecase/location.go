@@ -47,6 +47,14 @@ func (d *LocationUsecase) SearchLocations(ctx context.Context, userId string,
 	return locations, cnt, nil
 }
 
+func (d *LocationUsecase) GetLocationDreams(ctx context.Context, locationId string) ([]model.Dream, error) {
+	dreams, err := d.Rep.GetLocationDreams(ctx, locationId)
+	if err != nil {
+		return []model.Dream{}, err
+	}
+	return dreams, nil
+}
+
 func (d *LocationUsecase) AddEnergyToLocation(ctx context.Context, userId, locationId string, energy uint64) error {
 	//location, err := d.Rep.GetLocationById(ctx, locationId)
 	// if err != nil {

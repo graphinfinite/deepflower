@@ -18,7 +18,7 @@ import TableLiteLocations from "@/components/TableLiteLocation.vue"
 
 
 .maindata{
-  color: azure;
+  color: whitesmoke;
   padding: 20px;
   background-color: #172025;
 }

@@ -36,5 +36,7 @@ type (
 			limit uint64, offset uint64, onlyMyLocations bool,
 			order string, searchTerm string,
 			sort string) ([]model.Location, int, error)
+
+		GetLocationDreams(ctx context.Context, locationId string) ([]model.Dream, error)
 	}
 )
