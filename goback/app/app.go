@@ -7,7 +7,6 @@ import (
 	"deepflower/internal/repository"
 	"deepflower/internal/usecase"
 	"deepflower/pkg/postgres"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -33,19 +32,21 @@ func NewApp() *App {
 func (app *App) Run(cfg config.Configuration) error {
 	zlog := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 
-	zlog.Info().Msgf("configurate %+v", cfg)
+	zlog.Info().Msgf("configuration:   %+v", cfg)
 	zlog.Info().Msgf("connect to db...")
 	dbPool, err := postgres.NewPostgresPool(cfg.Db.Psql)
 	if err != nil {
+		zlog.Err(err)
 		return err
 	}
 	defer dbPool.Close()
 	zlog.Info().Msgf("migrate... ")
-	//TODO temporary
 	if err := postgres.MigrateDb(dbPool); err != nil {
+		zlog.Err(err)
 		return err
 	}
 
+	// client for requests to telegram
 	client := http.Client{Timeout: time.Second * 10}
 
 	// Auth
@@ -56,7 +57,7 @@ func (app *App) Run(cfg config.Configuration) error {
 		cfg.Auth.Signing_key,
 		time.Duration(cfg.Auth.Token_ttl)*time.Minute)
 	auth := ctrl.NewAuthController(&authUC, &zlog)
-	bot, _ := ctrl.NewBot(false, cfg.Telegram.Token, &client, &authUC, &zlog)
+	bot, _ := ctrl.NewBot(cfg.Telegram.Debug, cfg.Telegram.Token, &client, &authUC, &zlog)
 
 	// User
 	userUC := usecase.NewUserUC(&userstore)
@@ -72,6 +73,7 @@ func (app *App) Run(cfg config.Configuration) error {
 	locUC := usecase.NewLocationUsecase(&locstore)
 	loc := ctrl.NewLocationController(&locUC, &zlog)
 
+	// Router settings
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
@@ -110,7 +112,6 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Delete("/{locationId}", loc.DeleteUserLocation)
 		r.Post("/{locationId}/energy", loc.AddEnergyToLocation)
 		r.Get("/{locationId}/dreams", loc.GetLocationDreams)
-
 	})
 
 	// HTTP Server
@@ -124,8 +125,8 @@ func (app *App) Run(cfg config.Configuration) error {
 	zlog.Info().Msgf("deepflower server start... %s", app.httpServer.Addr)
 	go func() {
 		err := app.httpServer.ListenAndServe()
-		zlog.Info().Msg(err.Error())
-		fmt.Print("💀")
+		zlog.Err(err)
+		zlog.Info().Msg("💀")
 	}()
 
 	// Shutdown

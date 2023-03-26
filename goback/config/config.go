@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/viper"
 )
@@ -37,6 +38,7 @@ type ServerConfig struct {
 type TelegramConfig struct {
 	Token,
 	Boturl string
+	Debug bool
 }
 
 func Init() (Configuration, error) {
@@ -71,9 +73,14 @@ func Init() (Configuration, error) {
 		Host: viper.GetString("host"),
 		Port: viper.GetString("port"),
 	}
+	dbg, err := strconv.ParseBool(viper.GetString("telegram.debug"))
+	if err != nil {
+		return Configuration{}, err
+	}
 	tgconf := TelegramConfig{
 		Token:  viper.GetString("telegram.token"),
 		Boturl: viper.GetString("telegram.boturl"),
+		Debug:  dbg,
 	}
 
 	return Configuration{Db: dbconf, Auth: authconf, Server: srvconf, Telegram: tgconf}, nil

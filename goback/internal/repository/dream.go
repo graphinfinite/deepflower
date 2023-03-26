@@ -93,9 +93,9 @@ func (s *DreamStorage) SearchDreams(ctx context.Context, userId string,
 		queryCnt = `SELECT count(id) FROM dream`
 	}
 	q := query + filter
-	fmt.Println(q)
-	fmt.Println(queryCnt)
-	fmt.Println(args...)
+	// fmt.Println(q)
+	// fmt.Println(queryCnt)
+	// fmt.Println(args...)
 
 	if err := s.Db.SelectContext(ctx, &dreams, q, args...); err != nil {
 		return []model.Dream{}, 0, err

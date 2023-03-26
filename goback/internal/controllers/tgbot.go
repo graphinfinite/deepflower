@@ -13,7 +13,7 @@ import (
 
 type TelegramBot struct {
 	Bot         *tgbotapi.BotAPI
-	Logger      *zerolog.Logger
+	log         *zerolog.Logger
 	Authusecase AuthUCInterface
 }
 
@@ -23,14 +23,14 @@ func NewBot(debug bool, token string, client *http.Client, authusecase AuthUCInt
 	if err != nil {
 		return TelegramBot{}, err
 	}
-	return TelegramBot{Bot: bot, Logger: logger, Authusecase: authusecase}, nil
+	return TelegramBot{Bot: bot, log: logger, Authusecase: authusecase}, nil
 }
 
 func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	var upd tgbotapi.Update
 	if err := DecodeJSONBody(w, r, &upd); err != nil {
-		fmt.Println(err)
+		t.log.Err(err)
 	}
 	u := model.UserTelegram{
 		TgId:           upd.Message.From.ID,
@@ -40,7 +40,7 @@ func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Re
 		TgUserName:     upd.Message.From.UserName,
 		TgLanguageCode: upd.Message.From.LanguageCode,
 	}
-	t.Logger.Printf("User data: %#v", u)
+	t.log.Debug().Msgf("user data from tg: %#v", u)
 	// registration
 	if upd.Message.Text == "/start" {
 		var message string
@@ -50,11 +50,11 @@ func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Re
 		case errors.As(err, &ErrAuthUserAlreadyExist):
 			message = fmt.Sprintf("Glad to see you here again, %s!", usepas.Username)
 		case err != nil:
-
-			fmt.Print(err)
+			t.log.Err(err)
 			message = "I'm broke. Sorry"
 		default:
 			message = fmt.Sprintf("Success registration!\n Username: %s \nPassword: %s", usepas.Username, usepas.Password)
+			t.log.Info().Msgf("success registration. username: %s", usepas.Username)
 		}
 		msg := tgbotapi.NewMessage(upd.Message.Chat.ID, message)
 		t.Bot.Send(msg)

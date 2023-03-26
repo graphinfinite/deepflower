@@ -67,7 +67,6 @@ func (auth *AuthUsecase) Login(ctx context.Context, username, password string) (
 	claims := CustomClaims{
 		"x",
 		jwt.RegisteredClaims{
-			// A usual scenario is to set the expiration time relative to the current time
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(auth.expireDuration * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
@@ -77,7 +76,6 @@ func (auth *AuthUsecase) Login(ctx context.Context, username, password string) (
 			Audience:  []string{"aud"},
 		},
 	}
-
 	jwttoken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := jwttoken.SignedString([]byte(auth.signingKey))
 	if err != nil {
@@ -91,7 +89,6 @@ func (auth *AuthUsecase) ValidateJwtToken(ctx context.Context, tokenString strin
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 		return []byte(auth.signingKey), nil
 	})
 
@@ -99,7 +96,6 @@ func (auth *AuthUsecase) ValidateJwtToken(ctx context.Context, tokenString strin
 		return false, nil, err
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
-	//print(claims.GetSubject())
 	if ok && token.Valid {
 		return true, claims, nil
 	}

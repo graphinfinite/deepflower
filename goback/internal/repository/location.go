@@ -77,9 +77,9 @@ func (s *LocationStorage) SearchLocations(ctx context.Context, userId string,
 		queryCnt = `SELECT count(id) FROM location`
 	}
 	q := query + filter
-	fmt.Println(q)
-	fmt.Println(queryCnt)
-	fmt.Println(args...)
+	// fmt.Println(q)
+	// fmt.Println(queryCnt)
+	// fmt.Println(args...)
 
 	if err := s.Db.SelectContext(ctx, &locations, q, args...); err != nil {
 		return []model.Location{}, 0, err
