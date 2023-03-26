@@ -8,19 +8,18 @@
 
 </template>
 
-<style scoped lang="css">
-
+<style scoped lang="scss">
+@use '@/assets/scss/_colors' as clr;
 
 .maindata{
-  color: whitesmoke;
+  color: clr.$clr-route-header;
   padding: 20px;
-  background-color: #15042B;
-  margin-bottom: 30px;
+  background-color: clr.$bg-route-header;
 }
 
 .wrapper{
-  padding: 20px;
-  margin-top: 30px;
+  background-color: white;
+
 }
 </style>
 

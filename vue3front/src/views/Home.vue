@@ -74,7 +74,16 @@ const doLogout = () =>  AuthService.logout()
   
 </script>
 
-<style scoped lang="css">
+<style scoped lang="scss">
+@use '@/assets/scss/_colors' as clr;
+
+
+.mainuserdate{
+  color: clr.$clr-route-header;
+  padding: 20px;
+  background-color: clr.$bg-route-header;
+}
+
 li{
     padding:6px;
 }
@@ -90,31 +99,24 @@ li{
     content: ".";
 }    
 
-.mainuserdate{
-  color: whitesmoke;
-  padding: 20px;
-  background-color: #172025;
-}
 .userdate{
   padding: 20px;
-
   border: 1px solid whitesmoke;
 }
 
 
 .logout button {
-  color:rgb(255, 255, 255);
+  color: clr.$clr-button;
   padding: 10px;
   border-radius: 5%;
   margin-top: 10px;
+  margin-left: 10px;
 
-  background-color: #172025;
+  background-color: clr.$bg-button;
   transition: background-color 1s ease-in-out;
 }
 .logout button:hover {
-  background-color: #390e75;
-
-
+  background-color: clr.$bg-button-hover;
 }
 
 </style>

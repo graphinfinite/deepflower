@@ -27,30 +27,23 @@
 
     </ul>
     </div>
-
-
-
-
-
-
-    
-
-
-
-
   </div>
 
 
 </template>
 
-<style scoped lang="css">
+<style scoped lang="scss">
+
+
+@use '@/assets/scss/_colors' as clr;
+
 
 .maindata{
   display: flex;
   flex-direction: row;
   color: blueviolet;
   padding: 20px;
-  background-color: #172025;
+  background-color: clr.$bg-route-header;
 }
 .maindata .el {
   padding: 10px;
@@ -91,8 +84,7 @@
 
 
 .wrapper{
-  padding: 20px;
-  margin-top: 30px;
+ background-color: white;
 
 }
 </style>

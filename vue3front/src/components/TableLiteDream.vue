@@ -333,67 +333,69 @@ const addEnergyToDream = () => {
 <!-- .dreamroot {
 
 } -->
-<style scoped>
-.searchBox {
+<style scoped lang="scss">
+@use '@/assets/scss/_colors' as clr;
 
-  border: 1px solid white;
+.searchBox {
+  color: rgb(0, 0, 0);
+
   padding: 10px;
-  background-color:whitesmoke ;
+  background-color:#ffffff ;
 }
 
 .searchBox #checkbox1, #checkbox2 {
   cursor:pointer;
-  border: 1px solid black;
+  border: 1px solid rgb(219, 208, 208);
   padding: 5px;
   background-color: blueviolet;
   margin-left: 3px;
   margin-right: 7px;
 }
-
 .searchBox label {
-  color: #365778;
   padding-right: 5px;
   cursor:default;
 }
-
 .searchBox #checkbox1:checked {
   background-color: #365778;
 }
-
 .searchBox #filterInput {
   padding: 10px;
   background-color: white;
+  color: black;
 
 }
-
 .searchBox button {
-  color: azure;
   background-color: #172025;
   cursor: pointer;
-  border: 1px solid #add8d8;
   padding: 10px;
+  color: whitesmoke;
+}
 
+
+
+.dreamroot{
 
 }
 
+
 ::v-deep(.vtl-table .vtl-thead .vtl-thead-th) {
-  color: whitesmoke;
-  background-color: #365778;
+  color: clr.$clr-table-header;
+  background-color: clr.$bg-table-header;
   border-color: #172025;
 }
 ::v-deep(.vtl-table td),
 ::v-deep(.vtl-table tr) {
-  border: 1px solid whitesmoke;
+  border: 1px solid clr.$clr-table-header;
 }
 ::v-deep(.vtl-paging-info) {
-  color: #17324d;
+  color: clr.$bg-table-header;
 }
 ::v-deep(.vtl-paging-count-label),
 ::v-deep(.vtl-paging-page-label) {
-  color: #17324d;
+  color: clr.$bg-table-header;
 }
 ::v-deep(.vtl-paging-pagination-page-link) {
-  border: 1px solid whitesmoke;
+  border: 1px solid clr.$clr-table-header;
 }
 
 

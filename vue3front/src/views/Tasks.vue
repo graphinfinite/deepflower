@@ -18,23 +18,24 @@ import GraphModeler from '@/components/GraphModeler.vue';
 
 </template>
 
-<style scoped lang="css">
+<style scoped lang="scss">
+@use '@/assets/scss/_colors' as clr;
 
 
 .maindata{
-  color: blueviolet;
+  color: clr.$clr-route-header;
   padding: 20px;
-  background-color: #15042B;
-  margin-bottom: 30px;
+  background-color: clr.$bg-route-header;
 }
 
 .graphmodeler{
+  margin-top: 20px;
+  margin-left: 10px;
   
 }
 
 .wrapper{
-  padding: 20px;
-  margin-top: 30px;
+ background-color: white;
 }
 </style>
 

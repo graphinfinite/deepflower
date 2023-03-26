@@ -9,6 +9,9 @@
   <style scoped lang="scss">
   svg {
     transform: rotateZ(90deg);
+    color: whitesmoke;
   }
-  // .clr-i-outline {}
+  .clr-i-outline {
+    background-color: blueviolet;
+  }
   </style>

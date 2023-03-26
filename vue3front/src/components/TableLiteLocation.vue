@@ -68,7 +68,7 @@ columns: [
     label: "Geo",
     field: "Geolocation",
     width: "1%",
-    sortable: true,
+    sortable: false,
     display: (row) => {
         if (row.Geolocation) {
           if (row.Geolocation.length>30) {
@@ -84,19 +84,19 @@ columns: [
     label: "Active",
     field: "Active",
     width: "1%",
-    sortable: false,
+    sortable: true,
     },
     {
     label: "Radius",
     field: "Radius",
     width: "1%",
-    sortable: false,
+    sortable: true,
     },
     {
     label: "Height",
     field: "Height",
     width: "1%",
-    sortable: false,
+    sortable: true,
     },
 ],
 rows: [],
@@ -205,6 +205,10 @@ const doSend = () => {
   if (locationGeo.value === "") {
     locationGeo.value = "0,0"
   }
+  if (locationName.value === "") {
+    window.alert("location name is empty")
+    return
+  }
 
   if (locationGeo.value !== "") {
     var arrayll = locationGeo.value.split(",", 2)
@@ -270,6 +274,9 @@ const showLocationDream = () => {
   API.get("/locations/"+rowLocation.ID+"/dreams").then((response) => {
     if (response.data.status === "ok") {
       dreams.value = Array()
+      if (response.data.data.LocationDreams == null) {
+        return
+      }
       dreams.value.push(...response.data.data.LocationDreams)
       return
     }
@@ -305,9 +312,6 @@ const showLocationDream = () => {
   @row-clicked="rowClicked"
   />
 
-
-  
-  
 
 <div v-if='rowLocation.Name !==""'>
   <div id="locationrow">
@@ -400,18 +404,14 @@ const showLocationDream = () => {
 </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '@/assets/scss/_colors' as clr;
 
 
 .geo {
-  display: flex;
+display: flex;
 flex-direction: row;
-
 }
-/* .locationroot {
-
-} */
-
 
 .searchBox {
 
@@ -463,24 +463,30 @@ flex-direction: row;
 }
 
 ::v-deep(.vtl-table .vtl-thead .vtl-thead-th) {
-  color: whitesmoke;
-  background-color: #365778;
+  color: clr.$clr-table-header;
+  background-color: clr.$bg-table-header;
   border-color: #172025;
 }
 ::v-deep(.vtl-table td),
 ::v-deep(.vtl-table tr) {
-  border: 1px solid whitesmoke;
+  border: 1px solid rgb(53, 43, 43);
+  color: rgb(161, 156, 156);
+  background-color: #0c040f;
 }
 ::v-deep(.vtl-paging-info) {
-  color: #17324d;
+  color: rgb(161, 156, 156);
+  background-color: #13051a;
 }
 ::v-deep(.vtl-paging-count-label),
 ::v-deep(.vtl-paging-page-label) {
-  color: #17324d;
+  color: rgb(161, 156, 156);
+  background-color: #13051a;
 }
 ::v-deep(.vtl-paging-pagination-page-link) {
-  border: 1px solid whitesmoke;
+  color: rgb(161, 156, 156);
+  background-color: #13051a;
 }
+
 
 
 #locationrow {

@@ -14,10 +14,10 @@ function toggleSidebar() {
   <div class="wrapper">
     <aside :vue:is-open="isSidebarOpen">
 
-      <h4 :transparent="!isSidebarOpen">Open</h4>
+      <h4 :transparent="!isSidebarOpen">*</h4>
       <ul class="sidebar-head">
         <li>
-          <img src="@/assets/goat_animal_icon.png" alt="logo" width="32" height="32">
+          <img src="@/assets/triangle-32.ico" alt="logo" width="32" height="32">
         </li>
         <li>
           <button class="sidebar-toggle" :class="isSidebarOpen ? 'toggle-button' : ''">
@@ -29,7 +29,7 @@ function toggleSidebar() {
       <ul>
         <li>
           <router-link to="/">
-            <IconHome />
+            <img src="@/assets/white-home-icon-png-21.png" alt="logo" width="32" height="32">
             <Transition name="fade">
               <span v-show="isSidebarOpen">Home</span>
             </Transition>
@@ -46,7 +46,7 @@ function toggleSidebar() {
         </li>
         <li>
           <router-link to="/tasks">
-            <img src="@/assets/icons8-поделиться-2-50.png" alt="logo" width="32" height="32">
+            <img src="@/assets/icongraph.png" alt="logo" width="32" height="32">
             
             <Transition name="fade">
               <span v-show="isSidebarOpen">Tasks</span>
@@ -55,7 +55,7 @@ function toggleSidebar() {
         </li>
         <li>
           <router-link to="/locations">
-            <img src="@/assets/9042874_planet_icon.png" alt="logo" width="32" height="32">
+            <img src="@/assets/planet-32.png" alt="logo" width="32" height="32">
             <Transition name="fade">
               <span v-show="isSidebarOpen">Locations</span>
             </Transition>
@@ -63,7 +63,7 @@ function toggleSidebar() {
         </li>
         <li>
           <router-link to="/settings">
-            <img src="@/assets/icons8-сервисы.gif" alt="logo" width="32" height="32">
+            <img src="@/assets/settings-5-32.png" alt="logo" width="32" height="32">
             
             <Transition name="fade">
               <span v-show="isSidebarOpen">Settings</span>
@@ -72,7 +72,7 @@ function toggleSidebar() {
         </li>
         <li>
           <router-link to="/about">
-            <IconExclamation />
+            <img src="@/assets/info-6-32.png" alt="logo" width="32" height="32">
             <Transition name="fade">
               <span v-show="isSidebarOpen">About</span>
             </Transition>
@@ -88,12 +88,15 @@ function toggleSidebar() {
 $sidebar-width: 4rem;
 $toggle-duration: 300ms;
 $sidebar-padding-inline-start: 1rem;
+
+
 aside {
   color: clr.$primary;
   background: clr.$bg-dark;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  height: 100%;
   padding-block: 1rem;
   transition: all $toggle-duration;
   width: $sidebar-width;
@@ -137,7 +140,7 @@ li {
 }
 .sidebar-head {
   position: relative;
- padding-block-end: 4rem;
+  padding-block-end: 4rem;
 }
 .sidebar-toggle {
   padding-inline-start: $sidebar-padding-inline-start;
