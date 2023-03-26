@@ -1,7 +1,9 @@
 
 <template>
+    <div class="graph-panel"></div>
 
-    <div ref="stencil"></div>
+    
+    <div ref="stencilref" id="nodebar"></div>
     <div>
         <div ref="container"></div>
     </div>
@@ -20,7 +22,7 @@ import { Graph, Shape } from '@antv/x6'
  import { History } from '@antv/x6-plugin-history'
 import insertCss from 'insert-css'
 const container = ref(null)
-const stencil = ref(null)
+const stencilref = ref(null)
 const graph = ref(null)
 
 onMounted(() => {
@@ -28,8 +30,8 @@ onMounted(() => {
 // #region 初始化画布
 const graph = new Graph({
   container: container.value,
-  width: 500,
-  height: 500,
+  width: 1100,
+  height: 600,
 
   grid: true,
       panning:true,
@@ -92,32 +94,33 @@ const graph = new Graph({
   },
 })
 
-        const node1 = graph.addNode({
-            //shape: "vue3-shape",
-             x: 100,
-            y: 100,
-            width: 150,
-             height: 100,
-             // attrs: {
-             //   body: {       //     stroke: "#ebebeb",
-             //   },
-            // },
-             });
+const node1 = graph.addNode({
+//shape: "vue3-shape",
+x: 100,
+y: 100,
+width: 150,
+height: 100,
+// attrs: {
+//   body: {       //     stroke: "#ebebeb",
+//   },
+// },
+});
 
-        const node2 = graph.addNode({
-            //shape: "vue3-shape",
-             x: 350,
-            y: 500,
-            width: 150,
-             height: 100,
-             // attrs: {
-             //   body: {       //     stroke: "#ebebeb",
-             //   },
-            // },
-             });
+const node2 = graph.addNode({
+//shape: "vue3-shape",
+x: 350,
+y: 500,
+width: 150,
+height: 100,
+// attrs: {
+//   body: {       //     stroke: "#ebebeb",
+//   },
+// },
+});
 
-             graph
-  .use(
+
+            
+graph.use(
     new Transform({
       resizing: true,
       rotating: true,
@@ -154,7 +157,7 @@ const graph = new Graph({
 
 // #region 初始化 stencil
 const stencil = new Stencil({
-  title: '流程图',
+  title: 'Nodes',
   target: graph,
   stencilGraphWidth: 200,
   stencilGraphHeight: 180,
@@ -179,7 +182,7 @@ const stencil = new Stencil({
     rowHeight: 55,
   },
 })
-stencil.value.appendChild(stencil.container)
+stencilref.value.appendChild(stencil.container)
 // #endregion
 
 // #region 快捷键与事件
@@ -520,10 +523,6 @@ const r6 = graph.createNode({
 })
 stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
 
-
-    
-
-
 })
 
 
@@ -531,3 +530,23 @@ stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
 
 
 </script>
+
+
+
+<style>
+
+.graph-panel {
+
+    display: flex;
+  flex-direction: column;
+}
+
+#nodebar {
+    position: relative;
+
+
+    height: 300px;
+    width: 200px;
+}
+
+</style>
