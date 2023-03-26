@@ -2,8 +2,6 @@
 import { shallowRef } from 'vue';
 import { RouterLink } from 'vue-router';
  import IconAngle from './icons/IconAngle.vue';
- import IconExclamation from './icons/IconExclamation.vue';
- import IconHome from './icons/IconHome.vue';
 const isSidebarOpen = shallowRef<Boolean>(false)
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value;
