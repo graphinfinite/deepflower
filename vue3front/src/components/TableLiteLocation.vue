@@ -414,14 +414,10 @@ flex-direction: row;
 }
 
 .searchBox {
-
-  border: 1px solid white;
+  border: 1px solid whitesmoke;
   padding: 10px;
-  background-color:whitesmoke ;
+  background-color:white ;
 }
-
-
-
 .searchBox #checkbox1, #checkbox2  {
   cursor:pointer;
   border: 1px solid black;
@@ -431,35 +427,26 @@ flex-direction: row;
   margin-right: 7px;
 }
 
-
-
-
 .searchBox label {
   color: #365778;
   padding-right: 5px;
   cursor:default;
 }
-
 .searchBox #checkbox1:checked {
   background-color: #365778;
 }
-
-
-
 .searchBox #filterInput {
   padding: 10px;
   background-color: white;
-
+  border: 1px dashed rgb(201, 194, 194);
 }
 
 .searchBox button {
-  color: azure;
-  background-color: #172025;
+  color: clr.$clr-button;
+  background-color:clr.$bg-button;
   cursor: pointer;
   border: 1px solid #add8d8;
   padding: 10px;
-
-
 }
 
 ::v-deep(.vtl-table .vtl-thead .vtl-thead-th) {
@@ -469,22 +456,22 @@ flex-direction: row;
 }
 ::v-deep(.vtl-table td),
 ::v-deep(.vtl-table tr) {
-  border: 1px solid rgb(53, 43, 43);
-  color: rgb(161, 156, 156);
-  background-color: #0c040f;
+  border: 1px solid whitesmoke;
+  color: rgb(0, 0, 0);
+  background-color: #ffffff;
 }
 ::v-deep(.vtl-paging-info) {
-  color: rgb(161, 156, 156);
-  background-color: #13051a;
+  color: rgb(0, 0, 0);
+  background-color: #ffffff;
 }
 ::v-deep(.vtl-paging-count-label),
 ::v-deep(.vtl-paging-page-label) {
-  color: rgb(161, 156, 156);
-  background-color: #13051a;
+  color: rgb(0, 0, 0);
+  background-color: #ffffff;
 }
 ::v-deep(.vtl-paging-pagination-page-link) {
-  color: rgb(161, 156, 156);
-  background-color: #13051a;
+  color: rgb(2, 1, 1);
+  background-color: #ffffff;
 }
 
 
@@ -544,8 +531,8 @@ background-color: #ffffff;
 }
 
 .control-location-panel button {
-  color: azure;
-  background-color: #172025;
+  color: clr.$clr-button;
+  background-color:clr.$bg-button;
   cursor: pointer;
   border: 1px solid #add8d8;
   padding: 10px;
@@ -555,7 +542,7 @@ background-color: #ffffff;
   width: 20%;
 }
 .control-location-panel button:hover {
-  background-color: #bdf750;
+  background-color: clr.$bg-button-hover;
 }
 
 .control-location-panel #energe-input{
@@ -596,8 +583,8 @@ border-radius: 4px;
 
 
 #locationinput form button {
-  color: azure;
-  background-color: #172025;
+  color: clr.$clr-button;
+  background-color:clr.$bg-button;
   cursor: pointer;
   border: none;
   padding: 10px;
@@ -607,7 +594,7 @@ border-radius: 4px;
   width: 10%;
 }
 #locationinput form button:hover {
-  background-color: #bdf750;
+  background-color: clr.$bg-button-hover;
 }
 
 </style>

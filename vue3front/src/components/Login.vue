@@ -2,7 +2,7 @@
 
     <div id="login">
       <div id="description">
-        <img src="@/assets/goat_animal_icon.png" alt="goatlogo" width="32" height="32">
+        <img src="@/assets/goat-icon-18-256.png" alt="goatlogo" width="32" height="32">
         <p> Glory to the goats!</p>
       </div>
       <div id="form">
@@ -53,7 +53,7 @@
 div#login {
   font-family: Verdana, sans-serif;
   align-items: center;
-  background-color: #15042B;
+  background-color: #f0edf5;
   display: flex;
   justify-content: center;
   width: 100%;
@@ -61,7 +61,7 @@ div#login {
 }
 
 div#login div#description {
-  background-color: #ffffff;
+  background-color: #bdb9c9;
   width: 200px;
   padding: 35px;
 }
@@ -73,7 +73,7 @@ div#login div#description p {
 
 div#login div#description p {
   font-size: 0.8em;
-  color: #525252;
+  color: #ffffff;
   margin-top: 10px;
 }
 

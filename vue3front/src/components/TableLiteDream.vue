@@ -359,16 +359,19 @@ const addEnergyToDream = () => {
   background-color: #365778;
 }
 .searchBox #filterInput {
+  border: 1px dashed rgb(221, 210, 210);
   padding: 10px;
   background-color: white;
   color: black;
 
 }
 .searchBox button {
-  background-color: #172025;
+  color: clr.$clr-button;
+  background-color:clr.$bg-button;
+
   cursor: pointer;
   padding: 10px;
-  color: whitesmoke;
+
 }
 
 
@@ -430,8 +433,8 @@ background-color: #ffffff;
 }
 
 .control-dream-panel button {
-  color: azure;
-  background-color: #172025;
+  color: clr.$clr-button;
+  background-color:clr.$bg-button;
   cursor: pointer;
   border: 1px solid #add8d8;
   padding: 10px;
@@ -441,7 +444,7 @@ background-color: #ffffff;
   width: 20%;
 }
 .control-dream-panel button:hover {
-  background-color: #bdf750;
+  background-color:clr.$bg-button-hover;
 }
 
 .control-dream-panel #energe-input{
@@ -482,8 +485,8 @@ border-radius: 4px;
 
 
 #dreaminput form button {
-  color: azure;
-  background-color: #172025;
+  color: clr.$clr-button;
+  background-color:clr.$bg-button;
   cursor: pointer;
   border: none;
   padding: 10px;
@@ -493,7 +496,7 @@ border-radius: 4px;
   width: 10%;
 }
 #dreaminput form button:hover {
-  background-color: #bdf750;
+  background-color:clr.$bg-button-hover;
 }
 
 </style>

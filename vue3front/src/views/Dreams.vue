@@ -19,9 +19,10 @@ import TableLiteDream from "@/components/TableLiteDream.vue"
 
 
 .maindata{
-  color: whitesmoke;
+  color: clr.$clr-route-header;
   padding: 20px;
   background-color:clr.$bg-route-header;
+  border: 1px solid whitesmoke;
 }
 
 
