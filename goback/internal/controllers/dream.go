@@ -122,6 +122,7 @@ func (c *DreamController) AddEnergyToDream(w http.ResponseWriter, r *http.Reques
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
+
 	err := c.Uc.AddEnergyToDream(r.Context(), userId, dreamId, e.Energy)
 	if err != nil {
 		c.log.Err(err).Msg("AddEnergyToDream ")
