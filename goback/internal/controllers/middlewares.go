@@ -21,13 +21,13 @@ func (auth *AuthController) JWT(next http.Handler) http.Handler {
 		token := bearer[7:]
 		ok, claims, err := auth.Uc.ValidateJwtToken(r.Context(), token)
 		if err != nil || !ok {
-			auth.log.Err(err).Msg("token invalid")
+			auth.log.Err(err).Msg("JWT: validate token ")
 			JSON(w, STATUS_ERROR, "token invalid")
 			return
 		}
 		userId, err := claims.GetSubject()
 		if err != nil {
-			auth.log.Err(err)
+			auth.log.Err(err).Msg("JWT: get subject")
 			JSON(w, STATUS_ERROR, "no subject in sub")
 		}
 		ctx := context.WithValue(r.Context(), ContextUserIdKey, userId)
