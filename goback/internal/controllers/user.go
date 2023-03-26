@@ -20,7 +20,7 @@ func (u *UserController) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(ContextUserIdKey).(string)
 	user, err := u.Uc.GetUserInfo(r.Context(), userId)
 	if err != nil {
-		u.log.Err(err)
+		u.log.Err(err).Msg("GetUserInfo ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -30,13 +30,13 @@ func (u *UserController) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	user := model.User{}
 	if err := DecodeJSONBody(w, r, &user); err != nil {
-		u.log.Err(err)
+		u.log.Err(err).Msg("UpdateUser ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 	userUpdated, err := u.Uc.UpdateUser(r.Context(), user)
 	if err != nil {
-		u.log.Err(err)
+		u.log.Err(err).Msg("UpdateUser ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}

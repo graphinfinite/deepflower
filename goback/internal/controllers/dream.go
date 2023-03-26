@@ -83,14 +83,14 @@ type CreateDreamRequest struct {
 func (c *DreamController) CreateDream(w http.ResponseWriter, r *http.Request) {
 	var d CreateDreamRequest
 	if err := DecodeJSONBody(w, r, &d); err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("CreateDream ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
 	m, err := c.Uc.CreateDream(r.Context(), d.Name, d.Info, d.Location, userId)
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("CreateDream ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -101,7 +101,7 @@ func (c *DreamController) PublishDream(w http.ResponseWriter, r *http.Request) {
 	dreamId := chi.URLParam(r, "dreamId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
 	if err := c.Uc.PublishDream(r.Context(), userId, dreamId); err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("PublishDream ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -118,13 +118,13 @@ func (c *DreamController) AddEnergyToDream(w http.ResponseWriter, r *http.Reques
 	var e AddEnergyToDreamRequest
 
 	if err := DecodeJSONBody(w, r, &e); err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("AddEnergyToDream ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 	err := c.Uc.AddEnergyToDream(r.Context(), userId, dreamId, e.Energy)
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("AddEnergyToDream ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -136,7 +136,7 @@ func (c *DreamController) UpdateUserDream(w http.ResponseWriter, r *http.Request
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
 	dreamPatch := make(map[string]interface{}, 20)
 	if err := DecodeJSONBody(w, r, &dreamPatch); err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("UpdateUserDream ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -162,7 +162,7 @@ func (c *DreamController) UpdateUserDream(w http.ResponseWriter, r *http.Request
 
 	updatedDream, err := c.Uc.UpdateUserDream(r.Context(), userId, dreamId, dreamPatch)
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("UpdateUserDream ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -172,7 +172,7 @@ func (c *DreamController) DeleteUserDream(w http.ResponseWriter, r *http.Request
 	dreamId := chi.URLParam(r, "dreamId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
 	if err := c.Uc.DeleteUserDream(r.Context(), userId, dreamId); err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("DeleteUserDream ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}

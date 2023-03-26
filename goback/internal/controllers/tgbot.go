@@ -30,7 +30,7 @@ func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Re
 	defer r.Body.Close()
 	var upd tgbotapi.Update
 	if err := DecodeJSONBody(w, r, &upd); err != nil {
-		t.log.Err(err)
+		t.log.Err(err).Msg("TelegramBotMessageReader ")
 	}
 	u := model.UserTelegram{
 		TgId:           upd.Message.From.ID,
@@ -50,7 +50,7 @@ func (t *TelegramBot) TelegramBotMessageReader(w http.ResponseWriter, r *http.Re
 		case errors.As(err, &ErrAuthUserAlreadyExist):
 			message = fmt.Sprintf("Glad to see you here again, %s!", usepas.Username)
 		case err != nil:
-			t.log.Err(err)
+			t.log.Err(err).Msg("TelegramBotMessageReader ")
 			message = "I'm broke. Sorry"
 		default:
 			message = fmt.Sprintf("Success registration!\n Username: %s \nPassword: %s", usepas.Username, usepas.Password)

@@ -1,8 +1,18 @@
+
+<script setup lang="ts">
+import GraphModeler from '@/components/GraphModeler.vue';
+</script>
+
 <template>
     <div class="wrapper">
-        <div class="maindata">
+      <div class="maindata">
         <h1>Tasks</h1> 
-        </div>
+      </div>
+
+      <!-- WERY IMPORT ANT -->
+      <div class="graphmodeler">
+        <GraphModeler />
+      </div>
     </div>
 
 
@@ -18,6 +28,10 @@
   margin-bottom: 30px;
 }
 
+.graphmodeler{
+  
+}
+
 .wrapper{
   padding: 20px;
   margin-top: 30px;
@@ -25,7 +39,3 @@
 </style>
 
 
-<script setup lang="ts">
-
-
-</script>

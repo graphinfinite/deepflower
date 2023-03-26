@@ -33,27 +33,27 @@ func (c *LocationController) SearchLocations(w http.ResponseWriter, r *http.Requ
 	order := r.URL.Query().Get("Order")
 	limit, err := strconv.ParseUint(r.URL.Query().Get("Limit"), 0, 64)
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("SearchLocations ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 	offset, err := strconv.ParseUint(r.URL.Query().Get("Offset"), 0, 64)
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("SearchLocations ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 
 	onlyMyLocations, err := strconv.ParseBool(r.URL.Query().Get("OnlyMyLocations"))
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("SearchLocations ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 	locations, count, err := c.Uc.SearchLocations(r.Context(), userId, limit, offset,
 		onlyMyLocations, order, searchTerm, sort)
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("SearchLocations ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -73,7 +73,7 @@ func (c *LocationController) GetLocationDreams(w http.ResponseWriter, r *http.Re
 	var locdreams []model.Dream
 	locdreams, err := c.Uc.GetLocationDreams(r.Context(), locationId)
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("GetLocationDreams ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -95,14 +95,14 @@ type CreateLocationRequest struct {
 func (c *LocationController) CreateLocation(w http.ResponseWriter, r *http.Request) {
 	var l CreateLocationRequest
 	if err := DecodeJSONBody(w, r, &l); err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("CreateLocation ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
 	m, err := c.Uc.CreateLocation(r.Context(), userId, l.Name, l.Info, l.Geolocation, l.Radius, l.Height)
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("CreateLocation ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -119,13 +119,13 @@ func (c *LocationController) AddEnergyToLocation(w http.ResponseWriter, r *http.
 	var e AddEnergyToLocationRequest
 
 	if err := DecodeJSONBody(w, r, &e); err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("AddEnergyToLocation ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 	err := c.Uc.AddEnergyToLocation(r.Context(), userId, locationId, e.Energy)
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("AddEnergyToLocation ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -137,7 +137,7 @@ func (c *LocationController) UpdateUserLocation(w http.ResponseWriter, r *http.R
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
 	locationPatch := make(map[string]interface{}, 20)
 	if err := DecodeJSONBody(w, r, &locationPatch); err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("UpdateUserLocation ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -163,7 +163,7 @@ func (c *LocationController) UpdateUserLocation(w http.ResponseWriter, r *http.R
 
 	updatedDream, err := c.Uc.UpdateUserLocation(r.Context(), userId, locationId, locationPatch)
 	if err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("UpdateUserLocation ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
@@ -173,7 +173,7 @@ func (c *LocationController) DeleteUserLocation(w http.ResponseWriter, r *http.R
 	locationId := chi.URLParam(r, "locationId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
 	if err := c.Uc.DeleteUserLocation(r.Context(), userId, locationId); err != nil {
-		c.log.Err(err)
+		c.log.Err(err).Msg("DeleteUserLocation ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}

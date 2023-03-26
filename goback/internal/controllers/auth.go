@@ -34,13 +34,13 @@ func newSignInResponse(token string) *signInResponse {
 func (auth *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	u := loginUser{}
 	if err := DecodeJSONBody(w, r, &u); err != nil {
-		auth.log.Err(err)
+		auth.log.Err(err).Msg("Login ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 	token, err := auth.Uc.Login(r.Context(), u.Username, u.Password)
 	if err != nil {
-		auth.log.Err(err)
+		auth.log.Err(err).Msg("Login ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
