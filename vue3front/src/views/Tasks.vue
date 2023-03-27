@@ -29,8 +29,7 @@ import GraphModeler from '@/components/GraphModeler.vue';
 }
 
 .graphmodeler{
-  margin-top: 20px;
-  margin-left: 10px;
+   margin-left: 10px;
   
 }
 

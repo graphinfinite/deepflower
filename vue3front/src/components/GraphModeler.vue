@@ -1,12 +1,14 @@
 
 <template>
-    <div class="graph-panel"></div>
+    <div class="graph-panel">
+        <div ref="stencilref" id="nodebar"></div>
+        <div class="containerDrow">
+            <div ref="container"></div>
+        </div>
+    </div>
 
     
-    <div ref="stencilref" id="nodebar"></div>
-    <div>
-        <div ref="container"></div>
-    </div>
+
 </template>
 
 
@@ -26,7 +28,7 @@ const stencilref = ref(null)
 const graph = ref(null)
 
 onMounted(() => {
-        console.log(container.value)
+const cont = container.value
 // #region 初始化画布
 const graph = new Graph({
   container: container.value,
@@ -94,36 +96,36 @@ const graph = new Graph({
   },
 })
 
-const node1 = graph.addNode({
-//shape: "vue3-shape",
-x: 100,
-y: 100,
-width: 150,
-height: 100,
-// attrs: {
-//   body: {       //     stroke: "#ebebeb",
-//   },
-// },
-});
+// const node1 = graph.addNode({
+// //shape: "vue3-shape",
+// x: 100,
+// y: 100,
+// width: 150,
+// height: 100,
+// // attrs: {
+// //   body: {       //     stroke: "#ebebeb",
+// //   },
+// // },
+// });
 
-const node2 = graph.addNode({
-//shape: "vue3-shape",
-x: 350,
-y: 500,
-width: 150,
-height: 100,
-// attrs: {
-//   body: {       //     stroke: "#ebebeb",
-//   },
-// },
-});
+// const node2 = graph.addNode({
+// //shape: "vue3-shape",
+// x: 350,
+// y: 500,
+// width: 150,
+// height: 100,
+// // attrs: {
+// //   body: {       //     stroke: "#ebebeb",
+// //   },
+// // },
+// });
 
 
             
 graph.use(
     new Transform({
       resizing: true,
-      rotating: true,
+      //rotating: true,
     }),
   )
   .use(
@@ -157,29 +159,29 @@ graph.use(
 
 // #region 初始化 stencil
 const stencil = new Stencil({
-  title: 'Nodes',
+  title: 'Ноды',
   target: graph,
-  stencilGraphWidth: 200,
-  stencilGraphHeight: 180,
-  collapsable: true,
+  stencilGraphWidth: 1100,
+  stencilGraphHeight: 300,
+  collapsable: false,
   groups: [
     {
-      title: '基础流程图',
+      title: 'Ноды логические',
       name: 'group1',
     },
-    {
-      title: '系统设计图',
-      name: 'group2',
-      graphHeight: 250,
-      layoutOptions: {
-        rowHeight: 70,
-      },
-    },
+    // {
+    //   title: '系统设计图',
+    //   name: 'group2',
+    //   graphHeight: 250,
+    //   layoutOptions: {
+    //     rowHeight: 70,
+    //   },
+    // },
   ],
   layoutOptions: {
-    columns: 2,
-    columnWidth: 80,
-    rowHeight: 55,
+    columns: 6,
+    columnWidth: 100,
+    rowHeight: 100,
   },
 })
 stencilref.value.appendChild(stencil.container)
@@ -260,15 +262,15 @@ const showPorts = (ports, show) => {
   }
 }
 graph.on('node:mouseenter', () => {
-  const container = container.value
-  const ports = container.querySelectorAll(
+
+  const ports = cont.querySelectorAll(
     '.x6-port-body',
   ) 
   showPorts(ports, true)
 })
 graph.on('node:mouseleave', () => {
-  const container = container.value
-  const ports = container.querySelectorAll(
+
+  const ports = cont.querySelectorAll(
     '.x6-port-body',
   ) 
   showPorts(ports, false)
@@ -477,7 +479,7 @@ Graph.registerNode(
 
 const r1 = graph.createNode({
   shape: 'custom-rect',
-  label: '开始',
+  label: 'TaskW',
   attrs: {
     body: {
       rx: 20,
@@ -487,7 +489,7 @@ const r1 = graph.createNode({
 })
 const r2 = graph.createNode({
   shape: 'custom-rect',
-  label: '过程',
+  label: 'TaskR',
 })
 const r3 = graph.createNode({
   shape: 'custom-rect',
@@ -497,7 +499,7 @@ const r3 = graph.createNode({
       ry: 6,
     },
   },
-  label: '可选过程',
+  label: 'TaskT',
 })
 const r4 = graph.createNode({
   shape: 'custom-polygon',
@@ -506,7 +508,7 @@ const r4 = graph.createNode({
       refPoints: '0,10 10,0 20,10 10,20',
     },
   },
-  label: '决策',
+  label: 'TaskS',
 })
 const r5 = graph.createNode({
   shape: 'custom-polygon',
@@ -515,11 +517,11 @@ const r5 = graph.createNode({
       refPoints: '10,0 40,0 30,20 0,20',
     },
   },
-  label: '数据',
+  label: 'TaskL',
 })
 const r6 = graph.createNode({
   shape: 'custom-circle',
-  label: '连接',
+  label: 'TaskY',
 })
 stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
 
@@ -544,9 +546,15 @@ stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
 #nodebar {
     position: relative;
 
-
+    width: 1100px;
     height: 300px;
-    width: 200px;
+    border: 1px dashed black;
+}
+
+.containerDrow {
+
+    border: 1px dashed black;
+    background-color: rgb(29, 5, 5);
 }
 
 </style>
