@@ -8,9 +8,19 @@
         <div ref="stencilref" id="nodebar"></div>
         <div class="control-panel">
 
-            <button @click="graphToJson()" >tojson</button>            
+            <button @click="graphToJson()" >tojson</button> 
+
+                     
         </div>
+       
     </div>
+
+    <div class="cell-panel">
+      {{ selected_cell }}
+
+    </div>
+
+
 </template>
 
 
@@ -24,10 +34,16 @@ import { Graph, Shape } from '@antv/x6'
  import { Keyboard } from '@antv/x6-plugin-keyboard'
  import { Clipboard } from '@antv/x6-plugin-clipboard'
  import { History } from '@antv/x6-plugin-history'
+
+
+
+ import { defaultGraphOptions } from '@/modules/initGraphModeler'
 //import insertCss from 'insert-css'
 const container = ref(null)
 const stencilref = ref(null)
 const graphRef = reactive({})
+
+
 
 
 const graphToJson = () => {
@@ -35,81 +51,16 @@ const graphToJson = () => {
     console.log(graphRef.value.toJSON())
 }
 
+
+
+
 onMounted(() => { 
-console.log("onmount")
-// #region 
 graphRef.value = new Graph({
-  container: container.value,
-  //autoResize: true,
-  height: 650,
-  grid: true,
-      panning:true,
-  mousewheel: {
-    enabled: true,
-
-    zoomAtMousePosition: true,
-    modifiers: 'ctrl',
-    minScale: 0.5,
-    maxScale: 3,
-  },
-  scroller: {
-                enabled: true,
-                pannable: true,
-  },
-  connecting: {
-    router: 'manhattan',
-    connector: {
-      name: 'rounded',
-      args: {
-        radius: 8,
-      },
-    },
-    anchor: 'center',
-    connectionPoint: 'anchor',
-    allowBlank: false,
-    snap: {
-      radius: 20,
-    },
-    createEdge() {
-      return new Shape.Edge({
-        attrs: {
-          line: {
-            stroke: '#A2B1C3',
-            strokeWidth: 2,
-            targetMarker: {
-              name: 'block',
-              width: 12,
-              height: 8,
-            },
-          },
-        },
-        zIndex: 0,
-      })
-    },
-    validateConnection({ targetMagnet }) {
-      return !!targetMagnet
-    },
-  },
-  highlighting: {
-    magnetAdsorbed: {
-      name: 'stroke',
-      args: {
-        attrs: {
-          fill: '#5F95FF',
-          stroke: '#5F95FF',
-        },
-      },
-    },
-  },
+  ...defaultGraphOptions,
+  container: container.value
 })
-
-
-
 const graph = graphRef.value
-
-
-
-            
+        
 graph.use(
     new Transform({
       resizing: true,
@@ -143,9 +94,9 @@ graph.use(
       enabled: true,
     }),
   )
-// #endregion
 
-// #region 初始化 stencil
+  register_events(graph)
+
 const stencil = new Stencil({
   title: 'Формы',
   target: graph,
@@ -157,25 +108,17 @@ const stencil = new Stencil({
       title: 'Формы1',
       name: 'group1',
     },
-    // {
-    //   title: '系统设计图',
-    //   name: 'group2',
-    //   graphHeight: 250,
-    //   layoutOptions: {
-    //     rowHeight: 70,
-    //   },
-    // },
   ],
   layoutOptions: {
     columns: 2,
     columnWidth: 100,
     rowHeight: 100,
   },
-})
-stencilref.value.appendChild(stencil.container)
+});
+stencilref.value.appendChild(stencil.container);
 // #endregion
 
-// #region 快捷键与事件
+// #region
 graph.bindKey(['meta+c', 'ctrl+c'], () => {
   const cells = graph.getSelectedCells()
   if (cells.length) {
@@ -198,8 +141,6 @@ graph.bindKey(['meta+v', 'ctrl+v'], () => {
   }
   return false
 })
-
-// undo redo
 graph.bindKey(['meta+z', 'ctrl+z'], () => {
   if (graph.canUndo()) {
     graph.undo()
@@ -212,24 +153,18 @@ graph.bindKey(['meta+shift+z', 'ctrl+shift+z'], () => {
   }
   return false
 })
-
-// select all
 graph.bindKey(['meta+a', 'ctrl+a'], () => {
   const nodes = graph.getNodes()
   if (nodes) {
     graph.select(nodes)
   }
 })
-
-// delete
 graph.bindKey('backspace', () => {
   const cells = graph.getSelectedCells()
   if (cells.length) {
     graph.removeCells(cells)
   }
 })
-
-// zoom
 graph.bindKey(['ctrl+1', 'meta+1'], () => {
   const zoom = graph.zoom()
   if (zoom < 1.5) {
@@ -249,15 +184,14 @@ const showPorts = (ports, show) => {
     ports[i].style.visibility = show ? 'visible' : 'hidden'
   }
 }
-graph.on('node:mouseenter', () => {
 
+graph.on('node:mouseenter', () => {
   const ports = container.value.querySelectorAll(
     '.x6-port-body',
   ) 
   showPorts(ports, true)
 })
 graph.on('node:mouseleave', () => {
-
   const ports = container.value.querySelectorAll(
     '.x6-port-body',
   ) 
@@ -344,7 +278,6 @@ const ports = {
     },
   ],
 }
-
 Graph.registerNode(
   'custom-rect',
   {
@@ -366,7 +299,6 @@ Graph.registerNode(
   },
   true,
 )
-
 Graph.registerNode(
   'custom-polygon',
   {
@@ -398,7 +330,6 @@ Graph.registerNode(
   },
   true,
 )
-
 Graph.registerNode(
   'custom-circle',
   {
@@ -420,7 +351,6 @@ Graph.registerNode(
   },
   true,
 )
-
 Graph.registerNode(
   'custom-image',
   {
@@ -467,7 +397,7 @@ Graph.registerNode(
 
 const r1 = graph.createNode({
   shape: 'custom-rect',
-  label: 'TaskW',
+  label: "qwe",
   payload: {qwe:""},
   attrs: {
     body: {
@@ -517,6 +447,7 @@ const r6 = graph.createNode({
 })
 stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
 
+
 //return { graph }
 
 
@@ -525,18 +456,47 @@ stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
 
 
 
+const selected_cell = ref();
+function select_cell(cell) {
+    if (typeof cell !== 'undefined') {
+      selected_cell.value = cell;
+      graphRef.value?.select(cell);
+      graphRef.value?.scrollToCell(cell);
+    }
+}
 
-
-
-
-
+const register_events = (graph) => {
+        // https://x6.antv.vision/en/docs/tutorial/intermediate/events
+        // graph.on('cell:change:*', (args) => {
+        //     // console.log(args)
+        //     if (!(args.options.no_da_update ?? false)) {
+        //         if (args.key == 'target') {
+        //             // when target hits, it changes from {x: n, y: n} to Cell, which we will catch here.
+        //             if (typeof args.current.cell != typeof args.previous.cell)
+        //                 docassemble_cont_update()
+        //         // other changes to ignore:
+        //         } else if (!['target', 'zIndex', 'tools', 'position'].includes(args.key as string))
+        //             docassemble_cont_update()
+        //     }
+        // })
+        graph.on('cell:selected', ({ cell, options }) => {
+            if (selected_cell.value != cell)
+                selected_cell.value = cell
+        })
+        graph.on('cell:unselected', ({ cell, options }) => {
+            if (selected_cell.value != null)
+                selected_cell.value = undefined
+        })
+        graph.on('blank:click', ({ e, x, y }) => {
+            if (selected_cell.value != null)
+                selected_cell.value = undefined
+        })
+    }
 
 // this.graph.toJSON()Get all the contents of the node in the current canvas
 // JSON.stringify(this.graph.toJSON())You can convert all the node contents of the current canvas into JSON String save to local or background
 // JSON.parse(json); hold json The data is shaped into a data format and then passed fromJSON Method is then rendered onto the canvas.
 // this.graph.fromJSON(json); You can get it from the background or locally json The data is shaped and rendered on the canvas.
-
-
 
 </script>
 
@@ -575,5 +535,13 @@ stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
 
     background-color: white;
     padding: 20px;
+}
+
+.cell-panel{
+
+  padding: 20px;
+  border: 1px solid black;
+
+
 }
 </style>
