@@ -1,19 +1,21 @@
 
 <template>
     <div class="graph-panel">
-        <div ref="stencilref" id="nodebar"></div>
-        <div class="containerDrow">
+        <div class="containerDraw">
+            <p>Command: Ctrl+[C, V, Z, X, A, Shift+Z], backspace(delete), zoom</p>
             <div ref="container"></div>
         </div>
+        <div ref="stencilref" id="nodebar"></div>
+        <div class="control-panel">
+
+            <button @click="graphToJson()" >tojson</button>            
+        </div>
     </div>
-
-    
-
 </template>
 
 
-<script setup >
-import { ref, onMounted} from "vue"
+<script setup>
+import { ref, onMounted, reactive} from "vue"
 import { Graph, Shape } from '@antv/x6'
  import { Stencil } from '@antv/x6-plugin-stencil'
  import { Transform } from '@antv/x6-plugin-transform'
@@ -22,19 +24,24 @@ import { Graph, Shape } from '@antv/x6'
  import { Keyboard } from '@antv/x6-plugin-keyboard'
  import { Clipboard } from '@antv/x6-plugin-clipboard'
  import { History } from '@antv/x6-plugin-history'
-import insertCss from 'insert-css'
+//import insertCss from 'insert-css'
 const container = ref(null)
 const stencilref = ref(null)
-const graph = ref(null)
+const graphRef = reactive({})
 
-onMounted(() => {
-const cont = container.value
-// #region 初始化画布
-const graph = new Graph({
+
+const graphToJson = () => {
+    console.log("sadsdasd")
+    console.log(graphRef.value.toJSON())
+}
+
+onMounted(() => { 
+console.log("onmount")
+// #region 
+graphRef.value = new Graph({
   container: container.value,
-  width: 1100,
-  height: 600,
-
+  //autoResize: true,
+  height: 650,
   grid: true,
       panning:true,
   mousewheel: {
@@ -96,29 +103,10 @@ const graph = new Graph({
   },
 })
 
-// const node1 = graph.addNode({
-// //shape: "vue3-shape",
-// x: 100,
-// y: 100,
-// width: 150,
-// height: 100,
-// // attrs: {
-// //   body: {       //     stroke: "#ebebeb",
-// //   },
-// // },
-// });
 
-// const node2 = graph.addNode({
-// //shape: "vue3-shape",
-// x: 350,
-// y: 500,
-// width: 150,
-// height: 100,
-// // attrs: {
-// //   body: {       //     stroke: "#ebebeb",
-// //   },
-// // },
-// });
+
+const graph = graphRef.value
+
 
 
             
@@ -159,14 +147,14 @@ graph.use(
 
 // #region 初始化 stencil
 const stencil = new Stencil({
-  title: 'Ноды',
+  title: 'Формы',
   target: graph,
-  stencilGraphWidth: 1100,
+  stencilGraphWidth: 200,
   stencilGraphHeight: 300,
   collapsable: false,
   groups: [
     {
-      title: 'Ноды логические',
+      title: 'Формы1',
       name: 'group1',
     },
     // {
@@ -179,7 +167,7 @@ const stencil = new Stencil({
     // },
   ],
   layoutOptions: {
-    columns: 6,
+    columns: 2,
     columnWidth: 100,
     rowHeight: 100,
   },
@@ -263,14 +251,14 @@ const showPorts = (ports, show) => {
 }
 graph.on('node:mouseenter', () => {
 
-  const ports = cont.querySelectorAll(
+  const ports = container.value.querySelectorAll(
     '.x6-port-body',
   ) 
   showPorts(ports, true)
 })
 graph.on('node:mouseleave', () => {
 
-  const ports = cont.querySelectorAll(
+  const ports = container.value.querySelectorAll(
     '.x6-port-body',
   ) 
   showPorts(ports, false)
@@ -480,6 +468,7 @@ Graph.registerNode(
 const r1 = graph.createNode({
   shape: 'custom-rect',
   label: 'TaskW',
+  payload: {qwe:""},
   attrs: {
     body: {
       rx: 20,
@@ -487,6 +476,9 @@ const r1 = graph.createNode({
     },
   },
 })
+
+console.log(r1.store.data.payload)
+console.log(r1.store.data.attrs.text.text)
 const r2 = graph.createNode({
   shape: 'custom-rect',
   label: 'TaskR',
@@ -525,9 +517,24 @@ const r6 = graph.createNode({
 })
 stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
 
+//return { graph }
+
+
+// mount end
 })
 
 
+
+
+
+
+
+
+
+// this.graph.toJSON()Get all the contents of the node in the current canvas
+// JSON.stringify(this.graph.toJSON())You can convert all the node contents of the current canvas into JSON String save to local or background
+// JSON.parse(json); hold json The data is shaped into a data format and then passed fromJSON Method is then rendered onto the canvas.
+// this.graph.fromJSON(json); You can get it from the background or locally json The data is shaped and rendered on the canvas.
 
 
 
@@ -536,25 +543,37 @@ stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
 
 
 <style>
-
 .graph-panel {
-
-    display: flex;
-  flex-direction: column;
+  display: flex;
+  flex-direction: row;
 }
 
 #nodebar {
     position: relative;
-
-    width: 1100px;
-    height: 300px;
-    border: 1px dashed black;
+    width: 20%;
+    height: 670px;
+    border: 2px dashed black;
 }
 
-.containerDrow {
-
+.containerDraw {
+    width: 70%;
+    height: 670px;
     border: 1px dashed black;
     background-color: rgb(29, 5, 5);
 }
+.containerDraw p {
+    color:whitesmoke;
 
+}
+
+.control-panel {
+    width: 10%;
+    background-color: rgb(29, 5, 5);
+}
+
+.control-panel button {
+
+    background-color: white;
+    padding: 20px;
+}
 </style>
