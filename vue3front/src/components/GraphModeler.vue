@@ -1,32 +1,46 @@
 
 <template>
-    <div class="graph-panel">
-        <div class="containerDraw">
-            <p>Command: Ctrl+[C, V, Z, X, A, Shift+Z], backspace(delete), zoom</p>
-            <div ref="container"></div>
-        </div>
-        <div ref="stencilref" id="nodebar"></div>
-        <div class="control-panel">
+<div class="graph-panel">
+  <div class="containerDraw">
+      <p>Command: Ctrl+[C, V, Z, X, A, Shift+Z], backspace(delete), zoom</p>
+      <div ref="container"></div>
+  </div>
+  <div ref="stencilref" id="nodebar"></div>
+  <div class="control-panel">
+      <button @click="graphToJson()" >ToJson</button> 
+  </div>
+</div>
 
-            <button @click="graphToJson()" >tojson</button> 
+<div v-if="Object.keys(selected_cell).length !== 0" class="cell-panel">
+    isEdge:{{ selected_cell.value.shape==='edge' }}
 
-                     
-        </div>
-       
+    <div v-if="selected_cell.value.shape==='edge'" class="edgeForm">
+      {{ selected_cell.value }}
+      <input  type="text">
+      <button @click="updateEdge"></button>
     </div>
 
-    <div class="cell-panel">
-      {{ selected_cell }}
-
+    <div v-else class="nodeForm">
+      {{ selected_cell.value.attrs.text.text }}
+      <input v-model="newLabel" type="text" :placeholder="selected_cell.value.attrs.text.text" >
+      <button @click="updateNode">Update</button>
     </div>
 
+</div>
+
+<div v-else class="hhh">
+  Select node or edge
+</div>
 
 </template>
 
 
 <script setup>
 import { ref, onMounted, reactive} from "vue"
-import { Graph, Shape } from '@antv/x6'
+import { Graph } from '@antv/x6'
+//import { Cell } from '@antv/x6'
+//import { computed } from 'vue';
+import "@antv/x6-vue-shape";
  import { Stencil } from '@antv/x6-plugin-stencil'
  import { Transform } from '@antv/x6-plugin-transform'
  import { Selection } from '@antv/x6-plugin-selection'
@@ -34,33 +48,43 @@ import { Graph, Shape } from '@antv/x6'
  import { Keyboard } from '@antv/x6-plugin-keyboard'
  import { Clipboard } from '@antv/x6-plugin-clipboard'
  import { History } from '@antv/x6-plugin-history'
-
-
-
+//
  import { defaultGraphOptions } from '@/modules/initGraphModeler'
-//import insertCss from 'insert-css'
+
+
+///////   https://x6.antv.antgroup.com/api/model/model
+        // https://x6.antv.vision/en/docs/tutorial/intermediate/events
 const container = ref(null)
 const stencilref = ref(null)
-const graphRef = reactive({})
+const selected_cell = reactive({});
+let graph = null
 
+// Change data model
+const newLabel = ref("")
 
+const updateNode = () => {
+  console.log(selected_cell.value.getAttrs())
 
+  selected_cell.value.setAttrs({
+  label: { text: newLabel.value },
+})
+  //const nodes = graph.getNodes()
+  
+}
 
+// validation and upload to server
 const graphToJson = () => {
     console.log("sadsdasd")
     console.log(graphRef.value.toJSON())
 }
 
-
-
-
+// init GraphModeler
 onMounted(() => { 
-graphRef.value = new Graph({
+graph = new Graph({
   ...defaultGraphOptions,
   container: container.value
 })
-const graph = graphRef.value
-        
+     
 graph.use(
     new Transform({
       resizing: true,
@@ -199,7 +223,6 @@ graph.on('node:mouseleave', () => {
 })
 // #endregion
 
-// #region 初始化图形
 const ports = {
   groups: {
     top: {
@@ -407,8 +430,7 @@ const r1 = graph.createNode({
   },
 })
 
-console.log(r1.store.data.payload)
-console.log(r1.store.data.attrs.text.text)
+
 const r2 = graph.createNode({
   shape: 'custom-rect',
   label: 'TaskR',
@@ -446,58 +468,21 @@ const r6 = graph.createNode({
   label: 'TaskY',
 })
 stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
-
-
-//return { graph }
-
-
 // mount end
 })
 
-
-
-const selected_cell = ref();
-function select_cell(cell) {
-    if (typeof cell !== 'undefined') {
-      selected_cell.value = cell;
-      graphRef.value?.select(cell);
-      graphRef.value?.scrollToCell(cell);
-    }
-}
-
 const register_events = (graph) => {
-        // https://x6.antv.vision/en/docs/tutorial/intermediate/events
-        // graph.on('cell:change:*', (args) => {
-        //     // console.log(args)
-        //     if (!(args.options.no_da_update ?? false)) {
-        //         if (args.key == 'target') {
-        //             // when target hits, it changes from {x: n, y: n} to Cell, which we will catch here.
-        //             if (typeof args.current.cell != typeof args.previous.cell)
-        //                 docassemble_cont_update()
-        //         // other changes to ignore:
-        //         } else if (!['target', 'zIndex', 'tools', 'position'].includes(args.key as string))
-        //             docassemble_cont_update()
-        //     }
-        // })
-        graph.on('cell:selected', ({ cell, options }) => {
-            if (selected_cell.value != cell)
-                selected_cell.value = cell
+        graph.on('node:click', ({ e, x, y, node, view }) => { 
+          console.log(node)
+          if (selected_cell.value != node)
+                selected_cell.value = node
         })
-        graph.on('cell:unselected', ({ cell, options }) => {
-            if (selected_cell.value != null)
-                selected_cell.value = undefined
-        })
-        graph.on('blank:click', ({ e, x, y }) => {
-            if (selected_cell.value != null)
-                selected_cell.value = undefined
+        graph.on('edge:click', ({ e, x, y, edge, view }) => { 
+          console.log(edge)
+          if (selected_cell.value != edge)
+                selected_cell.value = edge
         })
     }
-
-// this.graph.toJSON()Get all the contents of the node in the current canvas
-// JSON.stringify(this.graph.toJSON())You can convert all the node contents of the current canvas into JSON String save to local or background
-// JSON.parse(json); hold json The data is shaped into a data format and then passed fromJSON Method is then rendered onto the canvas.
-// this.graph.fromJSON(json); You can get it from the background or locally json The data is shaped and rendered on the canvas.
-
 </script>
 
 
@@ -539,9 +524,36 @@ const register_events = (graph) => {
 
 .cell-panel{
 
+
   padding: 20px;
   border: 1px solid black;
 
 
 }
+
+.cell-panel input {
+
+  border: 1px solid black;
+}
+
+.cell-panel button {
+  border: 1px solid black;
+  background-color: blue;
+  padding: 5px;
+
+
+}
+
+.edgeForm, .nodeForm {
+  display: flex;
+  flex-direction: column;
+
+
+
+}
+
+
+
+
+
 </style>
