@@ -2,30 +2,38 @@
 <template>
 <div class="graph-panel">
   <div class="containerDraw">
-      <p>Command: Ctrl+[C, V, Z, X, A, Shift+Z], backspace(delete), zoom</p>
+      <p>Hello from graphinfinit! Command: Ctrl+[C, V, Z, X, A, Shift+Z], backspace(delete), zoom</p>
       <div ref="container"></div>
   </div>
   <div ref="stencilref" id="nodebar"></div>
-  <div class="control-panel">
+  <div class="project-panel">
       <button @click="graphToJson()" >ToJson</button> 
   </div>
 </div>
 
 <div v-if="Object.keys(selected_cell).length !== 0" class="cell-panel">
-    isEdge:{{ selected_cell.value.shape==='edge' }}
+    <!-- isEdge:{{ selected_cell.value.shape==='edge' }} -->
 
     <div v-if="selected_cell.value.shape==='edge'" class="edgeForm">
-      {{ selected_cell.value }}
-      <input  type="text">
-      <button @click="updateEdge"></button>
+      <!-- {{ selected_cell.value }} -->
+      <div class="node-id">EDGE ID: {{ selected_cell.value.id }}</div>
+      <label for="edge-label">Имя грани</label>
+      <input  type="text" v-model="edgeUpdate.Label" id="edge-label">
+      <button @click="updateEdge">Update</button>
     </div>
 
     <div v-else class="nodeForm">
-      {{ selected_cell.value.attrs.text.text }}
-      <input v-model="newLabel" type="text" :placeholder="selected_cell.value.attrs.text.text" >
+
+      {{ selected_cell.value }}
+      <div class="node-id">NODE ID: {{ selected_cell.value.id }}</div>
+      <label for="node-label">Имя</label>
+      <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
+      <label for="node-description">Описание</label>
+      <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" :placeholder="selected_cell.value.data.Description"></textarea>
+      <label for="leadtime">Длительность(ч)</label>
+      <input  type="number" v-model="nodeUpdate.LeadTime" id="node-leadtime" :placeholder="selected_cell.value.data.LeadTime">
       <button @click="updateNode">Update</button>
     </div>
-
 </div>
 
 <div v-else class="hhh">
@@ -37,7 +45,7 @@
 
 <script setup>
 import { ref, onMounted, reactive} from "vue"
-import { Graph } from '@antv/x6'
+import { Graph, Shape, Cell } from '@antv/x6'
 //import { Cell } from '@antv/x6'
 //import { computed } from 'vue';
 import "@antv/x6-vue-shape";
@@ -52,6 +60,7 @@ import "@antv/x6-vue-shape";
  import { defaultGraphOptions } from '@/modules/initGraphModeler'
 
 
+
 ///////   https://x6.antv.antgroup.com/api/model/model
         // https://x6.antv.vision/en/docs/tutorial/intermediate/events
 const container = ref(null)
@@ -59,17 +68,37 @@ const stencilref = ref(null)
 const selected_cell = reactive({});
 let graph = null
 
-// Change data model
-const newLabel = ref("")
 
-const updateNode = () => {
-  console.log(selected_cell.value.getAttrs())
-
-  selected_cell.value.setAttrs({
-  label: { text: newLabel.value },
+const nodeUpdate = reactive({
+  Label: "",
+  LeadTime: 0, 
+  Description: "",
 })
-  //const nodes = graph.getNodes()
-  
+const edgeUpdate = reactive({
+  Label: "",
+})
+const updateEdge = () => {
+  console.log(selected_cell.value.getLabels())
+  selected_cell.value.setLabels(edgeUpdate.Label)
+  edgeUpdate.Label = "";
+}
+const updateNode = () => {
+  console.log(nodeUpdate.Label)
+  selected_cell.value.setAttrs({
+  text: { text: nodeUpdate.Label},
+  })
+
+
+  console.log(selected_cell.value.getData())
+  console.log(nodeUpdate.Description)
+
+  //  const w = new Cell()
+// w.setData()
+
+  selected_cell.value.updateData({"Description":nodeUpdate.Description, "LeadTime":nodeUpdate.LeadTime}, { overwrite: true })
+  nodeUpdate.Label = "";
+  nodeUpdate.LeadTime = 0;
+  nodeUpdate.Description = "";
 }
 
 // validation and upload to server
@@ -119,13 +148,13 @@ graph.use(
     }),
   )
 
-  register_events(graph)
+register_events(graph)
 
 const stencil = new Stencil({
   title: 'Формы',
   target: graph,
-  stencilGraphWidth: 200,
-  stencilGraphHeight: 300,
+  stencilGraphWidth: 130,
+  stencilGraphHeight: 600,
   collapsable: false,
   groups: [
     {
@@ -134,9 +163,9 @@ const stencil = new Stencil({
     },
   ],
   layoutOptions: {
-    columns: 2,
+    columns: 1,
     columnWidth: 100,
-    rowHeight: 100,
+    rowHeight: 60,
   },
 });
 stencilref.value.appendChild(stencil.container);
@@ -301,16 +330,23 @@ const ports = {
     },
   ],
 }
+
+
+// slow
 Graph.registerNode(
-  'custom-rect',
+  'slow-model',
   {
     inherit: 'rect',
     width: 66,
     height: 36,
+    data: { 
+      Description: "1",
+      LeadTime: 0,
+    },
     attrs: {
       body: {
         strokeWidth: 1,
-        stroke: '#5F95FF',
+        stroke: '#EE0010',
         fill: '#EFF4FF',
       },
       text: {
@@ -322,8 +358,102 @@ Graph.registerNode(
   },
   true,
 )
+const slow = graph.createNode({
+  shape: 'slow-model',
+  label: 'SLOW',
+  data: { 
+      Description: "2",
+    LeadTime: 1,
+
+
+    },
+})
+
+
+// fast
 Graph.registerNode(
-  'custom-polygon',
+  'fast-model',
+  {
+    inherit: 'rect',
+    width: 66,
+    height: 36,
+    data: { 
+      Description: "1",
+    LeadTime: 0,
+
+
+    },
+    attrs: {
+      body: {
+        strokeWidth: 1,
+        stroke: '#0089C8',
+        fill: '#EFF4FF',
+      },
+      text: {
+        fontSize: 12,
+        fill: '#262626',
+      },
+    },
+    ports: { ...ports },
+  },
+  true,
+)
+const fast = graph.createNode({
+  shape: 'fast-model',
+  attrs: {
+    body: {
+      rx: 6,
+      ry: 6,
+    },
+  },
+  label: 'FAST',
+  data: { 
+      Description: "2",
+    LeadTime: 1,
+
+
+    },
+})
+
+
+
+// choice
+Graph.registerNode(
+  'choice-model',
+  {
+    inherit: 'rect',
+    width: 66,
+    height: 36,
+    attrs: {
+      body: {
+        strokeWidth: 1,
+        stroke: '#3CC5FF',
+        fill: '#3CC5FF',
+      },
+      text: {
+        fontSize: 12,
+        fill: '#FFFFFF',
+      },
+    },
+    ports: { ...ports },
+  },
+  true,
+)
+const choice = graph.createNode({
+  shape: 'choice-model',
+  label: "CHOICE",
+  attrs: {
+    body: {
+      rx: 20,
+      ry: 20,
+    },
+  },
+})
+
+
+// multiplex
+Graph.registerNode(
+  'multi-model',
   {
     inherit: 'polygon',
     width: 66,
@@ -331,8 +461,8 @@ Graph.registerNode(
     attrs: {
       body: {
         strokeWidth: 1,
-        stroke: '#5F95FF',
-        fill: '#EFF4FF',
+        stroke: '#FFD400',
+        fill: '#FFD400',
       },
       text: {
         fontSize: 12,
@@ -353,8 +483,20 @@ Graph.registerNode(
   },
   true,
 )
+const multi = graph.createNode({
+  shape: 'multi-model',
+  attrs: {
+    body: {
+      refPoints: '10,0 40,0 30,20 0,20',
+    },
+  },
+  label: 'MULTI',
+})
+
+
+// start end
 Graph.registerNode(
-  'custom-circle',
+  'START',
   {
     inherit: 'circle',
     width: 45,
@@ -363,11 +505,11 @@ Graph.registerNode(
       body: {
         strokeWidth: 1,
         stroke: '#5F95FF',
-        fill: '#EFF4FF',
+        fill: '#309A05',
       },
       text: {
         fontSize: 12,
-        fill: '#262626',
+        fill: '#F5F5F5',
       },
     },
     ports: { ...ports },
@@ -375,99 +517,80 @@ Graph.registerNode(
   true,
 )
 Graph.registerNode(
-  'custom-image',
+  'END',
   {
-    inherit: 'rect',
-    width: 52,
-    height: 52,
-    markup: [
-      {
-        tagName: 'rect',
-        selector: 'body',
-      },
-      {
-        tagName: 'image',
-      },
-      {
-        tagName: 'text',
-        selector: 'label',
-      },
-    ],
+    inherit: 'circle',
+    width: 45,
+    height: 45,
     attrs: {
       body: {
-        stroke: '#5F95FF',
-        fill: '#5F95FF',
+        strokeWidth: 1,
+        stroke: '#6F35F6',
+        fill: '#6F35F6',
       },
-      image: {
-        width: 26,
-        height: 26,
-        refX: 13,
-        refY: 16,
-      },
-      label: {
-        refX: 3,
-        refY: 2,
-        textAnchor: 'left',
-        textVerticalAnchor: 'top',
+      text: {
         fontSize: 12,
-        fill: '#fff',
+        fill: '#F5F5F5',
       },
     },
     ports: { ...ports },
   },
   true,
 )
+const start = graph.createNode({
+  shape: 'START',
+  label: 'START',
+})
+const end = graph.createNode({
+  shape: 'END',
+  label: 'END',
+})
 
-const r1 = graph.createNode({
-  shape: 'custom-rect',
-  label: "qwe",
-  payload: {qwe:""},
-  attrs: {
-    body: {
-      rx: 20,
-      ry: 26,
+
+// fail
+Graph.registerNode(
+  'fail-model',
+  {
+    inherit: 'polygon',
+    width: 66,
+    height: 36,
+    attrs: {
+      body: {
+        strokeWidth: 1,
+        stroke: '#EE0020',
+        fill: '#EE0020',
+      },
+      text: {
+        fontSize: 12,
+        fill: '#FFFFFF',
+      },
+    },
+    ports: {
+      ...ports,
+      items: [
+        {
+          group: 'top',
+        },
+        {
+          group: 'bottom',
+        },
+      ],
     },
   },
-})
-
-
-const r2 = graph.createNode({
-  shape: 'custom-rect',
-  label: 'TaskR',
-})
-const r3 = graph.createNode({
-  shape: 'custom-rect',
-  attrs: {
-    body: {
-      rx: 6,
-      ry: 6,
-    },
-  },
-  label: 'TaskT',
-})
-const r4 = graph.createNode({
-  shape: 'custom-polygon',
+  true,
+)
+const fail = graph.createNode({
+  shape: 'fail-model',
   attrs: {
     body: {
       refPoints: '0,10 10,0 20,10 10,20',
     },
   },
-  label: 'TaskS',
+  label: 'FAIL',
 })
-const r5 = graph.createNode({
-  shape: 'custom-polygon',
-  attrs: {
-    body: {
-      refPoints: '10,0 40,0 30,20 0,20',
-    },
-  },
-  label: 'TaskL',
-})
-const r6 = graph.createNode({
-  shape: 'custom-circle',
-  label: 'TaskY',
-})
-stencil.load([r1, r2, r3, r4, r5, r6], 'group1')
+
+
+stencil.load([start, slow, fast, choice, fail, multi, end], 'group1')
 // mount end
 })
 
@@ -485,9 +608,8 @@ const register_events = (graph) => {
     }
 </script>
 
-
-
-<style>
+<style scoped lang="scss">
+@use '@/assets/scss/_colors' as clr;
 .graph-panel {
   display: flex;
   flex-direction: row;
@@ -495,14 +617,14 @@ const register_events = (graph) => {
 
 #nodebar {
     position: relative;
-    width: 20%;
-    height: 670px;
+    width: 10%;
+    height: 770px;
     border: 2px dashed black;
 }
 
 .containerDraw {
     width: 70%;
-    height: 670px;
+    height: 770px;
     border: 1px dashed black;
     background-color: rgb(29, 5, 5);
 }
@@ -511,49 +633,50 @@ const register_events = (graph) => {
 
 }
 
-.control-panel {
-    width: 10%;
-    background-color: rgb(29, 5, 5);
+.project-panel {
+    width: 20%;
+    background-color: whitesmoke;
 }
+.project-panel button {
+  color:white;
 
-.control-panel button {
-
-    background-color: white;
+    background-color: rgb(21, 3, 32);
     padding: 20px;
 }
 
+
+
 .cell-panel{
-
-
   padding: 20px;
-  border: 1px solid black;
-
-
+  border: 1px solid whitesmoke;
+  max-width: 70%;
 }
-
-.cell-panel input {
-
-  border: 1px solid black;
-}
-
-.cell-panel button {
-  border: 1px solid black;
-  background-color: blue;
-  padding: 5px;
-
-
-}
-
-.edgeForm, .nodeForm {
+.cell-panel .edgeForm,.nodeForm {
   display: flex;
   flex-direction: column;
+  
+}
+.cell-panel input, textarea {
 
-
-
+  border: 1px solid whitesmoke;
+  padding: 10px;
+  margin-bottom: 10px;
 }
 
-
-
-
+.cell-panel label {
+color: #1D0505;
+margin-top: 20px;
+}
+.cell-panel button {
+  color: clr.$clr-button;
+  border: 1px solid black;
+  background-color: clr.$bg-button;
+  padding: 10px;
+  transition: 1.5s;
+  max-width: 20%;
+}
+.cell-panel button:hover {
+  background-color: clr.$bg-button-hover;
+}
 
 </style>

@@ -2,12 +2,9 @@
 
 import { Graph, Shape } from '@antv/x6'
 
-
-
-
 const defaultGraphOptions = {
     //autoResize: true,
-    height: 650,
+    height: 745,
     grid: true,
         panning:true,
     mousewheel: {
