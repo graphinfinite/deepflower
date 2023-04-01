@@ -11,14 +11,22 @@
   </div>
 </div>
 
+
+<!-- CELL DATA AND CONTROL -->
+
 <div v-if="Object.keys(selected_cell).length !== 0" class="cell-panel">
+
+    <!-- EDGE -->
+
     <div v-if="selected_cell.value.shape==='edge'" class="edgeForm">
-      <!-- {{ selected_cell.value }} -->
-      <div class="node-id">EDGE ID: {{ selected_cell.value.id }}</div>
-      <label for="edge-label">Имя грани</label>
+      <div class="edge-id">EDGE ID: {{ selected_cell.value.id }}</div>
+      <label for="edge-label">EDGE LABEL</label>
       <input  type="text" v-model="edgeUpdate.Label" id="edge-label">
       <button @click="updateEdge">Update</button>
     </div>
+
+
+    <!-- DATA NODES: SLOW AND FAST -->
 
     <div v-else-if="selected_cell.value.shape==='slow-model' || selected_cell.value.shape==='fast-model'" class="node">
       <div class="node-data">
@@ -47,9 +55,32 @@
       </div>
     </div>
 
+    <!-- CHOICE NODE -->
+
     <div v-else-if="selected_cell.value.shape==='CHOICE' " class="node">
-      CHOICE ID: {{ selected_cell.value.id }}
+      <div class="node-data">
+        <div class="node-id">NODE ID: {{ selected_cell.value.id }}</div>
+        <div class="node-label">Label: {{ selected_cell.value.attrs.text.text }} </div>
+        <div class="node-status">Status: {{ selected_cell.value.data.Status }}</div>
+        <div class="node-ways">Ways: {{ selected_cell.value.data.Ways }}</div>
+        <div class="node-choisenway">Chosen Way: {{ selected_cell.value.data.ChosenWay }}</div>
+        <div class="node-description">Description: {{ selected_cell.value.data.Description }}</div>
+      </div>
+      <div class="node-control">
+
+        <div class="node-change-created">
+          <label for="node-label">Label</label>
+          <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
+          <label for="node-description">Description</label>
+          <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" ></textarea>
+
+          <button @click="updateNode">Update</button>
+        </div>
+        <div class="node-change-publiched"></div>
+      </div>
     </div>
+
+    <!-- OTHER NODES -->
 
     <div v-else-if="selected_cell.value.shape==='MULTI' " class="node">
       MULTI: don`t use. After ways from CHOICE. Syntactic sugar for multiplying a subsequent graph into multiple subgraphs according to the number of multiple choice inputs.
@@ -94,15 +125,13 @@ import "@antv/x6-vue-shape";
  import { defaultGraphOptions } from '@/modules/initGraphModeler'
 
 
-
-///////   https://x6.antv.antgroup.com/api/model/model
-        // https://x6.antv.vision/en/docs/tutorial/intermediate/events
 const container = ref(null)
 const stencilref = ref(null)
 const selected_cell = reactive({});
 let graph = null
 
 
+//  UPDATE CELL
 const nodeUpdate = reactive({
   Label: "",
   LeadTime: 0, 
@@ -121,33 +150,25 @@ const updateNode = () => {
   selected_cell.value.setAttrs({
   text: { text: nodeUpdate.Label},
   })
-
-
-  // Description: "",
-  //     LeadTime: 0,
-  //     Performers: [],
-  //     Energy: 0,
-  //     Status: "",
-
   console.log(selected_cell.value.getData())
-
-  //  const w = new Cell()
-// w.setData()
-
   selected_cell.value.setData({"Description":nodeUpdate.Description, "LeadTime":nodeUpdate.LeadTime})
   nodeUpdate.Label = "";
   nodeUpdate.LeadTime = 0;
   nodeUpdate.Description = "";
 }
+// END UPDATE CELL
 
-// validation and upload to server
+
+// validation and upload project to server
 const graphToJson = () => {
-    console.log("sadsdasd")
-    console.log(graphRef.value.toJSON())
+    console.log(graph.toJSON())
 }
 
 // init GraphModeler
 onMounted(() => { 
+
+// https://x6.antv.antgroup.com/api/model/model
+// https://x6.antv.vision/en/docs/tutorial/intermediate/events
 graph = new Graph({
   ...defaultGraphOptions,
   container: container.value
@@ -472,7 +493,7 @@ Graph.registerNode(
     data:{
       Ways: {},
       Description: "",
-      Status: "",
+      Status: "created",
       ChosenWay: "",
     },
     attrs: {
@@ -734,11 +755,13 @@ width: 70%;
   margin-bottom: 10px;
 }
 
-.node label {
+label {
 color: #1D0505;
 margin-top: 20px;
 }
-.node button {
+
+
+button {
   color: clr.$clr-button;
   border: 1px solid black;
   background-color: clr.$bg-button;
@@ -746,9 +769,22 @@ margin-top: 20px;
   transition: 1.5s;
   max-width: 40%;
 }
-.node button:hover {
+button:hover {
   background-color: clr.$bg-button-hover;
 }
+
+
+
+.edgeForm {
+  padding: 20px;
+}
+
+.edgeForm input{
+
+  padding: 5px;
+  border: 1px solid whitesmoke;
+}
+
 
 
 
