@@ -12,8 +12,6 @@
 </div>
 
 <div v-if="Object.keys(selected_cell).length !== 0" class="cell-panel">
-    <!-- isEdge:{{ selected_cell.value.shape==='edge' }} -->
-
     <div v-if="selected_cell.value.shape==='edge'" class="edgeForm">
       <!-- {{ selected_cell.value }} -->
       <div class="node-id">EDGE ID: {{ selected_cell.value.id }}</div>
@@ -22,24 +20,60 @@
       <button @click="updateEdge">Update</button>
     </div>
 
-    <div v-else class="nodeForm">
+    <div v-else-if="selected_cell.value.shape==='slow-model' || selected_cell.value.shape==='fast-model'" class="node">
+      <div class="node-data">
+        <div class="node-id">NODE ID: {{ selected_cell.value.id }}</div>
+        <div class="node-label">Label: {{ selected_cell.value.attrs.text.text }} </div>
+        <div class="node-leadtime">Lead Time: {{ selected_cell.value.data.LeadTime }}</div>
+        <div class="node-status">Status: {{ selected_cell.value.data.Status }}</div>
+        <div class="node-energy">Energy: {{ selected_cell.value.data.Energy }}</div>
+        <div class="node-energy">Performers: {{ selected_cell.value.data.Performers }}</div>
+        <div class="node-description">Description: {{ selected_cell.value.data.Description }}</div>
+      </div>
 
-      {{ selected_cell.value }}
-      <div class="node-id">NODE ID: {{ selected_cell.value.id }}</div>
-      <label for="node-label">Имя</label>
-      <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
-      <label for="node-description">Описание</label>
-      <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" :placeholder="selected_cell.value.data.Description"></textarea>
-      <label for="leadtime">Длительность(ч)</label>
-      <input  type="number" v-model="nodeUpdate.LeadTime" id="node-leadtime" :placeholder="selected_cell.value.data.LeadTime">
-      <button @click="updateNode">Update</button>
+      <div class="node-control">
+
+        <div class="node-change-created">
+          <label for="node-label">Label</label>
+          <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
+          <label for="leadtime">Lead Time(h)</label>
+          <input  type="number" v-model="nodeUpdate.LeadTime" id="node-leadtime">
+          <label for="node-description">Description</label>
+          <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" ></textarea>
+
+          <button @click="updateNode">Update</button>
+        </div>
+        <div class="node-change-publiched"></div>
+      </div>
     </div>
+
+    <div v-else-if="selected_cell.value.shape==='CHOICE' " class="node">
+      CHOICE ID: {{ selected_cell.value.id }}
+    </div>
+
+    <div v-else-if="selected_cell.value.shape==='MULTI' " class="node">
+      MULTI: don`t use. After ways from CHOICE. Syntactic sugar for multiplying a subsequent graph into multiple subgraphs according to the number of multiple choice inputs.
+      ID: {{ selected_cell.value.id }}
+    </div>
+    <div v-else-if="selected_cell.value.shape==='START' " class="node">
+      START: special node for start project.
+      ID: {{ selected_cell.value.id }}
+    </div>
+    <div v-else-if="selected_cell.value.shape==='END' " class="node">
+      END: special node for end project.
+      ID: {{ selected_cell.value.id }}
+    </div>
+    <div v-else-if="selected_cell.value.shape==='FAIL' " class="node">
+      FAIL: special node after CHOICE. This path means the project can never be completed.
+      ID: {{ selected_cell.value.id }}
+    </div>
+
+    <div v-else class="node">{{selected_cell.value.shape}}</div>
 </div>
 
 <div v-else class="hhh">
   Select node or edge
 </div>
-
 </template>
 
 
@@ -89,13 +123,18 @@ const updateNode = () => {
   })
 
 
+  // Description: "",
+  //     LeadTime: 0,
+  //     Performers: [],
+  //     Energy: 0,
+  //     Status: "",
+
   console.log(selected_cell.value.getData())
-  console.log(nodeUpdate.Description)
 
   //  const w = new Cell()
 // w.setData()
 
-  selected_cell.value.updateData({"Description":nodeUpdate.Description, "LeadTime":nodeUpdate.LeadTime}, { overwrite: true })
+  selected_cell.value.setData({"Description":nodeUpdate.Description, "LeadTime":nodeUpdate.LeadTime})
   nodeUpdate.Label = "";
   nodeUpdate.LeadTime = 0;
   nodeUpdate.Description = "";
@@ -340,8 +379,11 @@ Graph.registerNode(
     width: 66,
     height: 36,
     data: { 
-      Description: "1",
+      Description: "",
       LeadTime: 0,
+      Performers: [],
+      Energy: 0,
+      Status: "",
     },
     attrs: {
       body: {
@@ -362,10 +404,11 @@ const slow = graph.createNode({
   shape: 'slow-model',
   label: 'SLOW',
   data: { 
-      Description: "2",
-    LeadTime: 1,
-
-
+    Description: "empty",
+    LeadTime: 0,
+    Performers: [],
+    Energy: 0,
+    Status: "created",
     },
 })
 
@@ -378,10 +421,11 @@ Graph.registerNode(
     width: 66,
     height: 36,
     data: { 
-      Description: "1",
-    LeadTime: 0,
-
-
+      Description: "",
+      LeadTime: 0,
+      Performers: [],
+      Energy: 0,
+      Status: "",
     },
     attrs: {
       body: {
@@ -408,10 +452,11 @@ const fast = graph.createNode({
   },
   label: 'FAST',
   data: { 
-      Description: "2",
-    LeadTime: 1,
-
-
+    Description: "empty",
+    LeadTime: 0,
+    Performers: [],
+    Energy: 0,
+    Status: "created",
     },
 })
 
@@ -419,11 +464,17 @@ const fast = graph.createNode({
 
 // choice
 Graph.registerNode(
-  'choice-model',
+  'CHOICE',
   {
     inherit: 'rect',
     width: 66,
     height: 36,
+    data:{
+      Ways: {},
+      Description: "",
+      Status: "",
+      ChosenWay: "",
+    },
     attrs: {
       body: {
         strokeWidth: 1,
@@ -440,7 +491,7 @@ Graph.registerNode(
   true,
 )
 const choice = graph.createNode({
-  shape: 'choice-model',
+  shape: 'CHOICE',
   label: "CHOICE",
   attrs: {
     body: {
@@ -453,7 +504,7 @@ const choice = graph.createNode({
 
 // multiplex
 Graph.registerNode(
-  'multi-model',
+  'MULTI',
   {
     inherit: 'polygon',
     width: 66,
@@ -484,7 +535,7 @@ Graph.registerNode(
   true,
 )
 const multi = graph.createNode({
-  shape: 'multi-model',
+  shape: 'MULTI',
   attrs: {
     body: {
       refPoints: '10,0 40,0 30,20 0,20',
@@ -549,7 +600,7 @@ const end = graph.createNode({
 
 // fail
 Graph.registerNode(
-  'fail-model',
+  'FAIL',
   {
     inherit: 'polygon',
     width: 66,
@@ -580,7 +631,7 @@ Graph.registerNode(
   true,
 )
 const fail = graph.createNode({
-  shape: 'fail-model',
+  shape: 'FAIL',
   attrs: {
     body: {
       refPoints: '0,10 10,0 20,10 10,20',
@@ -588,7 +639,6 @@ const fail = graph.createNode({
   },
   label: 'FAIL',
 })
-
 
 stencil.load([start, slow, fast, choice, fail, multi, end], 'group1')
 // mount end
@@ -614,14 +664,12 @@ const register_events = (graph) => {
   display: flex;
   flex-direction: row;
 }
-
 #nodebar {
     position: relative;
     width: 10%;
     height: 770px;
     border: 2px dashed black;
 }
-
 .containerDraw {
     width: 70%;
     height: 770px;
@@ -630,53 +678,80 @@ const register_events = (graph) => {
 }
 .containerDraw p {
     color:whitesmoke;
-
 }
-
 .project-panel {
     width: 20%;
     background-color: whitesmoke;
 }
 .project-panel button {
   color:white;
-
     background-color: rgb(21, 3, 32);
     padding: 20px;
 }
 
 
 
-.cell-panel{
-  padding: 20px;
-  border: 1px solid whitesmoke;
-  max-width: 70%;
+
+
+.cell-panel {
+  width: 100%;
+
+
 }
-.cell-panel .edgeForm,.nodeForm {
+.node{
+  margin-top: 20px;
+  margin-bottom: 40px;
+  box-shadow: 0 0 10px rgba(18, 2, 31, 0.5);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   
 }
-.cell-panel input, textarea {
 
+
+.node .node-data {
+padding: 10px;
+width: 70%;
+}
+.node .node-data div {
+
+  margin-top: 10px;
+}
+
+.node .node-control{
+  width: 30%;
+}
+
+.node .node-control .node-change-created {
+  display: flex;
+  flex-direction: column;
+  padding:10px;
+}
+
+
+.node input, textarea {
   border: 1px solid whitesmoke;
   padding: 10px;
   margin-bottom: 10px;
 }
 
-.cell-panel label {
+.node label {
 color: #1D0505;
 margin-top: 20px;
 }
-.cell-panel button {
+.node button {
   color: clr.$clr-button;
   border: 1px solid black;
   background-color: clr.$bg-button;
   padding: 10px;
   transition: 1.5s;
-  max-width: 20%;
+  max-width: 40%;
 }
-.cell-panel button:hover {
+.node button:hover {
   background-color: clr.$bg-button-hover;
 }
+
+
+
+
 
 </style>
