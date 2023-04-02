@@ -1,5 +1,38 @@
 
-<template>
+<template scoped>
+
+<div class="root">
+
+  <div class="searchBox">
+
+<label for="checkbox1">Only my dreams: {{ onlyMyDreams }}</label>
+<input type="checkbox" id="checkbox1" v-model="onlyMyDreams" />
+
+<label for="filterInput">SearchBy:</label>
+<input id="filterInput" v-model="searchTerm" />
+<button @click="doSearch(0, 10, 'id', 'asc')">GO</button>
+</div>
+
+
+  <div class="projectstable">
+  <table-lite
+  :max-width=300
+  :is-loading="table.isLoading"
+  :columns="table.columns"
+  :rows="table.rows"
+  :total="table.totalRecordCount"
+  :sortable="table.sortable"
+  :messages="table.messages"
+  @do-search="doSearch"
+  @is-finished="tableLoadingFinish"
+  @row-clicked="rowClicked"
+  />
+  </div>
+
+
+
+
+
 <div class="graph-panel">
   <div class="containerDraw">
       <p>Hello from graphinfinit! Command: Ctrl+[C, V, Z, X, A, Shift+Z], backspace(delete), zoom</p>
@@ -7,7 +40,23 @@
   </div>
   <div ref="stencilref" id="nodebar"></div>
   <div class="project-panel">
-      <button @click="graphToJson()" >ToJson</button> 
+
+
+      <div class="project-id">PROJECT ID: </div>
+      <div class="project-name">Name: </div>
+      <div class="project-dream">For dream: </div>
+      <div class="project-description">Description: </div>
+      <div class="project-creater">Creater: </div>
+      <div class="project-published">Published: </div>
+      <div class="project-pubdate">PubDate: </div>
+
+      <div class="project-complited">Complited(%): </div>
+      <div class="project-time">Total Time: </div>
+      <div class="project-energy">Total Energy: </div>
+      <div><button @click="graphToJson()" id="savebutton">Validate and Save</button></div>
+      
+      <div><button>DELETE</button></div>
+      
   </div>
 </div>
 
@@ -119,11 +168,16 @@
 <div v-else class="hhh">
   Select node or edge
 </div>
+
+
+
+
+</div>
 </template>
 
 
 <script setup>
-import { ref, onMounted, reactive, toRaw} from "vue"
+import { ref, onMounted, reactive, toRaw, setBlockTracking} from "vue"
 import { Graph, Shape, Cell } from '@antv/x6'
 //import { Cell } from '@antv/x6'
 //import { computed } from 'vue';
@@ -139,18 +193,160 @@ import { History } from '@antv/x6-plugin-history'
 import { defaultGraphOptions } from '@/modules/initGraphModeler'
 
 
+import TableLite from "vue3-table-lite";
+import { computed } from "vue"
+import API from "@/modules/api"
+  // init table settings
+const table = reactive({
+isLoading: false,
+columns: [
+    {
+    label: "ID",
+    field: "ID",
+    width: "5%",
+    sortable: false,
+    isKey: true,
+    },
+    {
+    label: "Name",
+    field: "Name",
+    width: "20%",
+    sortable: true,
+    display: (row) => {
+        if (row.Name) {
+          if (row.Name.length>15) {
+            return (row.Name.slice(0, 15)+"...")
+          };
+          return (row.Name);
+        } else {
+          return ("Empty")
+        };
+},
+    },
+    {
+    label: "Information",
+    field: "Info",
+    width: "30%",
+    sortable: false,
+    display: (row) => {
+        if (row.Info) {
+          if (row.Info.length>30) {
+            return (row.Info.slice(0, 31)+"...")
+          };
+          return (row.Info);
+        } else {
+          return ("<b>Empty</b>")
+        };
+},
+    },
+    {
+    label: "Pub",
+    field: "Published",
+    width: "3%",
+    sortable: true,
+    },
+    {
+    label: "PubDate",
+    field: "PublishAt",
+    width: "3%",
+    sortable: true,
+    display: (row) => {
+        if (row.PublishAt) {
+          return (row.PublishAt.slice(0, 19));
+        } else {
+          return ("Empty")
+        };
+},
+    },
+    {
+    label: "E",
+    field: "Energy",
+    width: "5%",
+    sortable: true,
+    },
+    {
+    label: "S",
+    field: "Status",
+    width: "1%",
+    sortable: false,
+    },
+],
+rows: [],
+totalRecordCount: 0,
+
+sortable: {
+    order: "id",
+    sort: "asc",
+},
+});
+
+const onlyMyProjects = ref(true)
+const searchTerm = ref("")
+ // 
+const doSearch = (offset, limit, order, sort) => {
+  var searchData = {
+    Offset: offset,
+    Limit: limit,
+    Order: order,
+    Sort: sort,
+    OnlyMyDreams: onlyMyProjects.value,
+    SearchTerm: searchTerm.value
+    }
+  console.log(JSON.stringify(searchData))
+  table.isLoading = true;
+  let url = '/projects';
+  API.get(url, {params: searchData} ).then((response) => {
+      if (response.data.status === "ok") {
+        table.isLoading = false;
+        // refresh table rows
+        table.rows = response.data.data.Dreams;
+        table.totalRecordCount = response.data.data.TotalRecordCount;
+        table.sortable.order = order;
+        table.sortable.sort = sort;
+        return
+      } 
+      window.alert(response.data.message);
+  }); 
+};
+  
+/**
+ * Table search finished event
+ */
+const tableLoadingFinish = (elements) => {
+table.isLoading = false;
+};
+
+//doSearch(0, 10, "id", "asc");
+
+const rowDream = reactive({
+      CountG: 0,
+      CreatedAt: "",
+      Creater: 0,
+      Energy: 0,
+      ID: 0,
+      Info: "",
+      Location: "",
+      Name: "",
+      Published: false,
+      PublishAt: "",
+      Status: "",
+})
+
+const rowClicked = (row) => {
+  Object.assign(rowDream,toRaw(row) );
+};
+
+
+
 
 const componentKey = ref(0);  /// почему-то плохо отрисовывается
 const choiceWaysObj = reactive({
   Key:"",
   Value:""
 })
-
 const addChoiceWay = ()=> {
   selected_cell.value.setData({Ways: {[choiceWaysObj.Key]:choiceWaysObj.Value}});
-  choiceWaysObj.Key="";
-  choiceWaysObj.Value="";
-  componentKey.value += 1;
+  choiceWaysObj.Key="";choiceWaysObj.Value="";componentKey.value += 1;
  }
 const removeNodeWay = (name)=> {
   let obj = selected_cell.value.getData()
@@ -159,17 +355,14 @@ const removeNodeWay = (name)=> {
   componentKey.value += 1;
 }
 
+
 const updateNodeChoice = ()=> {
   selected_cell.value.setAttrs({
   text: { text: nodeUpdate.Label},
   })
   selected_cell.value.setData({"Description":nodeUpdate.Description})
-  console.log(selected_cell.value)
-  nodeUpdate.Label = "";
-  nodeUpdate.Description = "";
+  nodeUpdate.Label = "";nodeUpdate.Description = "";
 }
-
-
 
 
 const container = ref(null)
@@ -188,16 +381,13 @@ const edgeUpdate = reactive({
   Label: "",
 })
 const updateEdge = () => {
-  console.log(selected_cell.value.getLabels())
   selected_cell.value.setLabels(edgeUpdate.Label)
   edgeUpdate.Label = "";
 }
 const updateNode = () => {
-  console.log(nodeUpdate.Label)
   selected_cell.value.setAttrs({
   text: { text: nodeUpdate.Label},
   })
-  console.log(selected_cell.value.getData())
   selected_cell.value.setData({"Description":nodeUpdate.Description, "LeadTime":nodeUpdate.LeadTime})
   nodeUpdate.Label = "";
   nodeUpdate.LeadTime = 0;
@@ -260,7 +450,7 @@ graph.use(
 register_events(graph)
 
 const stencil = new Stencil({
-  title: 'Формы',
+  title: 'Конструктор',
   target: graph,
   stencilGraphWidth: 130,
   stencilGraphHeight: 600,
@@ -730,15 +920,30 @@ const register_events = (graph) => {
 
 <style scoped lang="scss">
 @use '@/assets/scss/_colors' as clr;
+
+.root {
+}
+
+
+
+.searchBox {
+
+
+  padding: 20px;
+}
+
 .graph-panel {
   display: flex;
   flex-direction: row;
+  margin-top: 30px;
 }
 #nodebar {
     position: relative;
     width: 10%;
     height: 770px;
-    border: 2px dashed black;
+    border-top:10px solid #1D0505;
+    border-right:10px solid #1D0505;
+    border-bottom:10px solid #1D0505;
 }
 .containerDraw {
     width: 70%;
@@ -749,14 +954,37 @@ const register_events = (graph) => {
 .containerDraw p {
     color:whitesmoke;
 }
+
+
+
 .project-panel {
+    border-bottom:10px solid #1D0505;
     width: 20%;
-    background-color: whitesmoke;
+    background-color: white;
+    padding: 20px;
+}
+
+.project-panel div {
+  border-top:1px solid whitesmoke;
+  border-right:2px solid whitesmoke;
+  padding: 5px;
+
+  margin-top: 20px;
 }
 .project-panel button {
-  color:white;
-    background-color: rgb(21, 3, 32);
-    padding: 20px;
+  cursor: pointer;
+    background-color: white;
+    border: none;
+    color:rgb(247, 3, 3);
+
+}
+.project-panel button:hover {
+  background-color: white;
+  color: black;
+}
+
+#savebutton {
+  color:#309A05;
 }
 
 
@@ -765,11 +993,14 @@ const register_events = (graph) => {
 
 .cell-panel {
   width: 100%;
+  background-color: white;
+
 }
 .node{
-  margin-top: 20px;
-  margin-bottom: 40px;
-  box-shadow: 0 0 10px rgba(18, 2, 31, 0.5);
+  padding:10px;
+  border-left:10px solid #1D0505;
+  border-bottom:1px solid #1D0505;
+  //box-shadow: 0 0 40px rgba(254, 252, 255, 0.5);
   display: flex;
   flex-direction: row;
 }
@@ -802,15 +1033,18 @@ margin-top: 20px;
 }
 
 button {
+  cursor: pointer;
+  max-width: 70px;
+  border-radius: 4px;
+  padding: 3px;
   color: clr.$clr-button;
-  border: 1px solid black;
-  background-color: clr.$bg-button;
-  padding: 10px;
-  transition: 1.5s;
-  max-width: 40%;
+  color: clr.$bg-button;
+  transition: 0.5s;
+  box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
 }
 button:hover {
-  background-color: clr.$bg-button-hover;
+  box-shadow: 0px 0px 5px rgba(60, 41, 75, 0.5);
+  color: clr.$bg-button-hover;
 }
 
 

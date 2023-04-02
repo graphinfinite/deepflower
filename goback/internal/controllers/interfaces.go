@@ -42,6 +42,12 @@ type (
 		GetLocationDreams(ctx context.Context, locationId string) ([]model.Dream, error)
 	}
 
-	TaskUsecaseInterface interface {
+	ProjectUCInterface interface {
+		CreateProject(ctx context.Context, Name, Info, Graph, dreamName, userId string) (model.Project, error)
+		PublishProject(ctx context.Context, userId, projectId string) error
+		SearchProjects(ctx context.Context, userId string, limit, offset uint64,
+			onlyMyProjects bool, order string, searchTerm, sort string) ([]model.Project, int, error)
+		UpdateUserProject(ctx context.Context, userId, projectId string, projectPatch map[string]interface{}) (model.Project, error)
+		DeleteUserProject(ctx context.Context, userId, projectId string) error
 	}
 )

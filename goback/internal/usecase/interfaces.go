@@ -39,4 +39,16 @@ type (
 
 		GetLocationDreams(ctx context.Context, locationId string) ([]model.Dream, error)
 	}
+
+	ProjectStorageInterface interface {
+		CreateProject(ctx context.Context, name, info, graph, dreamName, creater string) (model.Project, error)
+		SearchProjects(ctx context.Context, userId string,
+			limit, offset uint64, onlyMyProjects bool, order string, searchTerm string, sort string) ([]model.Project, int, error)
+		EnergyTxUserToProject(ctx context.Context, userId, projectId string, EnergyForPublish uint64) error
+		GetProjectById(ctx context.Context, projectId string) (model.Project, error)
+
+		UpdateUserProject(ctx context.Context, projectId string, projectUpdate map[string]interface{}) (model.Project, error)
+
+		DeleteUserProject(ctx context.Context, projectId string) error
+	}
 )

@@ -73,6 +73,12 @@ func (app *App) Run(cfg config.Configuration) error {
 	locUC := usecase.NewLocationUsecase(&locstore)
 	loc := ctrl.NewLocationController(&locUC, &zlog)
 
+	// Project
+
+	projstore := repository.NewProjectStorage(dbPool)
+	projUC := usecase.NewProjectUsecase(&projstore)
+	proj := ctrl.NewProjectController(&projUC, &zlog)
+
 	// Router settings
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
@@ -112,6 +118,19 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Delete("/{locationId}", loc.DeleteUserLocation)
 		r.Post("/{locationId}/energy", loc.AddEnergyToLocation)
 		r.Get("/{locationId}/dreams", loc.GetLocationDreams)
+	})
+
+	r.Route("/projects", func(r chi.Router) {
+		r.Use(auth.JWT)
+		r.Post("/", proj.CreateProject)
+		r.Get("/", proj.SearchProjects)
+		r.Patch("/{projectId}", proj.UpdateUserProject)
+		r.Delete("/{projectId}", proj.DeleteUserProject)
+		r.Post("/{projectId}/publish", proj.PublishProject)
+		//r.Post("/{projectId}/energy", proj.AddEnergyToProject)
+
+		r.Post("/{projectId}/node/{nodeId}/addenergy", proj.AddEnergyToTask)
+		r.Post("/{projectId}/node/{nodeId}/close", proj.CloseTask)
 	})
 
 	// HTTP Server

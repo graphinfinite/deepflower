@@ -54,6 +54,27 @@ func MigrateDb(dbPool *sqlx.DB) error {
 		id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 		locationid uuid NOT NULL,
 		dreamid uuid NOT NULL);
+
+
+
+		CREATE TABLE IF NOT EXISTS "project" (
+			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+			name VARCHAR(64) UNIQUE NOT NULL DEFAULT 'empty',
+			info TEXT NOT NULL DEFAULT 'empty',
+			createdAt timestamp DEFAULT current_timestamp NOT NULL,
+			updatedAt timestamp DEFAULT current_timestamp NOT NULL,
+			publishAt timestamp NOT NULL DEFAULT current_timestamp ,
+			published BOOLEAN NOT NULL DEFAULT false,
+			status VARCHAR(32) NOT NULL,
+			creater uuid NOT NULL,
+			energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0);
+			graph TEXT NOT NULL DEFAULT 'empty';
+
+
+		CREATE TABLE IF NOT EXISTS "dream_project" (
+			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+			projectid uuid NOT NULL,
+			dreamid uuid NOT NULL);
 		`
 	_, errDb := dbPool.Exec(q)
 	if errDb != nil {
