@@ -5,10 +5,10 @@
 
   <div class="searchBox">
 
-<label for="checkbox1">Only my dreams: {{ onlyMyDreams }}</label>
-<input type="checkbox" id="checkbox1" v-model="onlyMyDreams" />
+<label for="checkbox1">Only my projects: {{ onlyMyProjects }}</label>
+<input type="checkbox" id="checkbox1" v-model="onlyMyProjects" />
 
-<label for="filterInput">SearchBy:</label>
+<label for="filterInput">For Dream:</label>
 <input id="filterInput" v-model="searchTerm" />
 <button @click="doSearch(0, 10, 'id', 'asc')">GO</button>
 </div>
@@ -289,7 +289,7 @@ const doSearch = (offset, limit, order, sort) => {
     Limit: limit,
     Order: order,
     Sort: sort,
-    OnlyMyDreams: onlyMyProjects.value,
+    OnlyMyProjets: onlyMyProjects.value,
     SearchTerm: searchTerm.value
     }
   console.log(JSON.stringify(searchData))
@@ -299,7 +299,7 @@ const doSearch = (offset, limit, order, sort) => {
       if (response.data.status === "ok") {
         table.isLoading = false;
         // refresh table rows
-        table.rows = response.data.data.Dreams;
+        table.rows = response.data.data.Projects;
         table.totalRecordCount = response.data.data.TotalRecordCount;
         table.sortable.order = order;
         table.sortable.sort = sort;
@@ -318,14 +318,12 @@ table.isLoading = false;
 
 //doSearch(0, 10, "id", "asc");
 
-const rowDream = reactive({
-      CountG: 0,
+const rowProject = reactive({
       CreatedAt: "",
       Creater: 0,
       Energy: 0,
       ID: 0,
       Info: "",
-      Location: "",
       Name: "",
       Published: false,
       PublishAt: "",
@@ -339,7 +337,7 @@ const rowClicked = (row) => {
 
 
 
-const componentKey = ref(0);  /// почему-то плохо отрисовывается
+const componentKey = ref(0);  /// для лучшей отрисовки
 const choiceWaysObj = reactive({
   Key:"",
   Value:""

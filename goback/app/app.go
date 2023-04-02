@@ -129,6 +129,7 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Post("/{projectId}/publish", proj.PublishProject)
 		//r.Post("/{projectId}/energy", proj.AddEnergyToProject)
 
+		// TODO
 		r.Post("/{projectId}/node/{nodeId}/addenergy", proj.AddEnergyToTask)
 		r.Post("/{projectId}/node/{nodeId}/close", proj.CloseTask)
 	})
