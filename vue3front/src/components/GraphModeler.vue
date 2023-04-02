@@ -49,7 +49,7 @@
           <label for="node-description">Description</label>
           <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" ></textarea>
 
-          <button @click="updateNode">Update</button>
+          <button @click="updateNode">Set</button>
         </div>
         <div class="node-change-publiched"></div>
       </div>
@@ -57,7 +57,7 @@
 
     <!-- CHOICE NODE -->
 
-    <div v-else-if="selected_cell.value.shape==='CHOICE' " class="node">
+    <div v-else-if="selected_cell.value.shape==='CHOICE' " class="node" :key="componentKey">
       <div class="node-data">
         <div class="node-id">NODE ID: {{ selected_cell.value.id }}</div>
         <div class="node-label">Label: {{ selected_cell.value.attrs.text.text }} </div>
@@ -66,15 +66,29 @@
         <div class="node-choisenway">Chosen Way: {{ selected_cell.value.data.ChosenWay }}</div>
         <div class="node-description">Description: {{ selected_cell.value.data.Description }}</div>
       </div>
-      <div class="node-control">
 
+      <div class="node-control">
         <div class="node-change-created">
           <label for="node-label">Label</label>
           <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
           <label for="node-description">Description</label>
           <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" ></textarea>
+          <button @click="updateNodeChoice">Set</button>
 
-          <button @click="updateNode">Update</button>
+
+          <div class="addchoice">
+            <div>
+              Way:<input v-model="choiceWaysObj.Key" type="text">
+              Сondition:<input v-model="choiceWaysObj.Value" type="text">
+              <button @click="addChoiceWay">+</button>
+            </div>
+            <div class="choiceWaislist" v-for="(value, name) in selected_cell.value.data.Ways">
+              <ul>
+                <li >{{ name }}: {{ value }}<button id="button-simple" @click="()=>{removeNodeWay(name)}">x</button></li>
+              </ul>
+            </div>
+          </div>
+          
         </div>
         <div class="node-change-publiched"></div>
       </div>
@@ -109,20 +123,53 @@
 
 
 <script setup>
-import { ref, onMounted, reactive} from "vue"
+import { ref, onMounted, reactive, toRaw} from "vue"
 import { Graph, Shape, Cell } from '@antv/x6'
 //import { Cell } from '@antv/x6'
 //import { computed } from 'vue';
 import "@antv/x6-vue-shape";
- import { Stencil } from '@antv/x6-plugin-stencil'
- import { Transform } from '@antv/x6-plugin-transform'
- import { Selection } from '@antv/x6-plugin-selection'
- import { Snapline } from '@antv/x6-plugin-snapline'
- import { Keyboard } from '@antv/x6-plugin-keyboard'
- import { Clipboard } from '@antv/x6-plugin-clipboard'
- import { History } from '@antv/x6-plugin-history'
+import { Stencil } from '@antv/x6-plugin-stencil'
+import { Transform } from '@antv/x6-plugin-transform'
+import { Selection } from '@antv/x6-plugin-selection'
+import { Snapline } from '@antv/x6-plugin-snapline'
+import { Keyboard } from '@antv/x6-plugin-keyboard'
+import { Clipboard } from '@antv/x6-plugin-clipboard'
+import { History } from '@antv/x6-plugin-history'
 //
- import { defaultGraphOptions } from '@/modules/initGraphModeler'
+import { defaultGraphOptions } from '@/modules/initGraphModeler'
+
+
+
+const componentKey = ref(0);  /// почему-то плохо отрисовывается
+const choiceWaysObj = reactive({
+  Key:"",
+  Value:""
+})
+
+const addChoiceWay = ()=> {
+  selected_cell.value.setData({Ways: {[choiceWaysObj.Key]:choiceWaysObj.Value}});
+  choiceWaysObj.Key="";
+  choiceWaysObj.Value="";
+  componentKey.value += 1;
+ }
+const removeNodeWay = (name)=> {
+  let obj = selected_cell.value.getData()
+  delete obj.Ways[name]
+  selected_cell.value.updateData(obj, {overwrite: true}) 
+  componentKey.value += 1;
+}
+
+const updateNodeChoice = ()=> {
+  selected_cell.value.setAttrs({
+  text: { text: nodeUpdate.Label},
+  })
+  selected_cell.value.setData({"Description":nodeUpdate.Description})
+  console.log(selected_cell.value)
+  nodeUpdate.Label = "";
+  nodeUpdate.Description = "";
+}
+
+
 
 
 const container = ref(null)
@@ -156,6 +203,8 @@ const updateNode = () => {
   nodeUpdate.LeadTime = 0;
   nodeUpdate.Description = "";
 }
+
+
 // END UPDATE CELL
 
 
@@ -716,8 +765,6 @@ const register_events = (graph) => {
 
 .cell-panel {
   width: 100%;
-
-
 }
 .node{
   margin-top: 20px;
@@ -725,13 +772,10 @@ const register_events = (graph) => {
   box-shadow: 0 0 10px rgba(18, 2, 31, 0.5);
   display: flex;
   flex-direction: row;
-  
 }
-
-
 .node .node-data {
 padding: 10px;
-width: 70%;
+width: 50%;
 }
 .node .node-data div {
 
@@ -739,7 +783,7 @@ width: 70%;
 }
 
 .node .node-control{
-  width: 30%;
+  width: 50%;
 }
 
 .node .node-control .node-change-created {
@@ -747,19 +791,15 @@ width: 70%;
   flex-direction: column;
   padding:10px;
 }
-
-
 .node input, textarea {
   border: 1px solid whitesmoke;
   padding: 10px;
   margin-bottom: 10px;
 }
-
 label {
 color: #1D0505;
 margin-top: 20px;
 }
-
 
 button {
   color: clr.$clr-button;
@@ -771,6 +811,21 @@ button {
 }
 button:hover {
   background-color: clr.$bg-button-hover;
+}
+
+
+#button-simple {
+  cursor: pointer;
+  font-size: 15px;
+  color: rgb(241, 6, 6);
+  border:none;
+  border-radius: 10px;
+  background-color: white;
+  transition: 1.5s;
+  margin-left: 10px;
+}
+.addchoice {
+  margin-top: 20px;
 }
 
 
