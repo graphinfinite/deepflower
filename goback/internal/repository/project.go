@@ -20,6 +20,7 @@ func NewProjectStorage(dbpool *sqlx.DB) ProjectStorage {
 func (s *ProjectStorage) CreateProject(ctx context.Context, name, info, graph, dreamName, creater string) (model.Project, error) {
 	var m model.Project
 	tx := s.Db.MustBegin()
+
 	q1 := `
 	INSERT INTO project (name, info ,published, status, creater, energy, graph) 
 	VALUES ($1,$2,$3,$4,$5,$6,$7) 
@@ -33,6 +34,7 @@ func (s *ProjectStorage) CreateProject(ctx context.Context, name, info, graph, d
 	q2 := `INSERT INTO dream_project(dreamid, projectid) 
 	VALUES ($1, (SELECT id FROM dream WHERE name=$2));
 	`
+
 	result, err := tx.ExecContext(ctx, q2, m.ID, dreamName)
 	if err != nil {
 		tx.Rollback()
@@ -123,7 +125,7 @@ func (s *ProjectStorage) DeleteUserProject(ctx context.Context, projectId string
 // dangerous method. strictly check the input data to patch
 func (s *ProjectStorage) UpdateUserProject(ctx context.Context, projectId string, patchProject map[string]interface{}) (model.Project, error) {
 	var project model.Project
-	sqlSet := `UPDATE dream SET`
+	sqlSet := `UPDATE project SET`
 	for key := range patchProject {
 		sqlSet += fmt.Sprintf(` %s=:%s,`, strings.ToLower(key), key)
 	}

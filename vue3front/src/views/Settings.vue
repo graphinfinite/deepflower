@@ -15,6 +15,7 @@
   color: clr.$clr-route-header;
   padding: 20px;
   background-color: clr.$bg-route-header;
+  font-size: clr.$route-header-fontsize;
 }
 
 .wrapper{

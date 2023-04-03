@@ -3,59 +3,114 @@
 
 <div class="root">
 
-  <div class="searchBox">
-
+<!-- SEARCH AND TABLE -->
+<div class="searchBox">
 <label for="checkbox1">Only my projects: {{ onlyMyProjects }}</label>
 <input type="checkbox" id="checkbox1" v-model="onlyMyProjects" />
 
-<label for="filterInput">For Dream:</label>
+<label for="filterInput">Search by dream/project_name:</label>
 <input id="filterInput" v-model="searchTerm" />
 <button @click="doSearch(0, 10, 'id', 'asc')">GO</button>
 </div>
 
-
-  <div class="projectstable">
-  <table-lite
-  :max-width=300
-  :is-loading="table.isLoading"
-  :columns="table.columns"
-  :rows="table.rows"
-  :total="table.totalRecordCount"
-  :sortable="table.sortable"
-  :messages="table.messages"
-  @do-search="doSearch"
-  @is-finished="tableLoadingFinish"
-  @row-clicked="rowClicked"
-  />
-  </div>
-
-
+<div class="projectstable">
+<table-lite
+:max-width=300
+:is-loading="table.isLoading"
+:columns="table.columns"
+:rows="table.rows"
+:total="table.totalRecordCount"
+:sortable="table.sortable"
+:messages="table.messages"
+@do-search="doSearch"
+@is-finished="tableLoadingFinish"
+@row-clicked="rowClicked"
+/>
+</div>
+<!-- END SEARCH AND TABLE -->
 
 
 
 <div class="graph-panel">
+
+
+  <!-- GRAPH MODELER -->
   <div class="containerDraw">
       <p>Hello from graphinfinit! Command: Ctrl+[C, V, Z, X, A, Shift+Z], backspace(delete), zoom</p>
       <div ref="container"></div>
   </div>
-  <div ref="stencilref" id="nodebar"></div>
-  <div class="project-panel">
 
-    <div class="project-label">Create new project.</div>
+  <div ref="stencilref" id="nodebar"></div>
+  <!-- END GRAPH MODELER -->
+
+
+
+
+  <!-- PROJECT -->
+
+  <div class="project-panel" v-if=showRowProject>
+
+    <div>
+      <button @click="showRowProject=!showRowProject" class="clonebutton">Clone</button>
+      <button @click="showRowProject=!showRowProject; graph.fromJSON({})" class="redbutton">Close</button>
+    </div>
+    <div></div>
+
+    
+
+    <div class="project-id">PROJECT ID: {{ rowProject.ID }}</div>
+    <div class="project-name">Name: 
+      {{rowProject.Name}}
+    </div>
+    <div class="project-description">Description: 
+      {{rowProject.Info}}
+    </div>
+    <div class="project-published">Published: 
+      {{rowProject.Published}} 
+      <div class="if-not-published" v-if="!rowProject.Published">
+        <button @click="publishProject" class="orangebutton">Publish</button>
+        <button @click="deleteProject" class="redbutton">Delete</button>
+      </div>
+    </div>
+    <div class="project-publishat">PublishAt: 
+      {{rowProject.PublishAt}}
+    </div>
+    <div class="project-energy">Energy: 
+      {{rowProject.Energy}}
+    </div>
+    <div class="project-status">Status: 
+      {{rowProject.Status}}
+    </div>
+    <div class="project-creater">Creater: 
+      {{rowProject.Creater}}
+    </div>
+
+
+    <!-- 
+  CreatedAt: "",
+  UpdatedAt: "",
+   -->
+
+
+  </div>
+
+  <div v-else class="project-panel">
+      <div class="project-label">Create new project!</div>
       <div class="project-dream">For dream:
-         <input  type="text" v-model="NewProject.DreamName">
+          <input  type="text" v-model="NewProject.DreamName">
       </div>
       <div class="project-name">Name: 
         <input  type="text" v-model="NewProject.Name">
       </div>
       <div class="project-description">Description: 
-        <textarea  type="text" v-model="NewProject.Description"></textarea>
+        <textarea  type="text" v-model="NewProject.Info"></textarea>
       </div>
       <div><button @click="createNewProject" id="savebutton">Validate and Save</button></div>
-      
-      <!-- <div><button>DELETE</button></div> -->
-      
+        <!-- <div><button>DELETE</button></div> -->
   </div>
+  <!-- END PROJECT -->
+
+
 </div>
 
 
@@ -73,102 +128,102 @@
     </div>
 
 
-    <!-- DATA NODES: SLOW AND FAST -->
+  <!-- DATA NODES: SLOW AND FAST -->
 
-    <div v-else-if="selected_cell.value.shape==='slow-model' || selected_cell.value.shape==='fast-model'" class="node">
-      <div class="node-data">
-        <div class="node-id">NODE ID: {{ selected_cell.value.id }}</div>
-        <div class="node-label">Label: {{ selected_cell.value.attrs.text.text }} </div>
-        <div class="node-leadtime">Lead Time: {{ selected_cell.value.data.LeadTime }}</div>
-        <div class="node-status">Status: {{ selected_cell.value.data.Status }}</div>
-        <div class="node-energy">Energy: {{ selected_cell.value.data.Energy }}</div>
-        <div class="node-energy">Performers: {{ selected_cell.value.data.Performers }}</div>
-        <div class="node-description">Description: {{ selected_cell.value.data.Description }}</div>
-      </div>
-
-      <div class="node-control">
-
-        <div class="node-change-created">
-          <label for="node-label">Label</label>
-          <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
-          <label for="leadtime">Lead Time(h)</label>
-          <input  type="number" v-model="nodeUpdate.LeadTime" id="node-leadtime">
-          <label for="node-description">Description</label>
-          <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" ></textarea>
-
-          <button @click="updateNode">Set</button>
-        </div>
-        <div class="node-change-publiched"></div>
-      </div>
+  <div v-else-if="selected_cell.value.shape==='slow-model' || selected_cell.value.shape==='fast-model'" class="node">
+    <div class="node-data">
+      <div class="node-id">NODE ID: {{ selected_cell.value.id }}</div>
+      <div class="node-label">Label: {{ selected_cell.value.attrs.text.text }} </div>
+      <div class="node-leadtime">Lead Time: {{ selected_cell.value.data.LeadTime }}</div>
+      <div class="node-status">Status: {{ selected_cell.value.data.Status }}</div>
+      <div class="node-energy">Energy: {{ selected_cell.value.data.Energy }}</div>
+      <div class="node-energy">Performers: {{ selected_cell.value.data.Performers }}</div>
+      <div class="node-description">Description: {{ selected_cell.value.data.Description }}</div>
     </div>
 
-    <!-- CHOICE NODE -->
+    <div class="node-control">
+      <div class="node-change-created">
+        <label for="node-label">Label</label>
+        <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
+        <label for="leadtime">Lead Time(h)</label>
+        <input  type="number" v-model="nodeUpdate.LeadTime" id="node-leadtime">
+        <label for="node-description">Description</label>
+        <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" ></textarea>
 
-    <div v-else-if="selected_cell.value.shape==='CHOICE' " class="node" :key="componentKey">
-      <div class="node-data">
-        <div class="node-id">NODE ID: {{ selected_cell.value.id }}</div>
-        <div class="node-label">Label: {{ selected_cell.value.attrs.text.text }} </div>
-        <div class="node-status">Status: {{ selected_cell.value.data.Status }}</div>
-        <div class="node-ways">Ways: {{ selected_cell.value.data.Ways }}</div>
-        <div class="node-choisenway">Chosen Way: {{ selected_cell.value.data.ChosenWay }}</div>
-        <div class="node-description">Description: {{ selected_cell.value.data.Description }}</div>
+        <button @click="updateNode">Set</button>
       </div>
+      <div class="node-change-publiched"></div>
+    </div>
+  </div>
 
-      <div class="node-control">
-        <div class="node-change-created">
-          <label for="node-label">Label</label>
-          <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
-          <label for="node-description">Description</label>
-          <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" ></textarea>
-          <button @click="updateNodeChoice">Set</button>
+  <!-- CHOICE NODE -->
+
+  <div v-else-if="selected_cell.value.shape==='CHOICE' " class="node" :key="componentKey">
+    <div class="node-data">
+      <div class="node-id">NODE ID: {{ selected_cell.value.id }}</div>
+      <div class="node-label">Label: {{ selected_cell.value.attrs.text.text }} </div>
+      <div class="node-status">Status: {{ selected_cell.value.data.Status }}</div>
+      <div class="node-ways">Ways: {{ selected_cell.value.data.Ways }}</div>
+      <div class="node-choisenway">Chosen Way: {{ selected_cell.value.data.ChosenWay }}</div>
+      <div class="node-description">Description: {{ selected_cell.value.data.Description }}</div>
+    </div>
+
+    <div class="node-control">
+      <div class="node-change-created">
+        <label for="node-label">Label</label>
+        <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
+        <label for="node-description">Description</label>
+        <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" ></textarea>
+        <button @click="updateNodeChoice">Set</button>
 
 
-          <div class="addchoice">
-            <div>
-              Way:<input v-model="choiceWaysObj.Key" type="text">
-              Сondition:<input v-model="choiceWaysObj.Value" type="text">
-              <button @click="addChoiceWay">+</button>
-            </div>
-            <div class="choiceWaislist" v-for="(value, name) in selected_cell.value.data.Ways">
-              <ul>
-                <li >{{ name }}: {{ value }}<button id="button-simple" @click="()=>{removeNodeWay(name)}">x</button></li>
-              </ul>
-            </div>
+        <div class="addchoice">
+          <div>
+            Way:<input v-model="choiceWaysObj.Key" type="text">
+            Сondition:<input v-model="choiceWaysObj.Value" type="text">
+            <button @click="addChoiceWay">+</button>
           </div>
-          
+          <div class="choiceWaislist" v-for="(value, name) in selected_cell.value.data.Ways">
+            <ul>
+              <li >{{ name }}: {{ value }}<button id="button-simple" @click="()=>{removeNodeWay(name)}">x</button></li>
+            </ul>
+          </div>
         </div>
-        <div class="node-change-publiched"></div>
+        
       </div>
+      <div class="node-change-publiched"></div>
     </div>
+  </div>
 
     <!-- OTHER NODES -->
 
-    <div v-else-if="selected_cell.value.shape==='MULTI' " class="node">
-      MULTI: don`t use. After ways from CHOICE. Syntactic sugar for multiplying a subsequent graph into multiple subgraphs according to the number of multiple choice inputs.
-      ID: {{ selected_cell.value.id }}
-    </div>
-    <div v-else-if="selected_cell.value.shape==='START' " class="node">
-      START: special node for start project.
-      ID: {{ selected_cell.value.id }}
-    </div>
-    <div v-else-if="selected_cell.value.shape==='END' " class="node">
-      END: special node for end project.
-      ID: {{ selected_cell.value.id }}
-    </div>
-    <div v-else-if="selected_cell.value.shape==='FAIL' " class="node">
-      FAIL: special node after CHOICE. This path means the project can never be completed.
-      ID: {{ selected_cell.value.id }}
-    </div>
+  <div v-else-if="selected_cell.value.shape==='MULTI' " class="node">
+    MULTI: don`t use. After ways from CHOICE. Syntactic sugar for multiplying a subsequent graph into multiple subgraphs according to the number of multiple choice inputs.
+    ID: {{ selected_cell.value.id }}
+  </div>
+  <div v-else-if="selected_cell.value.shape==='START' " class="node">
+    START: special node for start project.
+    ID: {{ selected_cell.value.id }}
+  </div>
+  <div v-else-if="selected_cell.value.shape==='END' " class="node">
+    END: special node for end project.
+    ID: {{ selected_cell.value.id }}
+  </div>
+  <div v-else-if="selected_cell.value.shape==='FAIL' " class="node">
+    FAIL: special node after CHOICE. This path means the project can never be completed.
+    ID: {{ selected_cell.value.id }}
+  </div>
+  <div v-else class="node">{{selected_cell.value.shape}}</div>
 
-    <div v-else class="node">{{selected_cell.value.shape}}</div>
+  <!-- END OTHER NODES -->
+
+<!-- END IF CELL -->
 </div>
-
-<div v-else class="hhh">
+<div v-else class="hh">
   Select node or edge
 </div>
 
-
-
+<!-- END CELL -->
 
 </div>
 </template>
@@ -280,7 +335,6 @@ sortable: {
 
 const onlyMyProjects = ref(true)
 const searchTerm = ref("")
- // 
 const doSearch = (offset, limit, order, sort) => {
   var searchData = {
     Offset: offset,
@@ -307,113 +361,98 @@ const doSearch = (offset, limit, order, sort) => {
   }); 
 };
   
-/**
- * Table search finished event
- */
 const tableLoadingFinish = (elements) => {
 table.isLoading = false;
 };
 
-//doSearch(0, 10, "id", "asc");
+doSearch(0, 10, "id", "asc");
 
 const rowProject = reactive({
-      CreatedAt: "",
-      Creater: 0,
-      Energy: 0,
-      ID: 0,
-      Info: "",
-      Name: "",
-      Published: false,
-      PublishAt: "",
-      Status: "",
+  ID: 0,
+  Name: "",
+  Info: "",
+  CreatedAt: "",
+  UpdatedAt: "",
+  Creater: 0,
+  Energy: 0,
+  Published: false,
+  PublishAt: "",
+  Status: "",
 })
 
+const showRowProject = ref(false)
 const rowClicked = (row) => {
-  Object.assign(rowDream,toRaw(row) );
+  showRowProject.value = true
+  Object.assign(rowProject,toRaw(row));
+  graph.fromJSON(JSON.parse(row.Graph))
+};
+
+
+const publishProject = () => {
+  let url = '/projects/'+rowProject.ID+ '/publish';
+  console.log(url)
+  API.post(url).then((response) => {
+    if (response.data.status === "ok") {
+      rowProject.Published = true;
+      doSearch(0, 10, "id", "asc") 
+    }
+    window.alert(response.data.message);
+  });
+
+};
+
+
+const deleteProject = () => {
+  let url = '/projects/'+rowProject.ID;
+  API.delete(url).then((response) => {
+    if (response.data.status == "ok") {
+      showRowProject.value=false; graph.fromJSON({});
+      doSearch(0, 10, "id", "asc")
+      return
+    }
+    window.alert(response.data.message);
+  });
 };
 
 
 
 const NewProject = reactive({
   DreamName: "",
-  Description:"",
-  Name: ""
+  Info:"",
+  Name: "",
+  Graph: ""
 })
-
 const createNewProject = () => {
   console.log(NewProject.DreamName)
   console.log(NewProject.Name)
-  console.log(NewProject.Description)
+  console.log(NewProject.Info)
+  console.log(graph.toJSON())
+
+
+  NewProject.Graph = JSON.stringify(graph.toJSON())
+
+
+  NewProject.Name = NewProject.DreamName +"/"+ NewProject.Name
+
+  let url = '/projects';
+  API.post(url, NewProject).then((response) => {
+      if (response.data.status === "ok") {
+        console.log("graph load")
+        return
+      } 
+      window.alert(response.data.message);
+  }); 
+
 }
 
 
-
-
-const componentKey = ref(0);  /// для лучшей отрисовки
-const choiceWaysObj = reactive({
-  Key:"",
-  Value:""
-})
-const addChoiceWay = ()=> {
-  selected_cell.value.setData({Ways: {[choiceWaysObj.Key]:choiceWaysObj.Value}});
-  choiceWaysObj.Key="";choiceWaysObj.Value="";componentKey.value += 1;
- }
-const removeNodeWay = (name)=> {
-  let obj = selected_cell.value.getData()
-  delete obj.Ways[name]
-  selected_cell.value.updateData(obj, {overwrite: true}) 
-  componentKey.value += 1;
-}
-
-
-const updateNodeChoice = ()=> {
-  selected_cell.value.setAttrs({
-  text: { text: nodeUpdate.Label},
-  })
-  selected_cell.value.setData({"Description":nodeUpdate.Description})
-  nodeUpdate.Label = "";nodeUpdate.Description = "";
-}
-
-
+////////
+/////// GRAPH INIT
+///////
 const container = ref(null)
 const stencilref = ref(null)
 const selected_cell = reactive({});
 let graph = null
-
-
-//  UPDATE CELL
-const nodeUpdate = reactive({
-  Label: "",
-  LeadTime: 0, 
-  Description: "",
-})
-const edgeUpdate = reactive({
-  Label: "",
-})
-const updateEdge = () => {
-  selected_cell.value.setLabels(edgeUpdate.Label)
-  edgeUpdate.Label = "";
-}
-const updateNode = () => {
-  selected_cell.value.setAttrs({
-  text: { text: nodeUpdate.Label},
-  })
-  selected_cell.value.setData({"Description":nodeUpdate.Description, "LeadTime":nodeUpdate.LeadTime})
-  nodeUpdate.Label = "";
-  nodeUpdate.LeadTime = 0;
-  nodeUpdate.Description = "";
-}
-
-
-// END UPDATE CELL
-
-
-// validation and upload project to server
-const graphToJson = () => {
-    console.log(graph.toJSON())
-}
-
-// init GraphModeler
 onMounted(() => { 
 
 // https://x6.antv.antgroup.com/api/model/model
@@ -913,7 +952,6 @@ const fail = graph.createNode({
 stencil.load([start, slow, fast, choice, fail, multi, end], 'group1')
 // mount end
 })
-
 const register_events = (graph) => {
         graph.on('node:click', ({ e, x, y, node, view }) => { 
           console.log(node)
@@ -925,8 +963,68 @@ const register_events = (graph) => {
           if (selected_cell.value != edge)
                 selected_cell.value = edge
         })
-    }
+}
+///////
+/////// END GRAPH INIT 
+//////
+
+
+
+//  UPDATE CELL
+const nodeUpdate = reactive({
+  Label: "",
+  LeadTime: 0, 
+  Description: "",
+})
+const edgeUpdate = reactive({
+  Label: "",
+})
+const componentKey = ref(0);  /// для лучшей отрисовки
+const choiceWaysObj = reactive({
+  Key:"",
+  Value:""
+})
+
+
+const updateEdge = () => {
+  selected_cell.value.setLabels(edgeUpdate.Label)
+  edgeUpdate.Label = "";
+}
+const updateNode = () => {
+  selected_cell.value.setAttrs({
+  text: { text: nodeUpdate.Label},
+  })
+  selected_cell.value.setData({"Description":nodeUpdate.Description, "LeadTime":nodeUpdate.LeadTime})
+  nodeUpdate.Label = "";
+  nodeUpdate.LeadTime = 0;
+  nodeUpdate.Description = "";
+}
+
+const addChoiceWay = ()=> {
+  selected_cell.value.setData({Ways: {[choiceWaysObj.Key]:choiceWaysObj.Value}});
+  choiceWaysObj.Key="";choiceWaysObj.Value="";componentKey.value += 1;
+ }
+const removeNodeWay = (name)=> {
+  let obj = selected_cell.value.getData()
+  delete obj.Ways[name]
+  selected_cell.value.updateData(obj, {overwrite: true}) 
+  componentKey.value += 1;
+}
+const updateNodeChoice = ()=> {
+  selected_cell.value.setAttrs({
+  text: { text: nodeUpdate.Label},
+  })
+  selected_cell.value.setData({"Description":nodeUpdate.Description})
+  nodeUpdate.Label = "";nodeUpdate.Description = "";
+}
+// END UPDATE CELL
+
+
+
 </script>
+
+
+
 
 <style scoped lang="scss">
 @use '@/assets/scss/_colors' as clr;
@@ -985,9 +1083,9 @@ const register_events = (graph) => {
     border-bottom:10px solid #1D0505;
 }
 .containerDraw {
+    border-left: 5px solid #ffffff;
     width: 70%;
     height: 770px;
-    border: 1px dashed black;
     background-color: rgb(29, 5, 5);
 }
 .containerDraw p {
@@ -1001,6 +1099,7 @@ const register_events = (graph) => {
 .project-panel {
     border-bottom:10px solid #1D0505;
     width: 20%;
+    max-width: 20%;
     background-color: white;
     padding: 20px;
 }
@@ -1011,18 +1110,24 @@ const register_events = (graph) => {
 }
 
 .project-panel div {
+  margin-top: 20px;
 }
-.project-panel button {
-  cursor: pointer;
-    background-color: white;
-    border: none;
-    color:rgb(247, 3, 3);
-    
+
+.project-panel .project-label {
+
+  font-size: 17px;
+  color: #2f156b;
 }
-.project-panel button:hover {
-  background-color: white;
-  color: black;
+
+.redbutton{
+  color: red;
+  margin-left: 10px;
 }
+.orangebutton{
+  color:darkorange;
+}
+
+
 #savebutton {
   color:#309A05;
   width: 100%;
@@ -1092,6 +1197,7 @@ button:hover {
   transition: 1.5s;
   margin-left: 10px;
 }
+
 .addchoice {
   margin-top: 20px;
 }

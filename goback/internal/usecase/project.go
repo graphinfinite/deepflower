@@ -50,6 +50,7 @@ func (d *ProjectUsecase) PublishProject(ctx context.Context, userId, projectId s
 	if err := d.Rep.EnergyTxUserToProject(ctx, userId, projectId, EnergyForPublish); err != nil {
 		return err
 	}
+	print("aasdasdasdasd")
 	if _, err := d.Rep.UpdateUserProject(ctx, projectId, map[string]interface{}{"Published": true}); err != nil {
 		return err
 	}

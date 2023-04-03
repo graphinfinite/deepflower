@@ -26,6 +26,7 @@ import GraphModeler from '@/components/GraphModeler.vue';
   color: clr.$clr-route-header;
   padding: 20px;
   background-color: clr.$bg-route-header;
+  font-size: clr.$route-header-fontsize;
 }
 
 .graphmodeler{
@@ -34,7 +35,7 @@ import GraphModeler from '@/components/GraphModeler.vue';
 }
 
 .wrapper{
-  border-left: 2px solid #ffffff;
+
 
 }
 </style>

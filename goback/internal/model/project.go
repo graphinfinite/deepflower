@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Project struct {
-	ID        uint      `db:"id" json:"ID"`
+	ID        string    `db:"id" json:"ID"`
 	Name      string    `db:"name" json:"Name,omitempty"`
 	Info      string    `db:"info" json:"Info,omitempty"`
 	CreatedAt time.Time `db:"createdat" json:"CreatedAt,omitempty"`

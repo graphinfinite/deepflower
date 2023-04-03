@@ -90,7 +90,6 @@ func (c *ProjectController) CreateProject(w http.ResponseWriter, r *http.Request
 func (c *ProjectController) PublishProject(w http.ResponseWriter, r *http.Request) {
 	projectId := chi.URLParam(r, "projectId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-
 	if err := c.Uc.PublishProject(r.Context(), userId, projectId); err != nil {
 		c.log.Err(err).Msg("PublishProject ")
 		JSON(w, STATUS_ERROR, err.Error())

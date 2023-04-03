@@ -206,7 +206,10 @@ const newdream = reactive({
     Info: dreaminfo,
     Location:location
 })
-const doSend = () => API.post("/dreams", JSON.stringify(newdream)).then((response) => {
+const doSend = () =>{
+
+  newdream.Name =newdream.Location +"/"+ newdream.Name
+  API.post("/dreams", JSON.stringify(newdream)).then((response) => {
     if (response.data.status === "ok") {
       doSearch(0, 10, "id", "asc")
       window.alert(response.data.message)
@@ -214,7 +217,10 @@ const doSend = () => API.post("/dreams", JSON.stringify(newdream)).then((respons
     }
     window.alert(response.data.message)
 
-})
+});
+
+
+} 
 
 
 const energyToDream = ref(0)
@@ -245,7 +251,7 @@ const addEnergyToDream = () => {
   <label for="checkbox1">Only my dreams: {{ onlyMyDreams }}</label>
   <input type="checkbox" id="checkbox1" v-model="onlyMyDreams" />
 
-  <label for="filterInput">SearchBy:</label>
+  <label for="filterInput">Search by location/dream:</label>
   <input id="filterInput" v-model="searchTerm" />
   <button @click="doSearch(0, 10, 'id', 'asc')">GO</button>
 </div>
@@ -310,13 +316,14 @@ const addEnergyToDream = () => {
 <div id="dreaminput">
         <h1>Create new dream!</h1>
         <form @submit.prevent="doSend">
+          <label for="location">Location name</label>&nbsp;
+          <input  id="location" v-model="location" placeholder="...">
           <label for="dreamname">Dream name</label>
           <input type="text" id="dreamname" v-model="dreamname" placeholder="..." autocomplete="off">
           <label for="dreaminfo">Dream info (Use simple html tags. No XSS Cross-Site Scripting)</label>&nbsp;
           <textarea id="dreaminfo" v-model="dreaminfo" placeholder="..."></textarea>
-          <label for="location">Location name</label>&nbsp;
-          <input  id="location" v-model="location" placeholder="...">
-          <button type="submit">SEND ->...</button> 
+
+          <button type="submit">Save</button> 
           <div class="form-group">
           <div v-if="messageErr" class="alert alert-danger" role="alert">
             {{ messageErr }}
@@ -447,6 +454,7 @@ button:hover {
     margin-bottom: 30px;
     margin-top: 30px;
     color:clr.$clr-button;
+    font-size: 20px;
 }
 
 #dreaminput form {

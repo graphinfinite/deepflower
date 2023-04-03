@@ -387,10 +387,10 @@ const showLocationDream = () => {
           </div>
           
           <label for="locationHeight">Location Height (m)</label>
-          <input type="number" id="locationHeight" v-model="locationHeight" placeholder="..." autocomplete="off">
+          <input type="number" id="locationHeight" v-model="locationHeight" placeholder="..." autocomplete="off" >
           <label for="locationRadius">Location Radius (m)</label>
-          <input type="number" id="locationRadius" v-model="locationRadius" placeholder="..." autocomplete="off">
-          <button type="submit">->...</button> 
+          <input type="number" id="locationRadius" v-model="locationRadius" placeholder="..." autocomplete="off" min="0">
+          <button type="submit">Save</button> 
 
 
           <div class="form-group">
@@ -545,7 +545,8 @@ flex-direction: row;
 #locationinput h1 {
     margin-bottom: 30px;
     margin-top: 30px;
-    color:clr.$bg-button;
+    color:clr.$clr-button;
+    font-size: 20px;
 }
 
 #locationinput form {
@@ -557,6 +558,15 @@ flex-direction: row;
 #locationinput form label {
     margin-top: 20px;
 
+}
+
+#locationinput img{
+  border: 3px solid rgb(165, 160, 160);
+  margin-left: 20px;
+  margin-top:  10px;
+
+  width: 150px;
+  height: 150px;
 }
 
 #locationinput form input, textarea {
