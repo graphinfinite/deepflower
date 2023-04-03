@@ -316,7 +316,7 @@ const addEnergyToDream = () => {
           <textarea id="dreaminfo" v-model="dreaminfo" placeholder="..."></textarea>
           <label for="location">Location name</label>&nbsp;
           <input  id="location" v-model="location" placeholder="...">
-          <button type="submit">->...</button> 
+          <button type="submit">SEND ->...</button> 
           <div class="form-group">
           <div v-if="messageErr" class="alert alert-danger" role="alert">
             {{ messageErr }}
@@ -337,29 +337,25 @@ const addEnergyToDream = () => {
 @use '@/assets/scss/_colors' as clr;
 
 .searchBox {
-  color: rgb(0, 0, 0);
-
   padding: 10px;
-  background-color:#ffffff ;
 }
 
 .searchBox #checkbox1, #checkbox2 {
   cursor:pointer;
-  border: 1px solid rgb(219, 208, 208);
   padding: 5px;
   background-color: blueviolet;
-  margin-left: 3px;
-  margin-right: 7px;
-}
-.searchBox label {
-  padding-right: 5px;
-  cursor:default;
+  margin-left: 5px;
 }
 .searchBox #checkbox1:checked {
   background-color: #365778;
 }
-.searchBox #filterInput {
-  border: 1px dashed rgb(221, 210, 210);
+.searchBox label {
+  cursor:default;
+  margin-left: 10px;
+}
+.searchBox input {
+  margin-left: 10px;
+  border: 1px solid whitesmoke;
   padding: 10px;
   background-color: white;
   color: black;
@@ -368,23 +364,17 @@ const addEnergyToDream = () => {
 .searchBox button {
   color: clr.$clr-button;
   background-color:clr.$bg-button;
-
   cursor: pointer;
   padding: 10px;
-
 }
 
-
-
 .dreamroot{
-
 }
 
 
 ::v-deep(.vtl-table .vtl-thead .vtl-thead-th) {
   color: clr.$clr-table-header;
   background-color: clr.$bg-table-header;
-  border-color: #172025;
 }
 ::v-deep(.vtl-table td),
 ::v-deep(.vtl-table tr) {
@@ -406,17 +396,12 @@ const addEnergyToDream = () => {
   display: flex;
   width: 100%;
   flex-direction: column;
-  border: 1px solid whitesmoke;
   padding: 20px;
 }
-
 #dreamrow div {
   padding-top: 10px;
 }
 
-#dreamrow .row-info .i-data{
-background-color: #ffffff;
-}
 
 
 .control-dream-panel {
@@ -424,6 +409,7 @@ background-color: #ffffff;
   width: 100%;
   flex-direction: column;
   border: 1px solid whitesmoke;
+  box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
   padding: 20px;
 }
 .control-dream-panel div {
@@ -432,27 +418,26 @@ background-color: #ffffff;
   border-top: 1px solid whitesmoke;
 }
 
-.control-dream-panel button {
-  color: clr.$clr-button;
+
+
+button {
+  box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
   background-color:clr.$bg-button;
   cursor: pointer;
-  border: 1px solid #add8d8;
   padding: 10px;
-  transition: background-color 2s ease-in-out;
-
+  transition: 0.5s;
   margin-top: 30px;
-  width: 20%;
+  color: clr.$clr-button;
+  margin-left:5px;
 }
-.control-dream-panel button:hover {
+button:hover {
+  box-shadow: 0px 0px 5px rgba(60, 41, 75, 0.5);
   background-color:clr.$bg-button-hover;
 }
 
-.control-dream-panel #energe-input{
-  padding: 10px;
-  border: 1px solid rgb(233, 229, 229);
-}
 
 
+///  new
 #dreaminput {
     padding: 20px;
     border: 1px solid whitesmoke;
@@ -461,7 +446,7 @@ background-color: #ffffff;
 #dreaminput h1 {
     margin-bottom: 30px;
     margin-top: 30px;
-    color:#2C5662;
+    color:clr.$clr-button;
 }
 
 #dreaminput form {
@@ -469,34 +454,15 @@ background-color: #ffffff;
     width: 100%;
     flex-direction: column;
 }
-
 #dreaminput form label {
     margin-top: 20px;
-
 }
 
 #dreaminput form input, textarea {
-background-color: rgb(250, 249, 253);
+//background-color: rgb(250, 249, 253);
 width: 100%;
 padding: 20px 20px;
 border: 1px solid whitesmoke;
-border-radius: 4px;
-}
-
-
-#dreaminput form button {
-  color: clr.$clr-button;
-  background-color:clr.$bg-button;
-  cursor: pointer;
-  border: none;
-  padding: 10px;
-  transition: background-color 2s ease-in-out;
-
-  margin-top: 30px;
-  width: 10%;
-}
-#dreaminput form button:hover {
-  background-color:clr.$bg-button-hover;
 }
 
 </style>

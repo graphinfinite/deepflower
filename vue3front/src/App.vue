@@ -19,8 +19,6 @@ import {ref} from "vue"
 
 console.log(localStorage.getItem("tokenAccess"))
 const isAuthorazed = ref(Boolean(localStorage.getItem("tokenAccess")))
-isAuthorazed.value = true
-
 </script>
 <style scoped lang="scss">
 #root {

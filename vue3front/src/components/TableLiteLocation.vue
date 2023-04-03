@@ -427,25 +427,24 @@ flex-direction: row;
   margin-right: 7px;
 }
 
-.searchBox label {
-  color: #365778;
-  padding-right: 5px;
-  cursor:default;
-}
+
 .searchBox #checkbox1:checked {
   background-color: #365778;
 }
+
+.searchBox label {
+  cursor:default;
+}
 .searchBox #filterInput {
+  margin-left: 15px;
   padding: 10px;
-  background-color: white;
-  border: 1px dashed rgb(201, 194, 194);
+  border: 1px solid whitesmoke;
 }
 
 .searchBox button {
   color: clr.$clr-button;
   background-color:clr.$bg-button;
   cursor: pointer;
-  border: 1px solid #add8d8;
   padding: 10px;
 }
 
@@ -485,19 +484,15 @@ flex-direction: row;
 }
 
 #locationrow div {
-  padding-top: 10px;
+  margin-top: 10px;
 }
 
-#locationrow .row-info .i-data{
-background-color: #ffffff;
-}
 
 
 
 #checkbox3 {
   color:blueviolet;
   cursor:pointer;
-  border: 1px solid whitesmoke;
   padding: 10px;
   margin-top: 30px;
 }
@@ -507,17 +502,16 @@ background-color: #ffffff;
   padding: 20px;
   background-color: whitesmoke;  /* aliceblue */
 }
-
 .location_dreams ul li{
   background-color: white;
   padding:15px;
   border: 1px solid rgb(200, 205, 226);
-
 }
 
 
 
 .control-location-panel {
+  box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -534,10 +528,8 @@ background-color: #ffffff;
   color: clr.$clr-button;
   background-color:clr.$bg-button;
   cursor: pointer;
-  border: 1px solid #add8d8;
   padding: 10px;
-  transition: background-color 2s ease-in-out;
-
+  transition: background-color 1.5s ease-in-out;
   margin-top: 30px;
   width: 20%;
 }
@@ -559,7 +551,7 @@ background-color: #ffffff;
 #locationinput h1 {
     margin-bottom: 30px;
     margin-top: 30px;
-    color:#2C5662;
+    color:clr.$bg-button;
 }
 
 #locationinput form {
@@ -574,27 +566,28 @@ background-color: #ffffff;
 }
 
 #locationinput form input, textarea {
-background-color: rgb(250, 249, 253);
 width: 100%;
 padding: 20px 20px;
 border: 1px solid whitesmoke;
-border-radius: 4px;
 }
 
 
-#locationinput form button {
-  color: clr.$clr-button;
+button {
+  box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
   background-color:clr.$bg-button;
   cursor: pointer;
-  border: none;
   padding: 10px;
-  transition: background-color 2s ease-in-out;
-
+  transition: 0.5s;
   margin-top: 30px;
-  width: 10%;
+  color: clr.$clr-button;
+  margin-left:5px;
 }
-#locationinput form button:hover {
-  background-color: clr.$bg-button-hover;
+button:hover {
+  box-shadow: 0px 0px 5px rgba(60, 41, 75, 0.5);
+  background-color:clr.$bg-button-hover;
 }
+
+
+
 
 </style>

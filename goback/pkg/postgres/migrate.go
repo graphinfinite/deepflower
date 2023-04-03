@@ -67,14 +67,15 @@ func MigrateDb(dbPool *sqlx.DB) error {
 			published BOOLEAN NOT NULL DEFAULT false,
 			status VARCHAR(32) NOT NULL,
 			creater uuid NOT NULL,
-			energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0);
-			graph TEXT NOT NULL DEFAULT 'empty';
+			energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
+			graph TEXT NOT NULL DEFAULT 'empty');
 
 
 		CREATE TABLE IF NOT EXISTS "dream_project" (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 			projectid uuid NOT NULL,
 			dreamid uuid NOT NULL);
+
 		`
 	_, errDb := dbPool.Exec(q)
 	if errDb != nil {

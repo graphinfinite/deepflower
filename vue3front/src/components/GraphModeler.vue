@@ -41,21 +41,19 @@
   <div ref="stencilref" id="nodebar"></div>
   <div class="project-panel">
 
-
-      <div class="project-id">PROJECT ID: </div>
-      <div class="project-name">Name: </div>
-      <div class="project-dream">For dream: </div>
-      <div class="project-description">Description: </div>
-      <div class="project-creater">Creater: </div>
-      <div class="project-published">Published: </div>
-      <div class="project-pubdate">PubDate: </div>
-
-      <div class="project-complited">Complited(%): </div>
-      <div class="project-time">Total Time: </div>
-      <div class="project-energy">Total Energy: </div>
-      <div><button @click="graphToJson()" id="savebutton">Validate and Save</button></div>
+    <div class="project-label">Create new project.</div>
+      <div class="project-dream">For dream:
+         <input  type="text" v-model="NewProject.DreamName">
+      </div>
+      <div class="project-name">Name: 
+        <input  type="text" v-model="NewProject.Name">
+      </div>
+      <div class="project-description">Description: 
+        <textarea  type="text" v-model="NewProject.Description"></textarea>
+      </div>
+      <div><button @click="createNewProject" id="savebutton">Validate and Save</button></div>
       
-      <div><button>DELETE</button></div>
+      <!-- <div><button>DELETE</button></div> -->
       
   </div>
 </div>
@@ -289,7 +287,7 @@ const doSearch = (offset, limit, order, sort) => {
     Limit: limit,
     Order: order,
     Sort: sort,
-    OnlyMyProjets: onlyMyProjects.value,
+    OnlyMyProjects: onlyMyProjects.value,
     SearchTerm: searchTerm.value
     }
   console.log(JSON.stringify(searchData))
@@ -333,6 +331,20 @@ const rowProject = reactive({
 const rowClicked = (row) => {
   Object.assign(rowDream,toRaw(row) );
 };
+
+
+
+const NewProject = reactive({
+  DreamName: "",
+  Description:"",
+  Name: ""
+})
+
+const createNewProject = () => {
+  console.log(NewProject.DreamName)
+  console.log(NewProject.Name)
+  console.log(NewProject.Description)
+}
 
 
 
@@ -925,10 +937,39 @@ const register_events = (graph) => {
 
 
 .searchBox {
-
-
   padding: 20px;
 }
+.searchBox {
+  border: 1px solid whitesmoke;
+  padding: 10px;
+  background-color:white ;
+}
+.searchBox #checkbox1, #checkbox2  {
+  cursor:pointer;
+  border: 1px solid black;
+  padding: 5px;
+  background-color: blueviolet;
+  margin-left: 3px;
+  margin-right: 7px;
+}
+
+.searchBox #checkbox1:checked {
+  background-color: #365778;
+}
+
+.searchBox label {
+  cursor:default;
+}
+.searchBox #filterInput {
+  margin-left: 15px;
+  padding: 10px;
+  background-color: white;
+  border: 1px solid whitesmoke;
+}
+.searchBox button {
+  padding: 10px;
+}
+
 
 .graph-panel {
   display: flex;
@@ -955,50 +996,50 @@ const register_events = (graph) => {
 
 
 
+
+// Стиль панели создание и обновление проекта
 .project-panel {
     border-bottom:10px solid #1D0505;
     width: 20%;
     background-color: white;
     padding: 20px;
 }
+.project-panel input{
+  padding: 5px;
+  margin-top: 5px;
+  border: 1px solid whitesmoke
+}
 
 .project-panel div {
-  border-top:1px solid whitesmoke;
-  border-right:2px solid whitesmoke;
-  padding: 5px;
-
-  margin-top: 20px;
 }
 .project-panel button {
   cursor: pointer;
     background-color: white;
     border: none;
     color:rgb(247, 3, 3);
-
+    
 }
 .project-panel button:hover {
   background-color: white;
   color: black;
 }
-
 #savebutton {
   color:#309A05;
+  width: 100%;
+  max-width: 100%;
 }
+//////// EnD
 
 
 
 
-
+////// ЯЧЕЙКА
 .cell-panel {
   width: 100%;
   background-color: white;
-
 }
 .node{
   padding:10px;
-  border-left:10px solid #1D0505;
-  border-bottom:1px solid #1D0505;
-  //box-shadow: 0 0 40px rgba(254, 252, 255, 0.5);
   display: flex;
   flex-direction: row;
 }
@@ -1007,14 +1048,11 @@ padding: 10px;
 width: 50%;
 }
 .node .node-data div {
-
   margin-top: 10px;
 }
-
 .node .node-control{
   width: 50%;
 }
-
 .node .node-control .node-change-created {
   display: flex;
   flex-direction: column;
@@ -1025,27 +1063,25 @@ width: 50%;
   padding: 10px;
   margin-bottom: 10px;
 }
+
+
+
+//// разобраться с этим
 label {
 color: #1D0505;
 margin-top: 20px;
 }
-
 button {
   cursor: pointer;
   max-width: 70px;
-  border-radius: 4px;
   padding: 3px;
   color: clr.$clr-button;
-  color: clr.$bg-button;
   transition: 0.5s;
   box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
 }
 button:hover {
   box-shadow: 0px 0px 5px rgba(60, 41, 75, 0.5);
-  color: clr.$bg-button-hover;
 }
-
-
 #button-simple {
   cursor: pointer;
   font-size: 15px;
@@ -1060,14 +1096,11 @@ button:hover {
   margin-top: 20px;
 }
 
-
-
 .edgeForm {
   padding: 20px;
 }
 
 .edgeForm input{
-
   padding: 5px;
   border: 1px solid whitesmoke;
 }

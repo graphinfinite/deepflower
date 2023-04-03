@@ -29,12 +29,13 @@ import GraphModeler from '@/components/GraphModeler.vue';
 }
 
 .graphmodeler{
-   margin-left: 10px;
+
   
 }
 
 .wrapper{
- background-color: white;
+  border-left: 2px solid #ffffff;
+
 }
 </style>
 
