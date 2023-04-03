@@ -451,26 +451,20 @@ flex-direction: row;
 ::v-deep(.vtl-table .vtl-thead .vtl-thead-th) {
   color: clr.$clr-table-header;
   background-color: clr.$bg-table-header;
-  border-color: #172025;
 }
 ::v-deep(.vtl-table td),
 ::v-deep(.vtl-table tr) {
-  border: 1px solid whitesmoke;
-  color: rgb(0, 0, 0);
-  background-color: #ffffff;
+  border: 1px solid clr.$clr-table-header;
 }
 ::v-deep(.vtl-paging-info) {
-  color: rgb(0, 0, 0);
-  background-color: #ffffff;
+  color: clr.$bg-table-header;
 }
 ::v-deep(.vtl-paging-count-label),
 ::v-deep(.vtl-paging-page-label) {
-  color: rgb(0, 0, 0);
-  background-color: #ffffff;
+  color: clr.$bg-table-header;
 }
 ::v-deep(.vtl-paging-pagination-page-link) {
-  color: rgb(2, 1, 1);
-  background-color: #ffffff;
+  border: 1px solid clr.$clr-table-header;
 }
 
 

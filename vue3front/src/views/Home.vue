@@ -68,10 +68,7 @@ API.get("/user").then((response) => {
 }
 )
 
-
 const doLogout = () =>  AuthService.logout()
-
-  
 </script>
 
 <style scoped lang="scss">
@@ -105,18 +102,26 @@ li{
 }
 
 
-.logout button {
+button {
+  cursor: pointer;
+  max-width: 70px;
+  padding: 3px;
   color: clr.$clr-button;
+  transition: 0.5s;
+  box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
+}
+button:hover {
+  box-shadow: 0px 0px 5px rgba(60, 41, 75, 0.5);
+}
+
+.logout button {
   padding: 10px;
-  border-radius: 5%;
   margin-top: 10px;
   margin-left: 10px;
 
   background-color: clr.$bg-button;
-  transition: background-color 1s ease-in-out;
+  transition: 0.5s;
 }
-.logout button:hover {
-  background-color: clr.$bg-button-hover;
-}
+
 
 </style>

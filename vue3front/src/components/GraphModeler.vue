@@ -1108,6 +1108,28 @@ button:hover {
 
 
 
+::v-deep(.vtl-table .vtl-thead .vtl-thead-th) {
+  color: clr.$clr-table-header;
+  background-color: clr.$bg-table-header;
+}
+::v-deep(.vtl-table td),
+::v-deep(.vtl-table tr) {
+  border: 1px solid clr.$clr-table-header;
+}
+::v-deep(.vtl-paging-info) {
+  color: clr.$bg-table-header;
+}
+::v-deep(.vtl-paging-count-label),
+::v-deep(.vtl-paging-page-label) {
+  color: clr.$bg-table-header;
+}
+::v-deep(.vtl-paging-pagination-page-link) {
+  border: 1px solid clr.$clr-table-header;
+}
+
+
+
+
 
 
 </style>
