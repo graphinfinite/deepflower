@@ -171,12 +171,40 @@ func (c *ProjectController) DeleteUserProject(w http.ResponseWriter, r *http.Req
 	JSON(w, STATUS_OK, "project was deleted")
 }
 
+type AddEnergyToTaskRequest struct {
+	Energy uint64 `json:"Energy,omitempty"`
+}
+
 func (c *ProjectController) AddEnergyToTask(w http.ResponseWriter, r *http.Request) {
-	return
+	var e AddEnergyToTaskRequest
+	userId, _ := r.Context().Value(ContextUserIdKey).(string)
+	projectId := chi.URLParam(r, "projectId")
+	nodeId := chi.URLParam(r, "nodeId")
+	if err := DecodeJSONBody(w, r, &e); err != nil {
+		c.log.Err(err).Msg("AddEnergyToTask ")
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+
+	if err := c.Uc.AddEnergyToTask(r.Context(), userId, projectId, nodeId, e.Energy); err != nil {
+		c.log.Err(err).Msg("AddEnergyToTask ")
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	JSON(w, STATUS_OK, "task energy updated")
 
 }
 
 func (c *ProjectController) CloseTask(w http.ResponseWriter, r *http.Request) {
-	return
+	userId, _ := r.Context().Value(ContextUserIdKey).(string)
+	projectId := chi.URLParam(r, "projectId")
+	nodeId := chi.URLParam(r, "nodeId")
+
+	if err := c.Uc.CloseTask(r.Context(), userId, projectId, nodeId); err != nil {
+		c.log.Err(err).Msg("CloseTask ")
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	JSON(w, STATUS_OK, "confirmation started")
 
 }

@@ -50,7 +50,6 @@ func (d *ProjectUsecase) PublishProject(ctx context.Context, userId, projectId s
 	if err := d.Rep.EnergyTxUserToProject(ctx, userId, projectId, EnergyForPublish); err != nil {
 		return err
 	}
-	print("aasdasdasdasd")
 	if _, err := d.Rep.UpdateUserProject(ctx, projectId, map[string]interface{}{"Published": true}); err != nil {
 		return err
 	}
@@ -63,7 +62,7 @@ func (d *ProjectUsecase) AddEnergyToProject(ctx context.Context, userId, project
 		return err
 	}
 	if !project.Published {
-		return fmt.Errorf("error: article not published")
+		return fmt.Errorf("error: project not published")
 	}
 	if err := d.Rep.EnergyTxUserToProject(ctx, userId, projectId, energy); err != nil {
 		return err
@@ -94,11 +93,29 @@ func (d *ProjectUsecase) DeleteUserProject(ctx context.Context, userId, projectI
 		return err
 	}
 	if project.Creater != userId || project.Published {
-		// TODO
 		return fmt.Errorf("not available")
 	}
 	if err := d.Rep.DeleteUserProject(ctx, projectId); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (d *ProjectUsecase) AddEnergyToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error {
+	// check status task
+	if err := d.Rep.EnergyTxUserToTask(ctx, userId, projectId, nodeId, energy); err != nil {
+		return err
+	}
+	return nil
+}
+func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeId string) error {
+
+	// check status task
+	// change status tast to 'confirmation'
+	if err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, "confirmation"); err != nil {
+		return err
+	}
+	// start consensus process
+
 	return nil
 }

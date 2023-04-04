@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"deepflower/internal/model"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -34,7 +35,6 @@ func (s *ProjectStorage) CreateProject(ctx context.Context, name, info, graph, d
 	q2 := `INSERT INTO dream_project(dreamid, projectid) 
 	VALUES ($1, (SELECT id FROM dream WHERE name=$2));
 	`
-
 	result, err := tx.ExecContext(ctx, q2, m.ID, dreamName)
 	if err != nil {
 		tx.Rollback()
@@ -86,9 +86,6 @@ func (s *ProjectStorage) SearchProjects(ctx context.Context, userId string,
 		queryCnt = `SELECT count(id) FROM project`
 	}
 	q := query + filter
-	// fmt.Println(q)
-	// fmt.Println(queryCnt)
-	// fmt.Println(args...)
 
 	if err := s.Db.SelectContext(ctx, &projects, q, args...); err != nil {
 		return []model.Project{}, 0, err
@@ -163,4 +160,46 @@ func (s *ProjectStorage) EnergyTxUserToProject(ctx context.Context, userId, proj
 		return err
 	}
 	return nil
+}
+
+// TODO : JSONB OR DECOMPOSE NODES DATA OR OTHER DB ?????
+func (s *ProjectStorage) EnergyTxUserToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error {
+	tx := s.Db.MustBegin()
+	query1 := `UPDATE users SET energy=energy-$1 WHERE id=$2;`
+
+	query2 := `SELECT graph FROM project WHERE id=$1;`
+
+	_, err := tx.ExecContext(ctx, query1, energy, userId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	var graphStr string
+	err = tx.SelectContext(ctx, &graphStr, query2, projectId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	var graph interface{}
+	err = json.Unmarshal([]byte(graphStr), graph)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	fmt.Println(graph)
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId, newStatus string) error {
+
+	return nil
+
 }

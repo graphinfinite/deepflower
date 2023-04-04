@@ -46,7 +46,7 @@ func (app *App) Run(cfg config.Configuration) error {
 		return err
 	}
 
-	// client for requests to telegram
+	// client for requests
 	client := http.Client{Timeout: time.Second * 10}
 
 	// Auth

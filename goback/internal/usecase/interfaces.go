@@ -50,5 +50,8 @@ type (
 		UpdateUserProject(ctx context.Context, projectId string, projectUpdate map[string]interface{}) (model.Project, error)
 
 		DeleteUserProject(ctx context.Context, projectId string) error
+
+		EnergyTxUserToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error
+		UpdateTaskStatus(ctx context.Context, projectId, nodeId, newStatus string) error
 	}
 )

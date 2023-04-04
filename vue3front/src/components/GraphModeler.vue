@@ -142,7 +142,7 @@
     </div>
 
     <div class="node-control">
-      <div class="node-change-created">
+      <div class="node-change-created" v-if="!rowProject.Published">
         <label for="node-label">Label</label>
         <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
         <label for="leadtime">Lead Time(h)</label>
@@ -152,7 +152,10 @@
 
         <button @click="updateNode">Set</button>
       </div>
-      <div class="node-change-publiched"></div>
+      <div class="node-change-publiched" v-else>
+        <div class="energy-to-task-form"><input type="number" min="0" v-model="energyToTask"><button @click="addEnergyToTask">+{{ energyToTask }} Energy</button></div>
+        <div class="close-task-form"><button @click="closeTask">CLOSE TASK</button></div>
+      </div>
     </div>
   </div>
 
@@ -169,7 +172,7 @@
     </div>
 
     <div class="node-control">
-      <div class="node-change-created">
+      <div class="node-change-created" v-if="!rowProject.Published">
         <label for="node-label">Label</label>
         <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
         <label for="node-description">Description</label>
@@ -191,7 +194,7 @@
         </div>
         
       </div>
-      <div class="node-change-publiched"></div>
+      <div class="node-change-publiched" v-else> TODO</div>
     </div>
   </div>
 
@@ -423,17 +426,8 @@ const NewProject = reactive({
   Graph: ""
 })
 const createNewProject = () => {
-  console.log(NewProject.DreamName)
-  console.log(NewProject.Name)
-  console.log(NewProject.Info)
-  console.log(graph.toJSON())
-
-
   NewProject.Graph = JSON.stringify(graph.toJSON())
-
-
   NewProject.Name = NewProject.DreamName +"/"+ NewProject.Name
-
   let url = '/projects';
   API.post(url, NewProject).then((response) => {
       if (response.data.status === "ok") {
@@ -442,8 +436,49 @@ const createNewProject = () => {
       } 
       window.alert(response.data.message);
   }); 
-
 }
+
+
+/* <div class="energy-to-task-form"><input type="number" min="0" v-model="energyToTask"><button @click="addEnergyToTask">+{{ energyToTask }} Energy</button></div>
+        <div class="close-task-form"><button @click="closeTask">CLOSE TASK</button></div>
+*/
+
+
+// TASK AND CHOICE CONTROL
+
+const energyToTask = ref(0)
+const addEnergyToTask = ()=> {
+  let obj = selected_cell.value.getData()
+  if (obj.Status == "created") {
+    let url = '/projects/'+ projectRow.ID+"/node/"+ selected_cell.value.id+"/addenergy";
+    API.post(url, JSON.stringify({Energy: energyToTask.value})).then((response) => {
+      if (response.data.status === "ok") {
+        console.log("energy added to the task")
+        selected_cell.value.setData({"Energy": obj.Energy + energyToTask.value})
+        return
+      } 
+      window.alert(response.data.message);
+    }); 
+  } 
+  window.alert("error. status != created");
+}
+
+const closeTask = ()=> {
+  let obj = selected_cell.value.getData()
+  if (obj.Status == "created") {
+    let url = '/projects/'+ projectRow.ID+"/node/"+ selected_cell.value.id+"/close";
+    API.post(url).then((response) => {
+      if (response.data.status === "ok") {
+        console.log("task in confirmation")
+        selected_cell.value.setData({"Status": "confirmation"})
+        return
+      } 
+      window.alert(response.data.message);
+    }); 
+    window.alert("error. status != created");
+  }
+}
+// END TASK AND CHOICE CONTROL
 
 
 ////////

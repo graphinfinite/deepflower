@@ -49,5 +49,9 @@ type (
 			onlyMyProjects bool, order string, searchTerm, sort string) ([]model.Project, int, error)
 		UpdateUserProject(ctx context.Context, userId, projectId string, projectPatch map[string]interface{}) (model.Project, error)
 		DeleteUserProject(ctx context.Context, userId, projectId string) error
+
+		// nodes updates
+		AddEnergyToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error
+		CloseTask(ctx context.Context, userId, projectId, nodeId string) error
 	}
 )
