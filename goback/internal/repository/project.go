@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -162,11 +163,11 @@ func (s *ProjectStorage) EnergyTxUserToProject(ctx context.Context, userId, proj
 	return nil
 }
 
-// TODO : JSONB OR DECOMPOSE NODES DATA OR OTHER DB ?????
+// CODE PROTOTYPE !!!!!!!!!!!!!!
+// / TODO :POSTGRES-> JSONB OR DECOMPOSE NODES DATA OR OTHER DB ?????
 func (s *ProjectStorage) EnergyTxUserToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error {
 	tx := s.Db.MustBegin()
 	query1 := `UPDATE users SET energy=energy-$1 WHERE id=$2;`
-
 	query2 := `SELECT graph FROM project WHERE id=$1;`
 
 	_, err := tx.ExecContext(ctx, query1, energy, userId)
@@ -174,35 +175,25 @@ func (s *ProjectStorage) EnergyTxUserToTask(ctx context.Context, userId, project
 		tx.Rollback()
 		return err
 	}
-
 	var graphStr string
 	err = tx.GetContext(ctx, &graphStr, query2, projectId)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-
 	var graph model.Graph
-
 	err = json.Unmarshal([]byte(graphStr), &graph)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-
 	for n, c := range graph.Cells {
 		if c.Shape == "slow-model" || c.Shape == "fast-model" {
-			print(c.Shape)
 			if c.Id == nodeId {
-				print(c.Id)
-				print(c.Data.Energy)
-				print(c.Data.Energy + energy)
 				graph.Cells[n].Data.Energy = c.Data.Energy + energy
-				fmt.Printf("%#v", graph.Cells[n].Data)
 			}
 		}
 	}
-
 	updatedGraphByte, err := json.Marshal(graph)
 	if err != nil {
 		tx.Rollback()
@@ -223,10 +214,17 @@ func (s *ProjectStorage) EnergyTxUserToTask(ctx context.Context, userId, project
 
 }
 
+// CODE PROTOTYPE !!!!!!!!!!!!!!
+// / TODO :POSTGRES-> JSONB OR DECOMPOSE NODES DATA OR OTHER DB ?????
 func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId, newStatus string) error {
 	tx := s.Db.MustBegin()
 	query2 := `SELECT graph FROM project WHERE id=$1;`
 	var graphStr string
+
+	///// check
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	err := tx.GetContext(ctx, &graphStr, query2, projectId)
 	if err != nil {
 		tx.Rollback()
@@ -238,10 +236,10 @@ func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId
 		tx.Rollback()
 		return err
 	}
-	for _, c := range graph.Cells {
+	for n, c := range graph.Cells {
 		if c.Shape == "slow-model" || c.Shape == "fast-model" {
 			if c.Id == nodeId {
-				c.Data.Status = newStatus
+				graph.Cells[n].Data.Status = newStatus
 			}
 		}
 	}
@@ -254,6 +252,9 @@ func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId
 	_, err = tx.ExecContext(ctx, query3, string(updatedGraphByte), projectId)
 	if err != nil {
 		tx.Rollback()
+		return err
+	}
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 	return nil

@@ -138,8 +138,8 @@ func (app *App) Run(cfg config.Configuration) error {
 	app.httpServer = &http.Server{
 		Addr:           net.JoinHostPort(cfg.Server.Host, cfg.Server.Port),
 		Handler:        r,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		ReadTimeout:    20 * time.Second,
+		WriteTimeout:   20 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 	zlog.Info().Msgf("deepflower server start... %s", app.httpServer.Addr)

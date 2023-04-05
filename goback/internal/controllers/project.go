@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
@@ -199,6 +200,8 @@ func (c *ProjectController) AddEnergyToTask(w http.ResponseWriter, r *http.Reque
 }
 
 func (c *ProjectController) CloseTask(w http.ResponseWriter, r *http.Request) {
+	/// check
+	start := time.Now()
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
 	projectId := chi.URLParam(r, "projectId")
 	nodeId := chi.URLParam(r, "nodeId")
@@ -208,6 +211,9 @@ func (c *ProjectController) CloseTask(w http.ResponseWriter, r *http.Request) {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
+	delta := time.Since(start)
+	fmt.Print(delta)
+
 	JSON(w, STATUS_OK, "confirmation started")
 
 }

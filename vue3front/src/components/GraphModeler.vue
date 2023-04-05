@@ -474,12 +474,17 @@ const closeTask = ()=> {
       if (response.data.status === "ok") {
         console.log("task in confirmation")
         selected_cell.value.setData({"Status": "confirmation"})
+        doSearch(0, 10, "id", "asc")
         return
       } 
       window.alert(response.data.message);
+      
     }); 
-    window.alert("error. status != created");
+    return
+    
   }
+  window.alert("error. status != created");
+
 }
 // END TASK AND CHOICE CONTROL
 
