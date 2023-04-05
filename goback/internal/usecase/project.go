@@ -109,13 +109,15 @@ func (d *ProjectUsecase) AddEnergyToTask(ctx context.Context, userId, projectId,
 	return nil
 }
 func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeId string) error {
-
 	// check status task
 	// change status tast to 'confirmation'
 	if err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, "confirmation"); err != nil {
 		return err
 	}
 	// start consensus process
-
+	///
+	///
+	///
+	///
 	return nil
 }

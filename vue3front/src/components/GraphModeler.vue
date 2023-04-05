@@ -436,6 +436,7 @@ const createNewProject = () => {
       } 
       window.alert(response.data.message);
   }); 
+
 }
 
 
@@ -449,16 +450,18 @@ const createNewProject = () => {
 const energyToTask = ref(0)
 const addEnergyToTask = ()=> {
   let obj = selected_cell.value.getData()
+  console.log(obj)
   if (obj.Status == "created") {
-    let url = '/projects/'+ projectRow.ID+"/node/"+ selected_cell.value.id+"/addenergy";
+    let url = '/projects/'+ rowProject.ID+"/node/"+ selected_cell.value.id+"/addenergy";
     API.post(url, JSON.stringify({Energy: energyToTask.value})).then((response) => {
       if (response.data.status === "ok") {
-        console.log("energy added to the task")
         selected_cell.value.setData({"Energy": obj.Energy + energyToTask.value})
+        doSearch(0, 10, "id", "asc")
         return
       } 
       window.alert(response.data.message);
     }); 
+    return
   } 
   window.alert("error. status != created");
 }
@@ -466,7 +469,7 @@ const addEnergyToTask = ()=> {
 const closeTask = ()=> {
   let obj = selected_cell.value.getData()
   if (obj.Status == "created") {
-    let url = '/projects/'+ projectRow.ID+"/node/"+ selected_cell.value.id+"/close";
+    let url = '/projects/'+ rowProject.ID+"/node/"+ selected_cell.value.id+"/close";
     API.post(url).then((response) => {
       if (response.data.status === "ok") {
         console.log("task in confirmation")
@@ -725,7 +728,7 @@ Graph.registerNode(
     data: { 
       Description: "",
       LeadTime: 0,
-      Performers: [],
+      Performers: "",
       Energy: 0,
       Status: "",
     },
@@ -750,7 +753,7 @@ const slow = graph.createNode({
   data: { 
     Description: "empty",
     LeadTime: 0,
-    Performers: [],
+    Performers: "",
     Energy: 0,
     Status: "created",
     },
@@ -767,7 +770,7 @@ Graph.registerNode(
     data: { 
       Description: "",
       LeadTime: 0,
-      Performers: [],
+      Performers: "",
       Energy: 0,
       Status: "",
     },
@@ -798,7 +801,7 @@ const fast = graph.createNode({
   data: { 
     Description: "empty",
     LeadTime: 0,
-    Performers: [],
+    Performers: "",
     Energy: 0,
     Status: "created",
     },

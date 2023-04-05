@@ -176,20 +176,45 @@ func (s *ProjectStorage) EnergyTxUserToTask(ctx context.Context, userId, project
 	}
 
 	var graphStr string
-	err = tx.SelectContext(ctx, &graphStr, query2, projectId)
+	err = tx.GetContext(ctx, &graphStr, query2, projectId)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	var graph interface{}
-	err = json.Unmarshal([]byte(graphStr), graph)
+	var graph model.Graph
+
+	err = json.Unmarshal([]byte(graphStr), &graph)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	fmt.Println(graph)
+	for n, c := range graph.Cells {
+		if c.Shape == "slow-model" || c.Shape == "fast-model" {
+			print(c.Shape)
+			if c.Id == nodeId {
+				print(c.Id)
+				print(c.Data.Energy)
+				print(c.Data.Energy + energy)
+				graph.Cells[n].Data.Energy = c.Data.Energy + energy
+				fmt.Printf("%#v", graph.Cells[n].Data)
+			}
+		}
+	}
+
+	updatedGraphByte, err := json.Marshal(graph)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	var query3 = `UPDATE project SET graph=$1 WHERE id=$2;`
+	_, err = tx.ExecContext(ctx, query3, string(updatedGraphByte), projectId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 
 	if err := tx.Commit(); err != nil {
 		return err
@@ -199,7 +224,37 @@ func (s *ProjectStorage) EnergyTxUserToTask(ctx context.Context, userId, project
 }
 
 func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId, newStatus string) error {
-
+	tx := s.Db.MustBegin()
+	query2 := `SELECT graph FROM project WHERE id=$1;`
+	var graphStr string
+	err := tx.GetContext(ctx, &graphStr, query2, projectId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	var graph model.Graph
+	err = json.Unmarshal([]byte(graphStr), &graph)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	for _, c := range graph.Cells {
+		if c.Shape == "slow-model" || c.Shape == "fast-model" {
+			if c.Id == nodeId {
+				c.Data.Status = newStatus
+			}
+		}
+	}
+	updatedGraphByte, err := json.Marshal(graph)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	var query3 = `UPDATE project SET graph=$1 WHERE id=$2;`
+	_, err = tx.ExecContext(ctx, query3, string(updatedGraphByte), projectId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	return nil
-
 }

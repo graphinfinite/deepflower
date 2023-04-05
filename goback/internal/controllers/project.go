@@ -180,14 +180,17 @@ func (c *ProjectController) AddEnergyToTask(w http.ResponseWriter, r *http.Reque
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
 	projectId := chi.URLParam(r, "projectId")
 	nodeId := chi.URLParam(r, "nodeId")
+
 	if err := DecodeJSONBody(w, r, &e); err != nil {
-		c.log.Err(err).Msg("AddEnergyToTask ")
+		c.log.Err(err).Msg("AddEnergyToTask/DecodeJSONBody")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
 
+	//fmt.Println(userId, projectId, nodeId, e.Energy)
+
 	if err := c.Uc.AddEnergyToTask(r.Context(), userId, projectId, nodeId, e.Energy); err != nil {
-		c.log.Err(err).Msg("AddEnergyToTask ")
+		c.log.Err(err).Msg("AddEnergyToTask/UC ")
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
