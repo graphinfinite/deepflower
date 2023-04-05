@@ -51,8 +51,8 @@
   <div class="project-panel" v-if=showRowProject>
 
     <div>
-      <button @click="showRowProject=!showRowProject" class="clonebutton">Clone</button>
-      <button @click="showRowProject=!showRowProject; graph.fromJSON({})" class="redbutton">Close</button>
+      <button v-if="!rowProject.Published" @click="showRowProject=!showRowProject" class="clonebutton">Clone</button>
+      <button @click="showRowProject=!showRowProject;rowProject={}; graph.fromJSON({}); selected_cell.value={}" class="redbutton">Close</button>
     </div>
     <div></div>
 
@@ -84,13 +84,12 @@
     <div class="project-creater">Creater: 
       {{rowProject.Creater}}
     </div>
-
-
-    <!-- 
-  CreatedAt: "",
-  UpdatedAt: "",
-   -->
-
+    <div class="project-CreatedAt">CreatedAt: 
+      {{rowProject.CreatedAt}}
+    </div>
+    <div class="project-UpdatedAt">UpdatedAt: 
+      {{rowProject.UpdatedAt}}
+    </div>
 
   </div>
 
@@ -153,8 +152,12 @@
         <button @click="updateNode">Set</button>
       </div>
       <div class="node-change-publiched" v-else>
-        <div class="energy-to-task-form"><input type="number" min="0" v-model="energyToTask"><button @click="addEnergyToTask">+{{ energyToTask }} Energy</button></div>
-        <div class="close-task-form"><button @click="closeTask">CLOSE TASK</button></div>
+        <div class="energy-to-task-form" v-if="selected_cell.value.getData().Status =='created'">
+          <input type="number" min="0" v-model="energyToTask"><button @click="addEnergyToTask">+{{ energyToTask }} Energy</button>
+        </div>
+        <div class="close-task-form" v-if="selected_cell.value.getData().Status =='created'">
+          <button @click="closeTask" >CLOSE TASK</button>
+        </div>
       </div>
     </div>
   </div>
@@ -315,6 +318,19 @@ columns: [
 },
     },
     {
+    label: "UpdDate",
+    field: "UpdatedAt",
+    width: "3%",
+    sortable: true,
+    display: (row) => {
+        if (row.UpdatedAt) {
+          return (row.UpdatedAt.slice(0, 19));
+        } else {
+          return ("Empty")
+        };
+},
+    },
+    {
     label: "E",
     field: "Energy",
     width: "5%",
@@ -432,6 +448,8 @@ const createNewProject = () => {
   API.post(url, NewProject).then((response) => {
       if (response.data.status === "ok") {
         console.log("graph load")
+        NewProject.Name = ""; NewProject.Info = ""; NewProject.Graph = ""
+        window.alert("Проект успешно сохранен!");
         return
       } 
       window.alert(response.data.message);
