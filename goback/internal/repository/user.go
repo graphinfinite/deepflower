@@ -15,8 +15,8 @@ type UserStorage struct {
 	Db *sqlx.DB
 }
 
-func NewUserStorage(dbpool *sqlx.DB) UserStorage {
-	return UserStorage{Db: dbpool}
+func NewUserStorage(dbpool *sqlx.DB) *UserStorage {
+	return &UserStorage{Db: dbpool}
 }
 
 // if user not found -> UserNotFoundStorageError

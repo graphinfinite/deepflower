@@ -15,8 +15,8 @@ type ProjectStorage struct {
 	Db *sqlx.DB
 }
 
-func NewProjectStorage(dbpool *sqlx.DB) ProjectStorage {
-	return ProjectStorage{Db: dbpool}
+func NewProjectStorage(dbpool *sqlx.DB) *ProjectStorage {
+	return &ProjectStorage{Db: dbpool}
 }
 
 func (s *ProjectStorage) CreateProject(ctx context.Context, name, info, graph, dreamName, creater string) (model.Project, error) {

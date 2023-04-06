@@ -36,8 +36,6 @@ type TelegramBot struct {
 	Auth Authorizater
 }
 
-////https://api.telegram.org/bot6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro/deleteWebhook
-
 func NewBot(token string, debug bool, client http.Client, logger *zerolog.Logger, auth Authorizater) (TelegramBot, error) {
 	bot, err := tgbotapi.NewBotAPIWithClient(token, &client)
 	bot.Debug = debug

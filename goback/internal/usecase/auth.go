@@ -20,8 +20,8 @@ type AuthUsecase struct {
 	expireDuration time.Duration
 }
 
-func NewAuthUsecase(r UserStorageInterface, cost int, signingKey string, expireDuration time.Duration) AuthUsecase {
-	return AuthUsecase{Rep: r, cost: cost, signingKey: signingKey, expireDuration: expireDuration}
+func NewAuthUsecase(r UserStorageInterface, cost int, signingKey string, expireDuration time.Duration) *AuthUsecase {
+	return &AuthUsecase{Rep: r, cost: cost, signingKey: signingKey, expireDuration: expireDuration}
 }
 
 // generate new username and password. save new user data.

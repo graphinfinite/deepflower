@@ -34,34 +34,38 @@ func NewApp() *App {
 func (app *App) Run(cfg config.Configuration) error {
 	zlog := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 
-	zlog.Info().Msgf("configuration:   %+v", cfg)
+	zlog.Info().Msgf("start with configurations: \n%+v", cfg)
 	zlog.Info().Msgf("connect to db...")
 	dbPool, err := postgres.NewPostgresPool(cfg.Db.Psql)
 	if err != nil {
-		zlog.Err(err)
+		zlog.Err(err).Msg("App/NewPostgresPool ")
 		return err
 	}
 	defer dbPool.Close()
-	zlog.Info().Msgf("migrate... ")
-	if err := postgres.MigrateDb(dbPool); err != nil {
-		zlog.Err(err)
+
+	zlog.Info().Msgf("up migrations... ")
+	if err := postgres.MigrateUp(dbPool); err != nil {
+		zlog.Err(err).Msg("App/MigrateUp ")
 		return err
 	}
 
 	// Auth
-	userstore := repository.NewUserStorage(dbPool)
 	authUC := usecase.NewAuthUsecase(
-		&userstore,
+		repository.NewUserStorage(dbPool),
 		cfg.Auth.Cost,
 		cfg.Auth.Signing_key,
 		time.Duration(cfg.Auth.Token_ttl)*time.Minute)
-	auth := ctrl.NewAuthController(&authUC, &zlog)
+	auth := ctrl.NewAuthController(authUC, &zlog)
+
+	// User
+	user := ctrl.NewUserController(usecase.NewUserUC(repository.NewUserStorage(dbPool)), &zlog)
 
 	// start bot server
 	zlog.Info().Msgf("start telegram bot... ")
 	client := http.Client{Timeout: time.Second * 10}
-	bot, err := telegram.NewBot(cfg.Telegram.Token, cfg.Telegram.Debug, client, &zlog, &authUC)
+	bot, err := telegram.NewBot(cfg.Telegram.Token, cfg.Telegram.Debug, client, &zlog, authUC)
 	if err != nil {
+		zlog.Err(err).Msg("App/NewBot ")
 		return err
 	}
 	go func() {
@@ -69,25 +73,17 @@ func (app *App) Run(cfg config.Configuration) error {
 	}()
 	defer bot.Bot.StopReceivingUpdates()
 
-	// User
-	userUC := usecase.NewUserUC(&userstore)
-	user := ctrl.NewUserController(&userUC, &zlog)
-
 	// Dream
-	dreamstore := repository.NewDreamStorage(dbPool)
-	dreamUC := usecase.NewDreamUsecase(&dreamstore)
-	dream := ctrl.NewDreamController(&dreamUC, &zlog)
+	dream := ctrl.NewDreamController(usecase.NewDreamUsecase(repository.NewDreamStorage(dbPool)), &zlog)
 
 	// Location
-	locstore := repository.NewLocationStorage(dbPool)
-	locUC := usecase.NewLocationUsecase(&locstore)
-	loc := ctrl.NewLocationController(&locUC, &zlog)
+	loc := ctrl.NewLocationController(usecase.NewLocationUsecase(repository.NewLocationStorage(dbPool)), &zlog)
 
 	// Project
 
 	projstore := repository.NewProjectStorage(dbPool)
-	projUC := usecase.NewProjectUsecase(&projstore)
-	proj := ctrl.NewProjectController(&projUC, &zlog)
+	projUC := usecase.NewProjectUsecase(projstore)
+	proj := ctrl.NewProjectController(projUC, &zlog)
 
 	// Router settings
 	r := chi.NewRouter()
@@ -104,7 +100,6 @@ func (app *App) Run(cfg config.Configuration) error {
 
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
-	//r.Post("/bot", bot.TelegramBotMessageReader)
 	r.Post("/auth/sign-in", auth.Login)
 	r.Route("/user", func(r chi.Router) {
 		r.Use(auth.JWT)
@@ -154,9 +149,11 @@ func (app *App) Run(cfg config.Configuration) error {
 	}
 	zlog.Info().Msgf("deepflower server start... %s", app.httpServer.Addr)
 	go func() {
-		err := app.httpServer.ListenAndServe()
-		zlog.Err(err)
+		if err := app.httpServer.ListenAndServe(); err != nil {
+			zlog.Err(err).Msg("💀💀💀")
+		}
 		zlog.Info().Msg("💀")
+
 	}()
 
 	// Shutdown

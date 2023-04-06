@@ -9,8 +9,8 @@ type UserUC struct {
 	Rep UserStorageInterface
 }
 
-func NewUserUC(r UserStorageInterface) UserUC {
-	return UserUC{Rep: r}
+func NewUserUC(r UserStorageInterface) *UserUC {
+	return &UserUC{Rep: r}
 }
 
 func (u *UserUC) GetUserInfo(ctx context.Context, userId string) (user model.User, err error) {

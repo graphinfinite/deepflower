@@ -19,8 +19,8 @@ type LocationUsecase struct {
 	Rep LocationStorageInterface
 }
 
-func NewLocationUsecase(s LocationStorageInterface) LocationUsecase {
-	return LocationUsecase{Rep: s}
+func NewLocationUsecase(s LocationStorageInterface) *LocationUsecase {
+	return &LocationUsecase{Rep: s}
 }
 
 func (d *LocationUsecase) CreateLocation(ctx context.Context, creater string, Name string, info string, geolocation string, radius uint64, height uint64) (model.Location, error) {

@@ -11,8 +11,8 @@ type ProjectUsecase struct {
 	Con ConsensusServerInterface
 }
 
-func NewProjectUsecase(s ProjectStorageInterface) ProjectUsecase {
-	return ProjectUsecase{Rep: s}
+func NewProjectUsecase(s ProjectStorageInterface) *ProjectUsecase {
+	return &ProjectUsecase{Rep: s}
 }
 
 // TODO проверка что мечта опубликована

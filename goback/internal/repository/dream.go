@@ -13,8 +13,8 @@ type DreamStorage struct {
 	Db *sqlx.DB
 }
 
-func NewDreamStorage(dbpool *sqlx.DB) DreamStorage {
-	return DreamStorage{Db: dbpool}
+func NewDreamStorage(dbpool *sqlx.DB) *DreamStorage {
+	return &DreamStorage{Db: dbpool}
 }
 
 func (s *DreamStorage) CreateDream(ctx context.Context, name, info, location, creater string) (model.Dream, error) {

@@ -2,7 +2,7 @@ package postgres
 
 import "github.com/jmoiron/sqlx"
 
-func MigrateDb(dbPool *sqlx.DB) error {
+func MigrateUp(dbPool *sqlx.DB) error {
 	q := `
 		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 	

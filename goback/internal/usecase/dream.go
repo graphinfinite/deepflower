@@ -10,8 +10,8 @@ type DreamUsecase struct {
 	Rep DreamStorageInterface
 }
 
-func NewDreamUsecase(s DreamStorageInterface) DreamUsecase {
-	return DreamUsecase{Rep: s}
+func NewDreamUsecase(s DreamStorageInterface) *DreamUsecase {
+	return &DreamUsecase{Rep: s}
 }
 
 func (d *DreamUsecase) CreateDream(ctx context.Context, name, info, location, creater string) (model.Dream, error) {
