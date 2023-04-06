@@ -29,7 +29,7 @@ func MigrateDb(dbPool *sqlx.DB) error {
 		updatedat timestamp DEFAULT current_timestamp NOT NULL,
 		creater uuid NOT NULL,
 		geolocation point,
-		radius bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
+		radius bigint NOT NULL DEFAULT 0 CHECK (radius >= 0),
 		height bigint NOT NULL DEFAULT 0,
 		energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
 		active BOOLEAN NOT NULL);

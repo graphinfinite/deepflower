@@ -44,20 +44,17 @@
   <!-- END GRAPH MODELER -->
 
 
-
-
   <!-- PROJECT -->
 
   <div class="project-panel" v-if=showRowProject>
 
     <div>
       <button v-if="!rowProject.Published" @click="showRowProject=!showRowProject" class="clonebutton">Clone</button>
-      <button @click="showRowProject=!showRowProject;rowProject={}; graph.fromJSON({}); selected_cell.value={}" class="redbutton">Close</button>
+      <button @click="showRowProject=!showRowProject;rowProject.value={}; graph.fromJSON({}); selected_cell.value={}" class="redbutton">Close</button>
     </div>
     <div></div>
 
     
-
     <div class="project-id">PROJECT ID: {{ rowProject.ID }}</div>
     <div class="project-name">Name: 
       {{rowProject.Name}}
@@ -105,7 +102,6 @@
         <textarea  type="text" v-model="NewProject.Info"></textarea>
       </div>
       <div><button @click="createNewProject" id="savebutton">Validate and Save</button></div>
-        <!-- <div><button>DELETE</button></div> -->
   </div>
   <!-- END PROJECT -->
 
@@ -145,7 +141,7 @@
         <label for="node-label">Label</label>
         <input v-model="nodeUpdate.Label" type="text" :placeholder="selected_cell.value.attrs.text.text"  id="node-label">
         <label for="leadtime">Lead Time(h)</label>
-        <input  type="number" v-model="nodeUpdate.LeadTime" id="node-leadtime">
+        <input  type="number" v-model="nodeUpdate.LeadTime" id="node-leadtime" min="1" step="1">
         <label for="node-description">Description</label>
         <textarea  type="text" v-model="nodeUpdate.Description" id="node-description" ></textarea>
 
@@ -153,10 +149,10 @@
       </div>
       <div class="node-change-publiched" v-else>
         <div class="energy-to-task-form" v-if="selected_cell.value.getData().Status =='created'">
-          <input type="number" min="0" v-model="energyToTask"><button @click="addEnergyToTask">+{{ energyToTask }} Energy</button>
+          <input type="number" min="1" step="1" v-model="energyToTask"><button @click="addEnergyToTask">+{{ energyToTask }} Energy</button>
         </div>
         <div class="close-task-form" v-if="selected_cell.value.getData().Status =='created'">
-          <button @click="closeTask" >CLOSE TASK</button>
+          <button @click="closeTask" >DONE</button>
         </div>
       </div>
     </div>
@@ -425,7 +421,7 @@ const deleteProject = () => {
   let url = '/projects/'+rowProject.ID;
   API.delete(url).then((response) => {
     if (response.data.status == "ok") {
-      showRowProject.value=false; graph.fromJSON({});
+      showRowProject.value=false; graph.fromJSON({}); selected_cell.value={};
       doSearch(0, 10, "id", "asc")
       return
     }
@@ -456,12 +452,6 @@ const createNewProject = () => {
   }); 
 
 }
-
-
-/* <div class="energy-to-task-form"><input type="number" min="0" v-model="energyToTask"><button @click="addEnergyToTask">+{{ energyToTask }} Energy</button></div>
-        <div class="close-task-form"><button @click="closeTask">CLOSE TASK</button></div>
-*/
-
 
 // TASK AND CHOICE CONTROL
 
@@ -1228,6 +1218,24 @@ width: 50%;
   border: 1px solid whitesmoke;
   padding: 10px;
   margin-bottom: 10px;
+}
+
+
+.close-task-form {
+
+  padding:30px;
+
+  background-color: #ede9f8;
+}
+.close-task-form button {
+
+}
+
+.energy-to-task-form{
+  border: 1px solid whitesmoke;
+  margin-bottom: 10px;
+
+  padding: 20px;
 }
 
 

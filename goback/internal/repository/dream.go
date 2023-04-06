@@ -55,6 +55,7 @@ func (s *DreamStorage) CreateDream(ctx context.Context, name, info, location, cr
 	return m, nil
 }
 
+// no used
 func (s *DreamStorage) GetAllUserDreams(ctx context.Context, userId string) ([]model.Dream, error) {
 	var dreams []model.Dream
 	q := `SELECT * FROM dream WHERE creater=$1;`
@@ -64,6 +65,7 @@ func (s *DreamStorage) GetAllUserDreams(ctx context.Context, userId string) ([]m
 	return dreams, nil
 }
 
+// поиск по имени мечты(searchTerm), сортировка, простая offset пагинация
 func (s *DreamStorage) SearchDreams(ctx context.Context, userId string,
 	limit uint64, offset uint64, onlyMyDreams bool, order string, searchTerm string,
 	sort string) ([]model.Dream, int, error) {
@@ -73,7 +75,6 @@ func (s *DreamStorage) SearchDreams(ctx context.Context, userId string,
 	var queryCnt string
 	var count int
 
-	// TODO поиск по тексту тоже добавить
 	filter := fmt.Sprintf(` ORDER BY %s %s LIMIT %d OFFSET %d;`, order, sort, limit, offset)
 	switch {
 	case searchTerm != "" && onlyMyDreams:
@@ -93,9 +94,6 @@ func (s *DreamStorage) SearchDreams(ctx context.Context, userId string,
 		queryCnt = `SELECT count(id) FROM dream`
 	}
 	q := query + filter
-	// fmt.Println(q)
-	// fmt.Println(queryCnt)
-	// fmt.Println(args...)
 
 	if err := s.Db.SelectContext(ctx, &dreams, q, args...); err != nil {
 		return []model.Dream{}, 0, err
@@ -151,6 +149,7 @@ func (s *DreamStorage) UpdateUserDream(ctx context.Context, dreamId string, patc
 	return dream, nil
 }
 
+// транзакция энергии от пользователя к мечте
 func (s *DreamStorage) EnergyTxUserToDream(ctx context.Context, userId, dreamId string, energy uint64) error {
 	tx := s.Db.MustBegin()
 	query1 := `UPDATE users SET energy=energy-$1 WHERE id=$2;`

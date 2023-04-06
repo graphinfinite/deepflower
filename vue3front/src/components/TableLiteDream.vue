@@ -306,7 +306,7 @@ const addEnergyToDream = () => {
         
         <div>
           <p>Вы тратите свою личную энергию на мечту!</p>
-          <input type="number" id="energe-input" v-model="energyToDream">
+          <input type="number" id="energe-input" min="1" step="1" v-model="energyToDream">
           <button @click="addEnergyToDream">+{{ energyToDream }} Energy</button>
         </div>
   </div>

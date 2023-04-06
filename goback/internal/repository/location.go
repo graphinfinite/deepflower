@@ -9,16 +9,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// CreateLocation(ctx context.Context, creater string, Name string, info string, geolocation string, radius uint64, height uint64, idFiles string) (model.Location, error)
-// GetLocationById(ctx context.Context, locationId string) (model.Location, error)
-// DeleteUserLocation(ctx context.Context, locationId string) error
-// UpdateUserLocation(ctx context.Context, locationId string, locationUpdate map[string]interface{}) (model.Location, error)
-// EnergyTxUserToLocation(ctx context.Context, userId, locationId string, energy uint64) error
-// SearchLocations(ctx context.Context, userId string,
-// 	limit uint64, offset uint64, onlyMyLocations bool,
-// 	order string, searchTerm string,
-// 	sort string) ([]model.Location, int, error)
-
 type LocationStorage struct {
 	Db *sqlx.DB
 }
@@ -47,6 +37,7 @@ func (s *LocationStorage) CreateLocation(ctx context.Context, creater string, na
 	return m, nil
 }
 
+// поиск по имени локации(searchTerm), сортировка, простая offset пагинация
 func (s *LocationStorage) SearchLocations(ctx context.Context, userId string,
 	limit uint64, offset uint64, onlyMyLocations bool,
 	order string, searchTerm string,
@@ -57,7 +48,6 @@ func (s *LocationStorage) SearchLocations(ctx context.Context, userId string,
 	var queryCnt string
 	var count int
 
-	// TODO поиск по тексту тоже добавить
 	filter := fmt.Sprintf(` ORDER BY %s %s LIMIT %d OFFSET %d;`, order, sort, limit, offset)
 	switch {
 	case searchTerm != "" && onlyMyLocations:
@@ -77,9 +67,6 @@ func (s *LocationStorage) SearchLocations(ctx context.Context, userId string,
 		queryCnt = `SELECT count(id) FROM location`
 	}
 	q := query + filter
-	// fmt.Println(q)
-	// fmt.Println(queryCnt)
-	// fmt.Println(args...)
 
 	if err := s.Db.SelectContext(ctx, &locations, q, args...); err != nil {
 		return []model.Location{}, 0, err
@@ -145,6 +132,7 @@ func (s *LocationStorage) UpdateUserLocation(ctx context.Context, locationId str
 	return location, nil
 }
 
+// транзакция энергии от пользователя к локации
 func (s *LocationStorage) EnergyTxUserToLocation(ctx context.Context, userId, locationId string, energy uint64) error {
 	tx := s.Db.MustBegin()
 	query1 := `UPDATE users SET energy=energy-$1 WHERE id=$2;`

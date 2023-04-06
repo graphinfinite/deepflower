@@ -362,7 +362,7 @@ const showLocationDream = () => {
         
         <div>
           <p>Повысить энергетический статус локации</p>
-          <input type="number" id="energe-input" v-model="energyToLocation">
+          <input type="number" id="energe-input" min="1" step="1" v-model="energyToLocation">
           <button @click="addEnergyToLocation">+{{ energyToLocation }} Energy</button>
         </div>
   </div>
@@ -387,9 +387,9 @@ const showLocationDream = () => {
           </div>
           
           <label for="locationHeight">Location Height (m)</label>
-          <input type="number" id="locationHeight" v-model="locationHeight" placeholder="..." autocomplete="off" >
+          <input type="number" step="1" id="locationHeight" v-model="locationHeight" placeholder="..." autocomplete="off" >
           <label for="locationRadius">Location Radius (m)</label>
-          <input type="number" id="locationRadius" v-model="locationRadius" placeholder="..." autocomplete="off" min="0">
+          <input type="number" id="locationRadius" minlength="0" step="1" v-model="locationRadius" placeholder="..." autocomplete="off" min="0">
           <button type="submit">Save</button> 
 
 

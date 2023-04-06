@@ -58,6 +58,7 @@ func (s *ProjectStorage) CreateProject(ctx context.Context, name, info, graph, d
 	return m, nil
 }
 
+// поиск по имени проекта (searchTerm), сортировка, простая offset пагинация
 func (s *ProjectStorage) SearchProjects(ctx context.Context, userId string,
 	limit uint64, offset uint64, onlyMyProjects bool, order string, searchTerm string,
 	sort string) ([]model.Project, int, error) {
@@ -67,7 +68,6 @@ func (s *ProjectStorage) SearchProjects(ctx context.Context, userId string,
 	var queryCnt string
 	var count int
 
-	// TODO поиск по тексту тоже добавить
 	filter := fmt.Sprintf(` ORDER BY %s %s LIMIT %d OFFSET %d;`, order, sort, limit, offset)
 	switch {
 	case searchTerm != "" && onlyMyProjects:

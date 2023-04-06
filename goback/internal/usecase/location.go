@@ -56,10 +56,6 @@ func (d *LocationUsecase) GetLocationDreams(ctx context.Context, locationId stri
 }
 
 func (d *LocationUsecase) AddEnergyToLocation(ctx context.Context, userId, locationId string, energy uint64) error {
-	//location, err := d.Rep.GetLocationById(ctx, locationId)
-	// if err != nil {
-	// 	return err
-	// }
 	if err := d.Rep.EnergyTxUserToLocation(ctx, userId, locationId, energy); err != nil {
 		return err
 	}
@@ -72,7 +68,7 @@ func (d *LocationUsecase) UpdateUserLocation(ctx context.Context, userId, locati
 		return model.Location{}, err
 	}
 	if location.Creater != userId {
-		return model.Location{}, fmt.Errorf("error: not available for user: %s", userId)
+		return model.Location{}, fmt.Errorf("error:update not available for user: %s", userId)
 	}
 	locationUpdated, err := d.Rep.UpdateUserLocation(ctx, locationId, patchLocation)
 	if err != nil {
@@ -86,8 +82,7 @@ func (d *LocationUsecase) DeleteUserLocation(ctx context.Context, userId string,
 		return err
 	}
 	if location.Creater != userId {
-		// TODO
-		return fmt.Errorf("not available")
+		return fmt.Errorf("error: delete not available for user: %s", userId)
 	}
 	if err := d.Rep.DeleteUserLocation(ctx, locationId); err != nil {
 		return err

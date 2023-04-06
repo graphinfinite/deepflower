@@ -34,6 +34,14 @@ function toggleSidebar() {
           </router-link>
         </li>
         <li>
+          <router-link to="/locations">
+            <img src="@/assets/planet-32.png" alt="logo" width="32" height="32">
+            <Transition name="fade">
+              <span v-show="isSidebarOpen">Locations</span>
+            </Transition>
+          </router-link>
+        </li>
+        <li>
           <router-link to="/dreams">
             <img src="@/assets/icons8-огонь-48.png" alt="logo" width="32" height="32">
             
@@ -51,14 +59,7 @@ function toggleSidebar() {
             </Transition>
           </router-link>
         </li>
-        <li>
-          <router-link to="/locations">
-            <img src="@/assets/planet-32.png" alt="logo" width="32" height="32">
-            <Transition name="fade">
-              <span v-show="isSidebarOpen">Locations</span>
-            </Transition>
-          </router-link>
-        </li>
+
         <li>
           <router-link to="/settings">
             <img src="@/assets/settings-5-32.png" alt="logo" width="32" height="32">

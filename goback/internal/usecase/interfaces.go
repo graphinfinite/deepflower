@@ -46,12 +46,14 @@ type (
 			limit, offset uint64, onlyMyProjects bool, order string, searchTerm string, sort string) ([]model.Project, int, error)
 		EnergyTxUserToProject(ctx context.Context, userId, projectId string, EnergyForPublish uint64) error
 		GetProjectById(ctx context.Context, projectId string) (model.Project, error)
-
 		UpdateUserProject(ctx context.Context, projectId string, projectUpdate map[string]interface{}) (model.Project, error)
-
 		DeleteUserProject(ctx context.Context, projectId string) error
-
 		EnergyTxUserToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error
 		UpdateTaskStatus(ctx context.Context, projectId, nodeId, newStatus string) error
+	}
+
+	ConsensusServerInterface interface {
+		GoConsensusProcessToNode(userId, projectId, nodeId string) error
+		GetActiveConsensusProcesses() (processes string, err error) //TODO processes detail
 	}
 )

@@ -19,7 +19,6 @@ func NewUserStorage(dbpool *sqlx.DB) UserStorage {
 	return UserStorage{Db: dbpool}
 }
 
-// return user
 // if user not found -> UserNotFoundStorageError
 func (s *UserStorage) GetUserByTgId(ctx context.Context, tgId int) (model.User, error) {
 	q := `SELECT * FROM users WHERE tgId = $1`
@@ -35,6 +34,7 @@ func (s *UserStorage) GetUserByTgId(ctx context.Context, tgId int) (model.User, 
 	return user, nil
 }
 
+// if user not found -> UserNotFoundStorageError
 func (s *UserStorage) GetUserByUsername(ctx context.Context, username string) (model.User, error) {
 	q := `SELECT * FROM users WHERE username = $1`
 	user := model.User{}
@@ -51,12 +51,14 @@ func (s *UserStorage) GetUserByUsername(ctx context.Context, username string) (m
 	return user, nil
 }
 
+// не реализован
 func (s *UserStorage) UpdateUser(ctx context.Context, m model.User) (model.User, error) {
 	//q := `UPDATE users SET username = $1`
 
 	return model.User{}, nil
 }
 
+// if user not found -> UserNotFoundStorageError
 func (s *UserStorage) GetUserById(ctx context.Context, userId string) (model.User, error) {
 	q := `SELECT * FROM users WHERE id = $1`
 	user := model.User{}

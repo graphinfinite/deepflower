@@ -18,6 +18,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog"
 
+	"deepflower/pkg/telegram"
+
 	"github.com/go-chi/cors"
 )
 
@@ -46,9 +48,6 @@ func (app *App) Run(cfg config.Configuration) error {
 		return err
 	}
 
-	// client for requests
-	client := http.Client{Timeout: time.Second * 10}
-
 	// Auth
 	userstore := repository.NewUserStorage(dbPool)
 	authUC := usecase.NewAuthUsecase(
@@ -57,7 +56,18 @@ func (app *App) Run(cfg config.Configuration) error {
 		cfg.Auth.Signing_key,
 		time.Duration(cfg.Auth.Token_ttl)*time.Minute)
 	auth := ctrl.NewAuthController(&authUC, &zlog)
-	bot, _ := ctrl.NewBot(cfg.Telegram.Debug, cfg.Telegram.Token, &client, &authUC, &zlog)
+
+	// start bot server
+	zlog.Info().Msgf("start telegram bot... ")
+	client := http.Client{Timeout: time.Second * 10}
+	bot, err := telegram.NewBot(cfg.Telegram.Token, cfg.Telegram.Debug, client, &zlog, &authUC)
+	if err != nil {
+		return err
+	}
+	go func() {
+		bot.StartReceiveUpdates()
+	}()
+	defer bot.Bot.StopReceivingUpdates()
 
 	// User
 	userUC := usecase.NewUserUC(&userstore)
@@ -94,7 +104,7 @@ func (app *App) Run(cfg config.Configuration) error {
 
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
-	r.Post("/bot", bot.TelegramBotMessageReader)
+	//r.Post("/bot", bot.TelegramBotMessageReader)
 	r.Post("/auth/sign-in", auth.Login)
 	r.Route("/user", func(r chi.Router) {
 		r.Use(auth.JWT)

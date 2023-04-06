@@ -23,6 +23,7 @@ func (d *DreamUsecase) CreateDream(ctx context.Context, name, info, location, cr
 
 }
 
+// не используется
 func (d *DreamUsecase) GetAllUserDreams(ctx context.Context, userId string) ([]model.Dream, error) {
 	dreams, err := d.Rep.GetAllUserDreams(ctx, userId)
 	if err != nil {
@@ -42,8 +43,6 @@ func (d *DreamUsecase) SearchDreams(ctx context.Context, userId string,
 	}
 	return dreams, cnt, nil
 }
-
-const EnergyForPublish uint64 = 1
 
 func (d *DreamUsecase) PublishDream(ctx context.Context, userId, dreamId string) error {
 	dream, err := d.Rep.GetDreamById(ctx, dreamId)

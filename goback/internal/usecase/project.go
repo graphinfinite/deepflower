@@ -8,12 +8,14 @@ import (
 
 type ProjectUsecase struct {
 	Rep ProjectStorageInterface
+	Con ConsensusServerInterface
 }
 
 func NewProjectUsecase(s ProjectStorageInterface) ProjectUsecase {
 	return ProjectUsecase{Rep: s}
 }
 
+// TODO проверка что мечта опубликована
 func (d *ProjectUsecase) CreateProject(ctx context.Context, name, info, graph, dreamName, creater string) (model.Project, error) {
 	project, err := d.Rep.CreateProject(ctx, name, info, graph, dreamName, creater)
 	if err != nil {
@@ -40,13 +42,14 @@ func (d *ProjectUsecase) PublishProject(ctx context.Context, userId, projectId s
 	if err != nil {
 		return err
 	}
-
 	if project.Creater != userId {
 		return fmt.Errorf("error: not available for user: %s", userId)
 	}
 	if project.Published {
 		return fmt.Errorf("error: project has already been published")
 	}
+
+	// объединить?
 	if err := d.Rep.EnergyTxUserToProject(ctx, userId, projectId, EnergyForPublish); err != nil {
 		return err
 	}
@@ -102,22 +105,42 @@ func (d *ProjectUsecase) DeleteUserProject(ctx context.Context, userId, projectI
 }
 
 func (d *ProjectUsecase) AddEnergyToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error {
-	// check status task
+	project, err := d.Rep.GetProjectById(ctx, projectId)
+	if err != nil {
+		return err
+	}
+	if !project.Published {
+		return fmt.Errorf("not available")
+	}
+	// TODO список участников полного консенсуса
 	if err := d.Rep.EnergyTxUserToTask(ctx, userId, projectId, nodeId, energy); err != nil {
 		return err
 	}
 	return nil
 }
+
 func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeId string) error {
+	project, err := d.Rep.GetProjectById(ctx, projectId)
+	if err != nil {
+		return err
+	}
+	if !project.Published {
+		return fmt.Errorf("not available for no published nodes")
+	}
 	// check status task
 	// change status tast to 'confirmation'
 	if err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, "confirmation"); err != nil {
 		return err
 	}
+	// TODO
 	// start consensus process
-	///
-	///
-	///
-	///
+	// выбор в настройках тип конценсуса и инструмент консенсуса
+	// если консенсус полный запустить процесс по отправке уведомлений в тг/другой инструмент для подтверждения
+	if err := d.Con.GoConsensusProcessToNode(userId, projectId, nodeId); err != nil {
+		// откат состояния задачи до created
+		return err
+
+	}
+	//
 	return nil
 }
