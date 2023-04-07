@@ -151,8 +151,11 @@
         <div class="energy-to-task-form" v-if="selected_cell.value.getData().Status =='created'">
           <input type="number" min="1" step="1" v-model="energyToTask"><button @click="addEnergyToTask">+{{ energyToTask }} Energy</button>
         </div>
-        <div class="close-task-form" v-if="selected_cell.value.getData().Status =='created'">
+        <div class="close-task-form" v-if="selected_cell.value.getData().Status =='inwork'">
           <button @click="closeTask" >DONE</button>
+        </div>
+        <div class="close-task-form" v-if="selected_cell.value.getData().Status =='created'">
+          <button @click="grabTask" >GRAB</button>
         </div>
       </div>
     </div>
@@ -474,9 +477,30 @@ const addEnergyToTask = ()=> {
   window.alert("error. status != created");
 }
 
-const closeTask = ()=> {
+
+const grabTask = ()=> {
   let obj = selected_cell.value.getData()
   if (obj.Status == "created") {
+    let url = '/projects/'+ rowProject.ID+"/node/"+ selected_cell.value.id+"/grab";
+    API.post(url).then((response) => {
+      if (response.data.status === "ok") {
+        console.log("task inwork")
+        selected_cell.value.setData({"Status": "inwork"})
+        doSearch(0, 10, "id", "asc")
+        return
+      } 
+      window.alert(response.data.message);
+      
+    }); 
+    return
+    
+  }
+  window.alert("error. status != created");
+}
+
+const closeTask = ()=> {
+  let obj = selected_cell.value.getData()
+  if (obj.Status == "inwork") {
     let url = '/projects/'+ rowProject.ID+"/node/"+ selected_cell.value.id+"/close";
     API.post(url).then((response) => {
       if (response.data.status === "ok") {
@@ -491,8 +515,7 @@ const closeTask = ()=> {
     return
     
   }
-  window.alert("error. status != created");
-
+  window.alert("first you need to grab the task");
 }
 // END TASK AND CHOICE CONTROL
 

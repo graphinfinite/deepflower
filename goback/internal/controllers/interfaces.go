@@ -52,6 +52,7 @@ type (
 
 		// nodes updates
 		AddEnergyToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error
+		ToWorkTask(ctx context.Context, userId, projectId, nodeId string) error
 		CloseTask(ctx context.Context, userId, projectId, nodeId string) error
 	}
 )

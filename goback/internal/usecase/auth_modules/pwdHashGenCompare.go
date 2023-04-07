@@ -1,4 +1,4 @@
-package helpers
+package auth_modules
 
 import (
 	"fmt"

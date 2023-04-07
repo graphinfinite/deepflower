@@ -8,7 +8,6 @@ import (
 
 type ProjectUsecase struct {
 	Rep ProjectStorageInterface
-	Con ConsensusServerInterface
 }
 
 func NewProjectUsecase(s ProjectStorageInterface) *ProjectUsecase {
@@ -119,13 +118,27 @@ func (d *ProjectUsecase) AddEnergyToTask(ctx context.Context, userId, projectId,
 	return nil
 }
 
+func (d *ProjectUsecase) ToWorkTask(ctx context.Context, userId, projectId, nodeId string) error {
+	project, err := d.Rep.GetProjectById(ctx, projectId)
+	if err != nil {
+		return err
+	}
+	if !project.Published {
+		return fmt.Errorf("not available for no published project")
+	}
+	if err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, "inwork"); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeId string) error {
 	project, err := d.Rep.GetProjectById(ctx, projectId)
 	if err != nil {
 		return err
 	}
 	if !project.Published {
-		return fmt.Errorf("not available for no published nodes")
+		return fmt.Errorf("not available for no published project")
 	}
 	// check status task
 	// change status tast to 'confirmation'
@@ -136,11 +149,14 @@ func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeI
 	// start consensus process
 	// выбор в настройках тип конценсуса и инструмент консенсуса
 	// если консенсус полный запустить процесс по отправке уведомлений в тг/другой инструмент для подтверждения
-	if err := d.Con.GoConsensusProcessToNode(userId, projectId, nodeId); err != nil {
-		// откат состояния задачи до created
-		return err
+	//const consensus_tool = "telegram"
+	//const consensus_type = "total"
 
-	}
+	// if err := GoConsensusProcessToNode(userId, projectId, nodeId); err != nil {
+	// 	// откат состояния задачи до created
+	// 	return err
+
+	// }
 	//
 	return nil
 }

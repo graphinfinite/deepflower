@@ -52,8 +52,8 @@ type (
 		UpdateTaskStatus(ctx context.Context, projectId, nodeId, newStatus string) error
 	}
 
-	ConsensusServerInterface interface {
-		GoConsensusProcessToNode(userId, projectId, nodeId string) error
+	ConsensusInterface interface {
+		StartConsensusProcessToTask(userId, projectId, nodeId string, settings map[string]string) (processId string, err error)
 		GetActiveConsensusProcesses() (processes string, err error) //TODO processes detail
 	}
 )

@@ -96,5 +96,4 @@ func (t *TelegramBot) SendMessages(ctx context.Context, chatIds []string, msg st
 		}
 	}
 	return nil
-
 }

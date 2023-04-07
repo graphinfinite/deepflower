@@ -199,6 +199,18 @@ func (c *ProjectController) AddEnergyToTask(w http.ResponseWriter, r *http.Reque
 
 }
 
+func (c *ProjectController) ToWorkTask(w http.ResponseWriter, r *http.Request) {
+	userId, _ := r.Context().Value(ContextUserIdKey).(string)
+	projectId := chi.URLParam(r, "projectId")
+	nodeId := chi.URLParam(r, "nodeId")
+	if err := c.Uc.ToWorkTask(r.Context(), userId, projectId, nodeId); err != nil {
+		c.log.Err(err).Msg("ToWorkTask/UC ")
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	JSON(w, STATUS_OK, "task at work")
+}
+
 func (c *ProjectController) CloseTask(w http.ResponseWriter, r *http.Request) {
 	/// check
 	start := time.Now()

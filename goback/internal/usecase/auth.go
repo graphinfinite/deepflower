@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	h "deepflower/internal/helpers"
 	m "deepflower/internal/model"
+	h "deepflower/internal/usecase/auth_modules"
 
 	"github.com/golang-jwt/jwt/v5"
 )
