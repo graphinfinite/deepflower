@@ -111,7 +111,7 @@ func (d *ProjectUsecase) AddEnergyToTask(ctx context.Context, userId, projectId,
 	if !project.Published {
 		return fmt.Errorf("not available")
 	}
-	// TODO список участников полного консенсуса
+
 	if err := d.Rep.EnergyTxUserToTask(ctx, userId, projectId, nodeId, energy); err != nil {
 		return err
 	}
@@ -126,7 +126,8 @@ func (d *ProjectUsecase) ToWorkTask(ctx context.Context, userId, projectId, node
 	if !project.Published {
 		return fmt.Errorf("not available for no published project")
 	}
-	if err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, "inwork"); err != nil {
+	_, err = d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, userId, "inwork")
+	if err != nil {
 		return err
 	}
 	return nil
@@ -142,18 +143,17 @@ func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeI
 	}
 	// check status task
 	// change status tast to 'confirmation'
-	if err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, "confirmation"); err != nil {
+	processId, err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, userId, "confirmation")
+	if err != nil {
 		return err
 	}
+
+	fmt.Println(processId)
+
 	// TODO
 	// start consensus process
-	// выбор в настройках тип конценсуса и инструмент консенсуса
-	// если консенсус полный запустить процесс по отправке уведомлений в тг/другой инструмент для подтверждения
-	//const consensus_tool = "telegram"
-	//const consensus_type = "total"
-
-	// if err := GoConsensusProcessToNode(userId, projectId, nodeId); err != nil {
-	// 	// откат состояния задачи до created
+	//if err := StartConsensusProcess(processId); err != nil {
+	// 	// откат состояния задачи и процесса до inwork
 	// 	return err
 
 	// }

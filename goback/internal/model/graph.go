@@ -3,7 +3,7 @@ package model
 type CellData struct {
 	Description string `json:"Description,omitempty"`
 	LeadTime    uint64 `json:"LeadTime,omitempty"`
-	Performers  string `json:"Performers,omitempty"`
+	Performer   string `json:"Performer,omitempty"`
 	Energy      uint64 `json:"Energy,omitempty"`
 	Status      string `json:"Status,omitempty"`
 }

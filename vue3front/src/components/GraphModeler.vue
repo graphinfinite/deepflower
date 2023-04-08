@@ -485,7 +485,7 @@ const grabTask = ()=> {
     API.post(url).then((response) => {
       if (response.data.status === "ok") {
         console.log("task inwork")
-        selected_cell.value.setData({"Status": "inwork"})
+        selected_cell.value.setData({"Status": "inwork", "Performer":"some" })
         doSearch(0, 10, "id", "asc")
         return
       } 
@@ -764,7 +764,7 @@ Graph.registerNode(
     data: { 
       Description: "",
       LeadTime: 0,
-      Performers: "",
+      Performer: "",
       Energy: 0,
       Status: "",
     },
@@ -789,7 +789,7 @@ const slow = graph.createNode({
   data: { 
     Description: "empty",
     LeadTime: 0,
-    Performers: "",
+    Performer: "",
     Energy: 0,
     Status: "created",
     },
@@ -806,7 +806,7 @@ Graph.registerNode(
     data: { 
       Description: "",
       LeadTime: 0,
-      Performers: "",
+      Performer: "",
       Energy: 0,
       Status: "",
     },
@@ -837,7 +837,7 @@ const fast = graph.createNode({
   data: { 
     Description: "empty",
     LeadTime: 0,
-    Performers: "",
+    Performer: "",
     Energy: 0,
     Status: "created",
     },

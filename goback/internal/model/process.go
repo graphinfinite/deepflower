@@ -17,10 +17,12 @@ type ProcessTask struct {
 	CreatedAt           time.Time `db:"createdat" json:"CreatedAt,omitempty"`
 	UpdatedAt           time.Time `db:"updatedat" json:"UpdatedAt,omitempty"`
 	ProjectId           string    `db:"projectid" json:"ProjectId,omitempty"`
+	LeadTime            uint64    `db:"leadtime" json:"LeadTime,omitempty"`
 	NodeId              string    `db:"nodeid" json:"NodeId,omitempty"`
 	ExecUserId          string    `db:"exec_userid" json:"ExecUserId,omitempty"`
-	InspectorTotal      uint64    `db:"inspectors_total" json:"InspectorTotal,omitempty"`
+	InspectorsTotal     uint64    `db:"inspectors_total" json:"InspectorsTotal,omitempty"`
 	InspectorsConfirmed uint64    `db:"inspectors_confirmed" json:"InspectorsConfirmed,omitempty"`
 	EnergyTotal         uint64    `db:"energy_total" json:"EnergyTotal,omitempty"`
+	Status              string    `db:"status" json:"Status,omitempty"`
 	Completed           bool      `db:"complited" json:"Complited"`
 }
