@@ -52,7 +52,7 @@ type (
 		UpdateTaskStatus(ctx context.Context, projectId, nodeId, userId, newStatus string) (processId string, err error)
 	}
 
-	ConsensusInterface interface {
+	ConsensusProcessInterface interface {
 		StartConsensusProcess(processId string) error
 		GetConsensusProcessById(processId string) (process model.ProcessTask, err error)
 	}

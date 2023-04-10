@@ -18,6 +18,7 @@ telegram:
   token: "6237215798:AAHQayrhFO8HAvYSi8uVyv4hOcbhJvVr5ro"
   boturl: "http://t.me/DeepFlowerbot"
   debug: "false"
+  buffer: 100
 
 
 

@@ -485,7 +485,7 @@ const grabTask = ()=> {
     API.post(url).then((response) => {
       if (response.data.status === "ok") {
         console.log("task inwork")
-        selected_cell.value.setData({"Status": "inwork", "Performer":"some" })
+        selected_cell.value.setData({"Status": "inwork", "Performer":"you" })
         doSearch(0, 10, "id", "asc")
         return
       } 

@@ -8,10 +8,11 @@ import (
 
 type ProjectUsecase struct {
 	Rep ProjectStorageInterface
+	CP  ConsensusProcessInterface
 }
 
-func NewProjectUsecase(s ProjectStorageInterface) *ProjectUsecase {
-	return &ProjectUsecase{Rep: s}
+func NewProjectUsecase(s ProjectStorageInterface, c ConsensusProcessInterface) *ProjectUsecase {
+	return &ProjectUsecase{Rep: s, CP: c}
 }
 
 // TODO проверка что мечта опубликована
@@ -148,15 +149,16 @@ func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeI
 		return err
 	}
 
-	fmt.Println(processId)
-
-	// TODO
+	//TODO
+	fmt.Printf("START Process ID: %s  ...", processId)
 	// start consensus process
-	//if err := StartConsensusProcess(processId); err != nil {
-	// 	// откат состояния задачи и процесса до inwork
-	// 	return err
-
-	// }
-	//
+	if errProcess := d.CP.StartConsensusProcess(processId); err != nil {
+		// откат состояния задачи и процесса до inwork
+		_, err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, userId, "confirmation")
+		if err != nil {
+			return fmt.Errorf("errProcess: %s RevertErr: %s", errProcess.Error(), err.Error())
+		}
+		return err
+	}
 	return nil
 }

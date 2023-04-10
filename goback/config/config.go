@@ -38,7 +38,8 @@ type ServerConfig struct {
 type TelegramConfig struct {
 	Token,
 	Boturl string
-	Debug bool
+	Debug  bool
+	Buffer int
 }
 
 func Init() (Configuration, error) {
@@ -81,6 +82,7 @@ func Init() (Configuration, error) {
 		Token:  viper.GetString("telegram.token"),
 		Boturl: viper.GetString("telegram.boturl"),
 		Debug:  dbg,
+		Buffer: viper.GetInt("telegram.buffer"),
 	}
 
 	return Configuration{Db: dbconf, Auth: authconf, Server: srvconf, Telegram: tgconf}, nil

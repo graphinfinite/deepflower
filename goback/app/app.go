@@ -20,6 +20,8 @@ import (
 
 	"deepflower/pkg/telegram"
 
+	"deepflower/internal/observer"
+
 	"github.com/go-chi/cors"
 )
 
@@ -49,6 +51,26 @@ func (app *App) Run(cfg config.Configuration) error {
 		return err
 	}
 
+	// НАБЛЮДАТЕЛЬ
+	obs := observer.NewObs()
+
+	// start bot server
+	zlog.Info().Msgf("start telegram bot... ")
+	client := http.Client{Timeout: time.Second * 10}
+	bot, err := telegram.NewBot(cfg.Telegram.Token, cfg.Telegram.Buffer, client, cfg.Telegram.Debug, &zlog)
+	if err != nil {
+		zlog.Err(err).Msg("App/NewBot ")
+		return err
+	}
+
+	botOutChan := make(chan observer.Event, cfg.Telegram.Buffer)
+	defer bot.Bot.StopReceivingUpdates()
+	go func() {
+		bot.StartReceiveUpdates(0, 100, 10, botOutChan)
+	}()
+
+	obs.AddPublisherChain(botOutChan)
+
 	// Auth
 	authUC := usecase.NewAuthUsecase(
 		repository.NewUserStorage(dbPool),
@@ -59,19 +81,6 @@ func (app *App) Run(cfg config.Configuration) error {
 
 	// User
 	user := ctrl.NewUserController(usecase.NewUserUC(repository.NewUserStorage(dbPool)), &zlog)
-
-	// start bot server
-	zlog.Info().Msgf("start telegram bot... ")
-	client := http.Client{Timeout: time.Second * 10}
-	bot, err := telegram.NewBot(cfg.Telegram.Token, cfg.Telegram.Debug, client, &zlog, authUC)
-	if err != nil {
-		zlog.Err(err).Msg("App/NewBot ")
-		return err
-	}
-	go func() {
-		bot.StartReceiveUpdates()
-	}()
-	defer bot.Bot.StopReceivingUpdates()
 
 	// Dream
 	dream := ctrl.NewDreamController(usecase.NewDreamUsecase(repository.NewDreamStorage(dbPool)), &zlog)

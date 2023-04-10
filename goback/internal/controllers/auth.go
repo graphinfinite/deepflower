@@ -21,14 +21,8 @@ type loginUser struct {
 	Username string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
 }
-type signInResponse struct {
+type SignInResponse struct {
 	Token string `json:"token,omitempty"`
-}
-
-func newSignInResponse(token string) *signInResponse {
-	return &signInResponse{
-		Token: token,
-	}
 }
 
 func (auth *AuthController) Login(w http.ResponseWriter, r *http.Request) {
@@ -44,5 +38,5 @@ func (auth *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-	JSONstruct(w, STATUS_OK, "token successfully generated", newSignInResponse(token))
+	JSONstruct(w, STATUS_OK, "token successfully generated", SignInResponse{Token: token})
 }
