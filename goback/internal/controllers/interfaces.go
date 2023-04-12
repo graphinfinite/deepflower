@@ -55,4 +55,8 @@ type (
 		ToWorkTask(ctx context.Context, userId, projectId, nodeId string) error
 		CloseTask(ctx context.Context, userId, projectId, nodeId string) error
 	}
+
+	BotInterface interface {
+		SendMessage(ctx context.Context, chatId int64, message string) error
+	}
 )

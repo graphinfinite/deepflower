@@ -1,5 +1,9 @@
 package observer
 
+import (
+	"github.com/rs/zerolog"
+)
+
 type Topic string
 
 type Event struct {
@@ -7,32 +11,30 @@ type Event struct {
 	Payload interface{}
 }
 
-type Observer interface {
-	AddPublisherChan(ch chan Event)
-	GetChanByTopics(topics []Topic) <-chan Event
-}
+type handler func(event Event)
 
-type Obs struct {
+type Observer struct {
+	Log            *zerolog.Logger
 	PublisherChans []<-chan Event
-	ChanTopics     map[chan Event][]Topic
+	Handlers       []handler
+	TopicsHandler  map[int][]Topic
 }
 
-func NewObs() *Obs {
-	return &Obs{}
+func NewObserver(l *zerolog.Logger) *Observer {
+	return &Observer{Log: l}
 }
 
-func (o *Obs) AddPublisherChain(ch <-chan Event) {
+func (o *Observer) AddPublisherChain(ch <-chan Event) {
 	o.PublisherChans = append(o.PublisherChans, ch)
 }
 
-func (o *Obs) GetChanByTopics(topics []Topic, buffer int) <-chan Event {
-	ch := make(chan Event, buffer)
-	o.ChanTopics[ch] = topics
-	return ch
+func (o *Observer) AddTopicsHandler(topics []Topic, handler func(event Event)) {
+	o.Handlers = append(o.Handlers, handler)
+	o.TopicsHandler[len(o.Handlers)-1] = topics
 }
 
-func merge(buffer int, cs ...<-chan Event) <-chan Event {
-	out := make(chan Event, buffer)
+func merge(cs ...<-chan Event) <-chan Event {
+	out := make(chan Event)
 	for _, c := range cs {
 		go func(c <-chan Event) {
 			for v := range c {
@@ -43,22 +45,35 @@ func merge(buffer int, cs ...<-chan Event) <-chan Event {
 	return out
 }
 
-func (o *Obs) Start() {
-	buf := 0
-	for c := range o.ChanTopics {
-		buf += cap(c)
-	}
-	pubChan := merge(buf, o.PublisherChans...)
-	for ch, topics := range o.ChanTopics {
-		go func(topics []Topic, ch chan Event) {
+func (o *Observer) Start() {
+	o.Log.Info().Msg("Observer/merge publishers channel")
+	pubChan := merge(o.PublisherChans...)
+
+	o.Log.Info().Msg("Observer/handlers: ")
+	var met map[chan Event][]Topic
+	for n, topics := range o.TopicsHandler {
+		h := o.Handlers[n]
+		ch := make(chan Event)
+		met[ch] = topics
+		o.Log.Info().Msgf("Observer/go handler for topics: %s", topics)
+		go func(handler, chan Event) {
 			for {
-				event := <-pubChan
+				event := <-ch
+				h(event)
+			}
+		}(h, ch)
+	}
+
+	o.Log.Info().Msg("Observer/go events manager")
+	go func(map[chan Event][]Topic, <-chan Event) {
+		for event := range pubChan {
+			for ch, topics := range met {
 				for _, topic := range topics {
 					if event.Topic == topic {
 						ch <- event
 					}
 				}
 			}
-		}(topics, ch)
-	}
+		}
+	}(met, pubChan)
 }

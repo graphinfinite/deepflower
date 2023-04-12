@@ -36,7 +36,7 @@ func NewApp() *App {
 func (app *App) Run(cfg config.Configuration) error {
 	zlog := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 
-	zlog.Info().Msgf("start with configurations: \n%+v", cfg)
+	zlog.Info().Msgf("start with config: \n%+v", cfg)
 	zlog.Info().Msgf("connect to db...")
 	dbPool, err := postgres.NewPostgresPool(cfg.Db.Psql)
 	if err != nil {
@@ -45,16 +45,14 @@ func (app *App) Run(cfg config.Configuration) error {
 	}
 	defer dbPool.Close()
 
+	// TODO migrations
 	zlog.Info().Msgf("up migrations... ")
 	if err := postgres.MigrateUp(dbPool); err != nil {
 		zlog.Err(err).Msg("App/MigrateUp ")
 		return err
 	}
 
-	// НАБЛЮДАТЕЛЬ
-	obs := observer.NewObs()
-
-	// start bot server
+	// Create publisher1 - tg bot
 	zlog.Info().Msgf("start telegram bot... ")
 	client := http.Client{Timeout: time.Second * 10}
 	bot, err := telegram.NewBot(cfg.Telegram.Token, cfg.Telegram.Buffer, client, cfg.Telegram.Debug, &zlog)
@@ -65,10 +63,13 @@ func (app *App) Run(cfg config.Configuration) error {
 
 	botOutChan := make(chan observer.Event, cfg.Telegram.Buffer)
 	defer bot.Bot.StopReceivingUpdates()
-	go func() {
+	go func(botOutChan chan observer.Event) {
 		bot.StartReceiveUpdates(0, 100, 10, botOutChan)
-	}()
+	}(botOutChan)
 
+	// OBS
+	obs := observer.NewObserver(&zlog)
+	// OBS
 	obs.AddPublisherChain(botOutChan)
 
 	// Auth
@@ -77,7 +78,10 @@ func (app *App) Run(cfg config.Configuration) error {
 		cfg.Auth.Cost,
 		cfg.Auth.Signing_key,
 		time.Duration(cfg.Auth.Token_ttl)*time.Minute)
-	auth := ctrl.NewAuthController(authUC, &zlog)
+	auth := ctrl.NewAuthController(authUC, &bot, &zlog)
+
+	// OBS
+	obs.AddTopicsHandler([]observer.Topic{}, auth.Registration)
 
 	// User
 	user := ctrl.NewUserController(usecase.NewUserUC(repository.NewUserStorage(dbPool)), &zlog)
