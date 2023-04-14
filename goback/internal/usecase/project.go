@@ -49,7 +49,7 @@ func (d *ProjectUsecase) PublishProject(ctx context.Context, userId, projectId s
 		return fmt.Errorf("error: project has already been published")
 	}
 
-	// объединить?
+	// TODO объединить?
 	if err := d.Rep.EnergyTxUserToProject(ctx, userId, projectId, EnergyForPublish); err != nil {
 		return err
 	}
@@ -73,6 +73,7 @@ func (d *ProjectUsecase) AddEnergyToProject(ctx context.Context, userId, project
 	return nil
 }
 
+// TODO no realize
 func (d *ProjectUsecase) UpdateUserProject(ctx context.Context, userId, projectId string, patchProject map[string]interface{}) (model.Project, error) {
 	project, err := d.Rep.GetProjectById(ctx, projectId)
 	if err != nil {
@@ -90,6 +91,7 @@ func (d *ProjectUsecase) UpdateUserProject(ctx context.Context, userId, projectI
 	}
 	return projectUpdated, nil
 }
+
 func (d *ProjectUsecase) DeleteUserProject(ctx context.Context, userId, projectId string) error {
 	project, err := d.Rep.GetProjectById(ctx, projectId)
 	if err != nil {
@@ -152,7 +154,7 @@ func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeI
 	//TODO
 	fmt.Printf("START Process ID: %s  ...", processId)
 	// start consensus process
-	if errProcess := d.CP.StartConsensusProcess(processId); err != nil {
+	if errProcess := d.CP.StartTaskConsensusProcess(ctx, processId); err != nil {
 		// откат состояния задачи и процесса до inwork
 		_, err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, userId, "confirmation")
 		if err != nil {

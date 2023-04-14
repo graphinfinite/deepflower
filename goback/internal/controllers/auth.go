@@ -76,9 +76,8 @@ func (auth *AuthController) Registration(event observer.Event) {
 			auth.log.Err(err).Msg("Registration/send message error ")
 
 		}
-
-	case "mail/registration":
-		// For example
-		auth.log.Error().Msg("Registration/event/mail registration")
+	default:
+		auth.log.Error().Msg("Registration/event/ unknow topic")
 	}
+
 }

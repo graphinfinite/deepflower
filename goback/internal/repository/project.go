@@ -227,6 +227,24 @@ func (s *ProjectStorage) EnergyTxUserToTask(ctx context.Context, userId, project
 
 }
 
+func (s *ProjectStorage) GetTaskConsensusProcessById(ctx context.Context, processId string) (model.ProcessTask, error) {
+	query := `SELECT * FROM task_process WHERE id=$1;`
+	var process model.ProcessTask
+	if err := s.Db.GetContext(ctx, process, query, processId); err != nil {
+		return model.ProcessTask{}, err
+	}
+	return process, nil
+}
+
+func (s *ProjectStorage) SelectTaskUsers(ctx context.Context, projectId, nodeId string) ([]model.User, error) {
+	query := `SELECT * FROM "users" WHERE id IN (SELECT userid FROM "task_users" WHERE projectid=$1, nodeid=$2);`
+	var users []model.User
+	if err := s.Db.SelectContext(ctx, &users, query, projectId, nodeId); err != nil {
+		return []model.User{}, err
+	}
+	return users, nil
+}
+
 // CODE PROTOTYPE !!!!!!!!!!!!!!
 // / TODO :POSTGRES-> JSONB OR DECOMPOSE NODES DATA OR OTHER DB ?????
 func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId, userId, newStatus string) (processId string, err error) {

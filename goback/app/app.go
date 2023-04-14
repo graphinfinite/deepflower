@@ -54,7 +54,7 @@ func (app *App) Run(cfg config.Configuration) error {
 
 	// Create publisher1 - tg bot
 	zlog.Info().Msgf("start telegram bot... ")
-	client := http.Client{Timeout: time.Second * 10}
+	client := http.Client{Timeout: time.Second * 100}
 	bot, err := telegram.NewBot(cfg.Telegram.Token, cfg.Telegram.Buffer, client, cfg.Telegram.Debug, &zlog)
 	if err != nil {
 		zlog.Err(err).Msg("App/NewBot ")
@@ -63,14 +63,18 @@ func (app *App) Run(cfg config.Configuration) error {
 
 	botOutChan := make(chan observer.Event, cfg.Telegram.Buffer)
 	defer bot.Bot.StopReceivingUpdates()
-	go func(botOutChan chan observer.Event) {
-		bot.StartReceiveUpdates(0, 100, 10, botOutChan)
-	}(botOutChan)
+	bot.StartReceiveUpdates(0, 500, 60, botOutChan)
+
+	// for {
+	// 	fmt.Println(<-botOutChan)
+	// 	time.Sleep(2 * time.Second)
+
+	// }
 
 	// OBS
 	obs := observer.NewObserver(&zlog)
 	// OBS
-	obs.AddPublisherChain(botOutChan)
+	obs.AddPublisherChan(botOutChan)
 
 	// Auth
 	authUC := usecase.NewAuthUsecase(
@@ -81,7 +85,12 @@ func (app *App) Run(cfg config.Configuration) error {
 	auth := ctrl.NewAuthController(authUC, &bot, &zlog)
 
 	// OBS
-	obs.AddTopicsHandler([]observer.Topic{}, auth.Registration)
+	obs.AddTopicsHandler([]observer.Topic{"bot/registration"}, auth.Registration)
+
+	zlog.Debug().Msgf("///%s ////%s ///%s", obs.Handlers, obs.PublisherChans, obs.TopicsHandler)
+
+	// OBS START
+	obs.Start()
 
 	// User
 	user := ctrl.NewUserController(usecase.NewUserUC(repository.NewUserStorage(dbPool)), &zlog)
@@ -95,7 +104,8 @@ func (app *App) Run(cfg config.Configuration) error {
 	// Project
 
 	projstore := repository.NewProjectStorage(dbPool)
-	projUC := usecase.NewProjectUsecase(projstore)
+	consensusUC := usecase.NewConsensusProcess(projstore, &bot)
+	projUC := usecase.NewProjectUsecase(projstore, consensusUC)
 	proj := ctrl.NewProjectController(projUC, &zlog)
 
 	// Router settings

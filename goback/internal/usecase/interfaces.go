@@ -50,10 +50,18 @@ type (
 		DeleteUserProject(ctx context.Context, projectId string) error
 		EnergyTxUserToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error
 		UpdateTaskStatus(ctx context.Context, projectId, nodeId, userId, newStatus string) (processId string, err error)
+
+		//
+		GetTaskConsensusProcessById(ctx context.Context, processId string) (process model.ProcessTask, err error)
+		SelectTaskUsers(ctx context.Context, projectId, nodeId string) ([]model.User, error)
 	}
 
 	ConsensusProcessInterface interface {
-		StartConsensusProcess(processId string) error
-		GetConsensusProcessById(processId string) (process model.ProcessTask, err error)
+		StartTaskConsensusProcess(ctx context.Context, processId string) error
+	}
+
+	BotInterface interface {
+		SendMessage(ctx context.Context, chatId int64, message string) error
+		SendMessagesWithOkButton(ctx context.Context, chatIds []int64, msg string) error
 	}
 )
