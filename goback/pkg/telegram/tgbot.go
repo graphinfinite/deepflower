@@ -4,6 +4,7 @@ import (
 	"context"
 	"deepflower/internal/model"
 	"deepflower/internal/observer"
+	"fmt"
 	"net/http"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -109,6 +110,9 @@ func (t *TelegramBot) SendMessages(ctx context.Context, chatIds []int64, msg str
 }
 
 func (t *TelegramBot) SendMessagesWithOkButton(ctx context.Context, chatIds []int64, msg string) error {
+
+	fmt.Println("QWERTY BRO BRO", chatIds, msg)
+
 	for _, chatId := range chatIds {
 		msg := tgbotapi.NewMessage(chatId, msg)
 

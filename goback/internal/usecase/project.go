@@ -137,6 +137,8 @@ func (d *ProjectUsecase) ToWorkTask(ctx context.Context, userId, projectId, node
 }
 
 func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeId string) error {
+
+	print("sssss")
 	project, err := d.Rep.GetProjectById(ctx, projectId)
 	if err != nil {
 		return err
@@ -144,6 +146,8 @@ func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeI
 	if !project.Published {
 		return fmt.Errorf("not available for no published project")
 	}
+
+	print("rrrrr")
 	// check status task
 	// change status tast to 'confirmation'
 	processId, err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, userId, "confirmation")
@@ -155,12 +159,13 @@ func (d *ProjectUsecase) CloseTask(ctx context.Context, userId, projectId, nodeI
 	fmt.Printf("START Process ID: %s  ...", processId)
 	// start consensus process
 	if errProcess := d.CP.StartTaskConsensusProcess(ctx, processId); err != nil {
+		print("ghghghjhgjhgjhgjhgjhgjhgjhgjhg")
 		// откат состояния задачи и процесса до inwork
-		_, err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, userId, "confirmation")
-		if err != nil {
-			return fmt.Errorf("errProcess: %s RevertErr: %s", errProcess.Error(), err.Error())
-		}
-		return err
+		//_, err := d.Rep.UpdateTaskStatus(ctx, projectId, nodeId, userId, "created")
+		// if err != nil {
+		// 	return fmt.Errorf("errProcess: %s RevertErr: %s", errProcess.Error(), err.Error())
+		// }
+		return errProcess
 	}
 	return nil
 }

@@ -57,9 +57,6 @@ func (auth *AuthController) Registration(event observer.Event) {
 			auth.log.Error().Msg("Registration/event/error payload type")
 		}
 		user, err := auth.Uc.RegistrationFromTg(ctx, e)
-		if err != nil {
-			auth.log.Err(err).Msg("Registration/RegistrationFromTg ")
-		}
 		var ErrAuthUserAlreadyExist *usecase.ErrAuthUserAlreadyExist
 		var m string
 		switch {

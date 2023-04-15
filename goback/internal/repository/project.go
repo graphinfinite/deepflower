@@ -210,11 +210,11 @@ func (s *ProjectStorage) EnergyTxUserToTask(ctx context.Context, userId, project
 
 	query4 := `INSERT INTO "task_users" (projectid, nodeid, userid, updatedAt, energy, confirmed)
 	VALUES($1,$2,$3,$4,$5,$6) 
-	ON CONFLICT (userid) 
+	ON CONFLICT (nodeid, userid)
 	DO 
 	   UPDATE SET energy="task_users".energy + $7, updatedat=$8;`
 
-	_, err = tx.ExecContext(ctx, query4, projectId, nodeId, userId, time.Now(), energy, false)
+	_, err = tx.ExecContext(ctx, query4, projectId, nodeId, userId, time.Now(), energy, false, energy, time.Now())
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -230,14 +230,15 @@ func (s *ProjectStorage) EnergyTxUserToTask(ctx context.Context, userId, project
 func (s *ProjectStorage) GetTaskConsensusProcessById(ctx context.Context, processId string) (model.ProcessTask, error) {
 	query := `SELECT * FROM task_process WHERE id=$1;`
 	var process model.ProcessTask
-	if err := s.Db.GetContext(ctx, process, query, processId); err != nil {
+	if err := s.Db.GetContext(ctx, &process, query, processId); err != nil {
 		return model.ProcessTask{}, err
 	}
+
 	return process, nil
 }
 
 func (s *ProjectStorage) SelectTaskUsers(ctx context.Context, projectId, nodeId string) ([]model.User, error) {
-	query := `SELECT * FROM "users" WHERE id IN (SELECT userid FROM "task_users" WHERE projectid=$1, nodeid=$2);`
+	query := `SELECT * FROM "users" WHERE id IN (SELECT userid FROM "task_users" WHERE projectid=$1 AND nodeid=$2);`
 	var users []model.User
 	if err := s.Db.SelectContext(ctx, &users, query, projectId, nodeId); err != nil {
 		return []model.User{}, err
@@ -252,17 +253,21 @@ func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId
 	query2 := `SELECT graph FROM project WHERE id=$1;`
 	var graphStr string
 
+	print("1")
+
 	err = tx.GetContext(ctx, &graphStr, query2, projectId)
 	if err != nil {
 		tx.Rollback()
 		return "", err
 	}
+	print("2")
 	var graph model.Graph
 	err = json.Unmarshal([]byte(graphStr), &graph)
 	if err != nil {
 		tx.Rollback()
 		return "", err
 	}
+	print("3")
 
 	var celldata model.CellData
 	for n, c := range graph.Cells {
@@ -273,30 +278,41 @@ func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId
 		}
 
 	}
+	print("4")
 	updatedGraphByte, err := json.Marshal(graph)
 	if err != nil {
 		tx.Rollback()
 		return "", err
 	}
+	print("5")
 	var query3 = `UPDATE project SET graph=$1 WHERE id=$2;`
 	_, err = tx.ExecContext(ctx, query3, string(updatedGraphByte), projectId)
 	if err != nil {
 		tx.Rollback()
 		return "", err
 	}
+	print("6")
 
-	query4 := `INSERT INTO "task_process" (projectid, nodeid, exec_userid, inspectors_total,inspectors_confirmed, energy_total,leadtime,status)
-	VALUES($1,$2,$3,(SELECT count(*) FROM "task_users" WHERE projectid=$4 ,nodeid=$5),$6,$7,$8,$9)
+	query4 := `
+	INSERT INTO "task_process" 
+	(projectid, nodeid,exec_userid,
+	inspectors_total,inspectors_confirmed,energy_total,
+	leadtime,status) VALUES (
+	$1,$2,$3, (SELECT count(*) FROM "task_users" WHERE projectid=$4 AND nodeid=$5), $6, $7, $8, $9)
 	ON CONFLICT (nodeid) 
 	DO 
 	   UPDATE SET status=$10, updatedat=$11
 	RETURNING id;`
 	var insId string
+
+	fmt.Println(projectId, nodeId, projectId, nodeId, userId, 0, celldata.Energy, celldata.LeadTime, newStatus, newStatus, time.Now())
+
 	err = tx.GetContext(ctx, &insId, query4, projectId, nodeId, userId, projectId, nodeId, 0, celldata.Energy, celldata.LeadTime, newStatus, newStatus, time.Now())
 	if err != nil {
 		tx.Rollback()
 		return "", err
 	}
+	print("7")
 
 	if err := tx.Commit(); err != nil {
 		return "", err

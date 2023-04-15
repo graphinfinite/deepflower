@@ -56,7 +56,7 @@ func (o *Observer) Start() {
 	pubChan := merge(o.PublisherChans...)
 
 	o.log.Info().Msg("Observer/handlers: ")
-	var met map[chan Event][]Topic
+	met := make(map[chan Event][]Topic)
 	for n, topics := range o.TopicsHandler {
 		h := o.Handlers[n]
 		ch := make(chan Event)

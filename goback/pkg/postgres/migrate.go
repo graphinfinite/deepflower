@@ -75,10 +75,12 @@ func MigrateUp(dbPool *sqlx.DB) error {
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 			projectid uuid NOT NULL,
 			nodeid uuid NOT NULL,
-			userid uuid UNIQUE NOT NULL,
+			userid uuid NOT NULL,
 			updatedAt timestamp DEFAULT current_timestamp NOT NULL,
 			energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
-			confirmed BOOLEAN NOT NULL DEFAULT false);
+			confirmed BOOLEAN NOT NULL DEFAULT false,
+			UNIQUE (nodeid, userid)
+			);
 
 		CREATE TABLE IF NOT EXISTS "task_process" (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -91,7 +93,7 @@ func MigrateUp(dbPool *sqlx.DB) error {
 			inspectors_confirmed bigint NOT NULL DEFAULT 0 CHECK (inspectors_confirmed >= 0),
 			energy_total bigint NOT NULL DEFAULT 0 CHECK (inspectors_confirmed >= 0),
 			leadtime bigint NOT NULL DEFAULT 0 CHECK (inspectors_confirmed >= 0),
-			status VARCHAR(64) UNIQUE NOT NULL DEFAULT 'created',
+			status VARCHAR(64) NOT NULL DEFAULT 'created',
 			completed BOOLEAN NOT NULL DEFAULT false);
 		`
 	_, errDb := dbPool.Exec(q)

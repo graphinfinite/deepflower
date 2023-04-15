@@ -24,5 +24,5 @@ type ProcessTask struct {
 	InspectorsConfirmed uint64    `db:"inspectors_confirmed" json:"InspectorsConfirmed,omitempty"`
 	EnergyTotal         uint64    `db:"energy_total" json:"EnergyTotal,omitempty"`
 	Status              string    `db:"status" json:"Status,omitempty"`
-	Completed           bool      `db:"complited" json:"Complited"`
+	Completed           bool      `db:"completed" json:"Complited"`
 }
