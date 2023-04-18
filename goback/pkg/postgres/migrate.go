@@ -23,11 +23,11 @@ func MigrateUp(dbPool *sqlx.DB) error {
 		
 		CREATE TABLE IF NOT EXISTS "location" (
 		id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-		name VARCHAR(64) UNIQUE NOT NULL DEFAULT 'empty',
+		name VARCHAR(64) UNIQUE NOT NULL,
 		info TEXT NOT NULL DEFAULT 'empty',
 		createdat timestamp DEFAULT current_timestamp NOT NULL,
 		updatedat timestamp DEFAULT current_timestamp NOT NULL,
-		creater uuid NOT NULL,
+		creater uuid REFERENCES users (id),
 		geolocation point,
 		radius bigint NOT NULL DEFAULT 0 CHECK (radius >= 0),
 		height bigint NOT NULL DEFAULT 0,
@@ -36,46 +36,46 @@ func MigrateUp(dbPool *sqlx.DB) error {
 
 		CREATE TABLE IF NOT EXISTS "dream" (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-			name VARCHAR(64) UNIQUE NOT NULL DEFAULT 'empty',
+			name VARCHAR(64) UNIQUE NOT NULL,
 			info TEXT NOT NULL DEFAULT 'empty',
 			createdAt timestamp DEFAULT current_timestamp NOT NULL,
 			updatedAt timestamp DEFAULT current_timestamp NOT NULL,
 			publishAt timestamp NOT NULL DEFAULT current_timestamp ,
 			published BOOLEAN NOT NULL DEFAULT false,
 			status VARCHAR(32) NOT NULL,
-			creater uuid NOT NULL,
+			creater uuid REFERENCES users (id),
 			energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
-			location VARCHAR(128) NOT NULL DEFAULT 'empty',
 			countG integer NOT NULL DEFAULT 0);
 
 		CREATE TABLE IF NOT EXISTS "dream_location" (
 		id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-		locationid uuid NOT NULL,
-		dreamid uuid UNIQUE NOT NULL);
+		locationid uuid REFERENCES location (id),
+		dreamid uuid REFERENCES dream (id),
+		);
 
 		CREATE TABLE IF NOT EXISTS "project" (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-			name VARCHAR(64) UNIQUE NOT NULL DEFAULT 'empty',
+			name VARCHAR(64) UNIQUE NOT NULL,
 			info TEXT NOT NULL DEFAULT 'empty',
 			createdAt timestamp DEFAULT current_timestamp NOT NULL,
 			updatedAt timestamp DEFAULT current_timestamp NOT NULL,
 			publishAt timestamp NOT NULL DEFAULT current_timestamp ,
 			published BOOLEAN NOT NULL DEFAULT false,
 			status VARCHAR(32) NOT NULL,
-			creater uuid NOT NULL,
+			creater uuid REFERENCES users (id),
 			energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
 			graph TEXT NOT NULL DEFAULT '{}');
 
 		CREATE TABLE IF NOT EXISTS "dream_project" (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-			projectid uuid UNIQUE NOT NULL,
-			dreamid uuid NOT NULL);
+			projectid uuid REFERENCES project (id),
+			dreamid uuid REFERENCES dream (id));
 
 		CREATE TABLE IF NOT EXISTS "task_users" (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-			projectid uuid NOT NULL,
+			projectid uuid REFERENCES project (id),
 			nodeid uuid NOT NULL,
-			userid uuid NOT NULL,
+			userid uuid REFERENCES users (id),
 			updatedAt timestamp DEFAULT current_timestamp NOT NULL,
 			energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
 			confirmed BOOLEAN NOT NULL DEFAULT false,
@@ -84,11 +84,11 @@ func MigrateUp(dbPool *sqlx.DB) error {
 
 		CREATE TABLE IF NOT EXISTS "task_process" (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-			projectid uuid NOT NULL,
+			projectid uuid REFERENCES project (id),
 			nodeid uuid UNIQUE NOT NULL,
 			createdAt timestamp DEFAULT current_timestamp NOT NULL,
 			updatedAt timestamp DEFAULT current_timestamp NOT NULL,
-			exec_userid uuid NOT NULL,
+			exec_userid uuid REFERENCES users (id),
 			inspectors_total bigint NOT NULL DEFAULT 0 CHECK (inspectors_total >= 0),
 			inspectors_confirmed bigint NOT NULL DEFAULT 0 CHECK (inspectors_confirmed >= 0),
 			energy_total bigint NOT NULL DEFAULT 0 CHECK (inspectors_confirmed >= 0),

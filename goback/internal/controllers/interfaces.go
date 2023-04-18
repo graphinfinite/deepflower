@@ -15,12 +15,24 @@ type (
 	}
 	UserUCInterface interface {
 		GetUserInfo(ctx context.Context, userId string) (user model.User, err error)
-		UpdateUser(context.Context, model.User) (user model.User, err error)
+		//UpdateUser(context.Context, model.User) (user model.User, err error)
+	}
+
+	LocationUCInterface interface {
+		CreateLocation(ctx context.Context, creater string, Name string, info string, geolocation string, radius uint64, height uint64) (model.Location, error)
+		//UpdateUserLocation(ctx context.Context, userId, locationId string, locationUpdate map[string]interface{}) (model.Location, error)
+		DeleteUserLocation(ctx context.Context, userId string, locationId string) error
+		EnergyTxUserToLocation(ctx context.Context, userId, locationId string, energy uint64) error
+		SearchLocations(ctx context.Context, userId string,
+			limit uint64, offset uint64, onlyMyLocations bool,
+			order string, searchTerm string,
+			sort string) ([]model.Location, int, error)
+		GetLocationDreams(ctx context.Context, locationId string) ([]model.Dream, error)
 	}
 	DreamUCInterface interface {
 		CreateDream(ctx context.Context, name, info, location string, creater string) (model.Dream, error)
 		GetAllUserDreams(ctx context.Context, userId string) ([]model.Dream, error)
-		UpdateUserDream(ctx context.Context, userId, dreamId string, dream map[string]interface{}) (model.Dream, error)
+		//UpdateUserDream(ctx context.Context, userId, dreamId string, dream map[string]interface{}) (model.Dream, error)
 		DeleteUserDream(ctx context.Context, userId string, dreamId string) error
 		AddEnergyToDream(ctx context.Context, userId, dreamId string, energy uint64) error
 		PublishDream(ctx context.Context, userId, dreamId string) error
@@ -28,18 +40,6 @@ type (
 			limit uint64, offset uint64, onlyMyDreams bool,
 			order string, searchTerm string,
 			sort string) ([]model.Dream, int, error)
-	}
-
-	LocationUCInterface interface {
-		CreateLocation(ctx context.Context, creater string, Name string, info string, geolocation string, radius uint64, height uint64) (model.Location, error)
-		UpdateUserLocation(ctx context.Context, userId, locationId string, locationUpdate map[string]interface{}) (model.Location, error)
-		DeleteUserLocation(ctx context.Context, userId string, locationId string) error
-		AddEnergyToLocation(ctx context.Context, userId, locationId string, energy uint64) error
-		SearchLocations(ctx context.Context, userId string,
-			limit uint64, offset uint64, onlyMyLocations bool,
-			order string, searchTerm string,
-			sort string) ([]model.Location, int, error)
-		GetLocationDreams(ctx context.Context, locationId string) ([]model.Dream, error)
 	}
 
 	ProjectUCInterface interface {

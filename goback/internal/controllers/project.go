@@ -99,30 +99,6 @@ func (c *ProjectController) PublishProject(w http.ResponseWriter, r *http.Reques
 	JSON(w, STATUS_OK, "project was published")
 }
 
-// type AddEnergyToProjectRequest struct {
-// 	Energy uint64 `json:"Energy,omitempty"`
-// }
-
-// func (c *ProjectController) AddEnergyToDream(w http.ResponseWriter, r *http.Request) {
-// 	dreamId := chi.URLParam(r, "dreamId")
-// 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-// 	var e AddEnergyToDreamRequest
-
-// 	if err := DecodeJSONBody(w, r, &e); err != nil {
-// 		c.log.Err(err).Msg("AddEnergyToDream ")
-// 		JSON(w, STATUS_ERROR, err.Error())
-// 		return
-// 	}
-
-// 	err := c.Uc.AddEnergyToDream(r.Context(), userId, dreamId, e.Energy)
-// 	if err != nil {
-// 		c.log.Err(err).Msg("AddEnergyToDream ")
-// 		JSON(w, STATUS_ERROR, err.Error())
-// 		return
-// 	}
-// 	JSON(w, STATUS_OK, "dream energy updated")
-// }
-
 func (c *ProjectController) UpdateUserProject(w http.ResponseWriter, r *http.Request) {
 	projectId := chi.URLParam(r, "projectId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)

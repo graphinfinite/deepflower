@@ -50,7 +50,7 @@
 
     <div>
       <button v-if="!rowProject.Published" @click="showRowProject=!showRowProject" class="clonebutton">Clone</button>
-      <button @click="showRowProject=!showRowProject;rowProject.value={}; graph.fromJSON({}); selected_cell.value={}" class="redbutton">Close</button>
+      <button @click="showRowProject=!showRowProject;rowProject.value={}; rowProject.Published=false; graph.fromJSON({}); selected_cell.value={}" class="redbutton">Close</button>
     </div>
     <div></div>
 

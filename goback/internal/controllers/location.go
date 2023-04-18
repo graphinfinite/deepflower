@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"deepflower/internal/model"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -123,7 +122,7 @@ func (c *LocationController) AddEnergyToLocation(w http.ResponseWriter, r *http.
 		JSON(w, STATUS_ERROR, err.Error())
 		return
 	}
-	err := c.Uc.AddEnergyToLocation(r.Context(), userId, locationId, e.Energy)
+	err := c.Uc.EnergyTxUserToLocation(r.Context(), userId, locationId, e.Energy)
 	if err != nil {
 		c.log.Err(err).Msg("AddEnergyToLocation ")
 		JSON(w, STATUS_ERROR, err.Error())
@@ -132,43 +131,45 @@ func (c *LocationController) AddEnergyToLocation(w http.ResponseWriter, r *http.
 	JSON(w, STATUS_OK, "location energy updated")
 }
 
-func (c *LocationController) UpdateUserLocation(w http.ResponseWriter, r *http.Request) {
-	locationId := chi.URLParam(r, "locationId")
-	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	locationPatch := make(map[string]interface{}, 20)
-	if err := DecodeJSONBody(w, r, &locationPatch); err != nil {
-		c.log.Err(err).Msg("UpdateUserLocation ")
-		JSON(w, STATUS_ERROR, err.Error())
-		return
-	}
-	// TODO validate patch
-	errorMsg := ""
-	for key, value := range locationPatch {
-		switch key {
-		case "Name", "Info":
-			_, ok := value.(string)
-			if !ok {
-				errorMsg += fmt.Sprintf("%s: not valid type ", key)
-			}
-		default:
-			errorMsg += fmt.Sprintf("Undefined key: %s", key)
+/*
+	func (c *LocationController) UpdateUserLocation(w http.ResponseWriter, r *http.Request) {
+		locationId := chi.URLParam(r, "locationId")
+		userId, _ := r.Context().Value(ContextUserIdKey).(string)
+		locationPatch := make(map[string]interface{}, 20)
+		if err := DecodeJSONBody(w, r, &locationPatch); err != nil {
+			c.log.Err(err).Msg("UpdateUserLocation ")
+			JSON(w, STATUS_ERROR, err.Error())
+			return
 		}
-	}
-	if len(errorMsg) > 0 {
-		c.log.Error().Msg(errorMsg)
-		JSON(w, STATUS_ERROR, errorMsg)
-		return
-	}
-	// end validate patch
+		// TODO validate patch
+		errorMsg := ""
+		for key, value := range locationPatch {
+			switch key {
+			case "Name", "Info":
+				_, ok := value.(string)
+				if !ok {
+					errorMsg += fmt.Sprintf("%s: not valid type ", key)
+				}
+			default:
+				errorMsg += fmt.Sprintf("Undefined key: %s", key)
+			}
+		}
+		if len(errorMsg) > 0 {
+			c.log.Error().Msg(errorMsg)
+			JSON(w, STATUS_ERROR, errorMsg)
+			return
+		}
+		// end validate patch
 
-	updatedDream, err := c.Uc.UpdateUserLocation(r.Context(), userId, locationId, locationPatch)
-	if err != nil {
-		c.log.Err(err).Msg("UpdateUserLocation ")
-		JSON(w, STATUS_ERROR, err.Error())
-		return
+		updatedDream, err := c.Uc.UpdateUserLocation(r.Context(), userId, locationId, locationPatch)
+		if err != nil {
+			c.log.Err(err).Msg("UpdateUserLocation ")
+			JSON(w, STATUS_ERROR, err.Error())
+			return
+		}
+		JSONstruct(w, STATUS_OK, "location was updated", updatedDream)
 	}
-	JSONstruct(w, STATUS_OK, "location was updated", updatedDream)
-}
+*/
 func (c *LocationController) DeleteUserLocation(w http.ResponseWriter, r *http.Request) {
 	locationId := chi.URLParam(r, "locationId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)

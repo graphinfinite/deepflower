@@ -106,21 +106,13 @@ func (s *ProjectStorage) GetProjectById(ctx context.Context, projectId string) (
 
 func (s *ProjectStorage) DeleteUserProject(ctx context.Context, projectId string) error {
 	q := `DELETE FROM project WHERE id=$1;`
-	result, err := s.Db.ExecContext(ctx, q, projectId)
+	_, err := s.Db.ExecContext(ctx, q, projectId)
 	if err != nil {
 		return err
-	}
-	count, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if count != 1 {
-		return fmt.Errorf("count != 1")
 	}
 	return nil
 }
 
-// dangerous method. strictly check the input data to patch
 func (s *ProjectStorage) UpdateUserProject(ctx context.Context, projectId string, patchProject map[string]interface{}) (model.Project, error) {
 	var project model.Project
 	sqlSet := `UPDATE project SET`
@@ -233,7 +225,6 @@ func (s *ProjectStorage) GetTaskConsensusProcessById(ctx context.Context, proces
 	if err := s.Db.GetContext(ctx, &process, query, processId); err != nil {
 		return model.ProcessTask{}, err
 	}
-
 	return process, nil
 }
 
@@ -252,23 +243,17 @@ func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId
 	tx := s.Db.MustBegin()
 	query2 := `SELECT graph FROM project WHERE id=$1;`
 	var graphStr string
-
-	print("1")
-
 	err = tx.GetContext(ctx, &graphStr, query2, projectId)
 	if err != nil {
 		tx.Rollback()
 		return "", err
 	}
-	print("2")
 	var graph model.Graph
 	err = json.Unmarshal([]byte(graphStr), &graph)
 	if err != nil {
 		tx.Rollback()
 		return "", err
 	}
-	print("3")
-
 	var celldata model.CellData
 	for n, c := range graph.Cells {
 		if c.Id == nodeId {
@@ -278,21 +263,17 @@ func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId
 		}
 
 	}
-	print("4")
 	updatedGraphByte, err := json.Marshal(graph)
 	if err != nil {
 		tx.Rollback()
 		return "", err
 	}
-	print("5")
 	var query3 = `UPDATE project SET graph=$1 WHERE id=$2;`
 	_, err = tx.ExecContext(ctx, query3, string(updatedGraphByte), projectId)
 	if err != nil {
 		tx.Rollback()
 		return "", err
 	}
-	print("6")
-
 	query4 := `
 	INSERT INTO "task_process" 
 	(projectid, nodeid,exec_userid,
@@ -304,7 +285,6 @@ func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId
 	   UPDATE SET status=$10, updatedat=$11
 	RETURNING id;`
 	var insId string
-
 	fmt.Println(projectId, nodeId, projectId, nodeId, userId, 0, celldata.Energy, celldata.LeadTime, newStatus, newStatus, time.Now())
 
 	err = tx.GetContext(ctx, &insId, query4, projectId, nodeId, userId, projectId, nodeId, 0, celldata.Energy, celldata.LeadTime, newStatus, newStatus, time.Now())
@@ -312,8 +292,6 @@ func (s *ProjectStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId
 		tx.Rollback()
 		return "", err
 	}
-	print("7")
-
 	if err := tx.Commit(); err != nil {
 		return "", err
 	}

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"deepflower/internal/model"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -132,43 +131,45 @@ func (c *DreamController) AddEnergyToDream(w http.ResponseWriter, r *http.Reques
 	JSON(w, STATUS_OK, "dream energy updated")
 }
 
-func (c *DreamController) UpdateUserDream(w http.ResponseWriter, r *http.Request) {
-	dreamId := chi.URLParam(r, "dreamId")
-	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	dreamPatch := make(map[string]interface{}, 20)
-	if err := DecodeJSONBody(w, r, &dreamPatch); err != nil {
-		c.log.Err(err).Msg("UpdateUserDream ")
-		JSON(w, STATUS_ERROR, err.Error())
-		return
-	}
-	// TODO validate patch
-	errorMsg := ""
-	for key, value := range dreamPatch {
-		switch key {
-		case "Name", "Info", "Location":
-			_, ok := value.(string)
-			if !ok {
-				errorMsg += fmt.Sprintf("%s: not valid type ", key)
-			}
-		default:
-			errorMsg += fmt.Sprintf("Undefined key: %s", key)
+/*
+	func (c *DreamController) UpdateUserDream(w http.ResponseWriter, r *http.Request) {
+		dreamId := chi.URLParam(r, "dreamId")
+		userId, _ := r.Context().Value(ContextUserIdKey).(string)
+		dreamPatch := make(map[string]interface{}, 20)
+		if err := DecodeJSONBody(w, r, &dreamPatch); err != nil {
+			c.log.Err(err).Msg("UpdateUserDream ")
+			JSON(w, STATUS_ERROR, err.Error())
+			return
 		}
-	}
-	if len(errorMsg) > 0 {
-		c.log.Error().Msg(errorMsg)
-		JSON(w, STATUS_ERROR, errorMsg)
-		return
-	}
-	// end validate patch
+		// TODO validate patch
+		errorMsg := ""
+		for key, value := range dreamPatch {
+			switch key {
+			case "Name", "Info":
+				_, ok := value.(string)
+				if !ok {
+					errorMsg += fmt.Sprintf("%s: not valid type ", key)
+				}
+			default:
+				errorMsg += fmt.Sprintf("Undefined key: %s", key)
+			}
+		}
+		if len(errorMsg) > 0 {
+			c.log.Error().Msg(errorMsg)
+			JSON(w, STATUS_ERROR, errorMsg)
+			return
+		}
+		// end validate patch
 
-	updatedDream, err := c.Uc.UpdateUserDream(r.Context(), userId, dreamId, dreamPatch)
-	if err != nil {
-		c.log.Err(err).Msg("UpdateUserDream ")
-		JSON(w, STATUS_ERROR, err.Error())
-		return
+		updatedDream, err := c.Uc.UpdateUserDream(r.Context(), userId, dreamId, dreamPatch)
+		if err != nil {
+			c.log.Err(err).Msg("UpdateUserDream ")
+			JSON(w, STATUS_ERROR, err.Error())
+			return
+		}
+		JSONstruct(w, STATUS_OK, "dream was updated", updatedDream)
 	}
-	JSONstruct(w, STATUS_OK, "dream was updated", updatedDream)
-}
+*/
 func (c *DreamController) DeleteUserDream(w http.ResponseWriter, r *http.Request) {
 	dreamId := chi.URLParam(r, "dreamId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)

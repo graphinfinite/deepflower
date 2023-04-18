@@ -4,33 +4,33 @@ import (
 	"context"
 	"deepflower/internal/model"
 	"fmt"
-	"strings"
+
+	"deepflower/pkg/postgres"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type LocationStorage struct {
-	Db *sqlx.DB
+type Tx interface {
+	ExtractTx(ctx context.Context) (*sqlx.Tx, error)
 }
 
-func NewLocationStorage(dbpool *sqlx.DB) *LocationStorage {
-	return &LocationStorage{Db: dbpool}
+type LocationStorage struct {
+	Db *postgres.PG
+}
+
+func NewLocationStorage(db *postgres.PG) *LocationStorage {
+	return &LocationStorage{Db: db}
 }
 
 func (s *LocationStorage) CreateLocation(ctx context.Context, creater string, name string, info string, geolocation string, radius uint64, height uint64) (model.Location, error) {
+	tx := s.Db.ExtractTx(ctx)
 	var m model.Location
-	tx := s.Db.MustBegin()
 	q := `
 	INSERT INTO location (name, info, creater, energy, geolocation, radius, height, active) 
 	VALUES ($1,$2,$3,$4,$5,$6,$7, $8) 
 	returning *;
 	`
 	err := tx.GetContext(ctx, &m, q, name, info, creater, 0, geolocation, radius, height, true)
-	if err != nil {
-		tx.Rollback()
-		return model.Location{}, err
-	}
-	err = tx.Commit()
 	if err != nil {
 		return model.Location{}, err
 	}
@@ -42,6 +42,7 @@ func (s *LocationStorage) SearchLocations(ctx context.Context, userId string,
 	limit uint64, offset uint64, onlyMyLocations bool,
 	order string, searchTerm string,
 	sort string) ([]model.Location, int, error) {
+	tx := s.Db.ExtractTx(ctx)
 	var locations []model.Location
 	var args []interface{}
 	var query string
@@ -68,17 +69,18 @@ func (s *LocationStorage) SearchLocations(ctx context.Context, userId string,
 	}
 	q := query + filter
 
-	if err := s.Db.SelectContext(ctx, &locations, q, args...); err != nil {
+	if err := tx.SelectContext(ctx, &locations, q, args...); err != nil {
 		return []model.Location{}, 0, err
 	}
-	s.Db.GetContext(ctx, &count, queryCnt, args...)
+	tx.GetContext(ctx, &count, queryCnt, args...)
 	return locations, count, nil
 }
 
 func (s *LocationStorage) GetLocationDreams(ctx context.Context, locationId string) ([]model.Dream, error) {
+	tx := s.Db.ExtractTx(ctx)
 	var dreams []model.Dream
 	q := `SELECT * FROM dream WHERE id IN (SELECT dreamid FROM dream_location WHERE locationid=$1);`
-	if err := s.Db.SelectContext(ctx, &dreams, q, locationId); err != nil {
+	if err := tx.SelectContext(ctx, &dreams, q, locationId); err != nil {
 		return []model.Dream{}, err
 	}
 	return dreams, nil
@@ -86,17 +88,19 @@ func (s *LocationStorage) GetLocationDreams(ctx context.Context, locationId stri
 }
 
 func (s *LocationStorage) GetLocationById(ctx context.Context, locationId string) (model.Location, error) {
+	tx := s.Db.ExtractTx(ctx)
 	var location model.Location
 	q := `SELECT * FROM location WHERE id=$1;`
-	if err := s.Db.GetContext(ctx, &location, q, locationId); err != nil {
+	if err := tx.GetContext(ctx, &location, q, locationId); err != nil {
 		return model.Location{}, err
 	}
 	return location, nil
 }
 
 func (s *LocationStorage) DeleteUserLocation(ctx context.Context, locationId string) error {
+	tx := s.Db.ExtractTx(ctx)
 	q := `DELETE FROM location WHERE id=$1;`
-	result, err := s.Db.ExecContext(ctx, q, locationId)
+	result, err := tx.ExecContext(ctx, q, locationId)
 	if err != nil {
 		return err
 	}
@@ -110,7 +114,8 @@ func (s *LocationStorage) DeleteUserLocation(ctx context.Context, locationId str
 	return nil
 }
 
-// dangerous method. strictly check the input data to patch
+/*
+
 func (s *LocationStorage) UpdateUserLocation(ctx context.Context, locationId string, patchLocation map[string]interface{}) (model.Location, error) {
 	var location model.Location
 	sqlSet := `UPDATE location SET`
@@ -132,24 +137,36 @@ func (s *LocationStorage) UpdateUserLocation(ctx context.Context, locationId str
 	return location, nil
 }
 
-// транзакция энергии от пользователя к локации
-func (s *LocationStorage) EnergyTxUserToLocation(ctx context.Context, userId, locationId string, energy uint64) error {
-	tx := s.Db.MustBegin()
-	query1 := `UPDATE users SET energy=energy-$1 WHERE id=$2;`
-	query2 := `UPDATE location SET energy=energy+$1 WHERE id=$2;`
+*/
 
-	_, err := tx.ExecContext(ctx, query1, energy, userId)
+func (s *LocationStorage) AddEnergy(ctx context.Context, locationId string, energy uint64) error {
+	tx := s.Db.ExtractTx(ctx)
+	query2 := `UPDATE location SET energy=energy+$1 WHERE id=$2;`
+	_, err := tx.ExecContext(ctx, query2, energy, locationId)
 	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	_, err = tx.ExecContext(ctx, query2, energy, locationId)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	if err := tx.Commit(); err != nil {
 		return err
 	}
 	return nil
 }
+
+// // транзакция энергии от пользователя к локации
+// func (s *LocationStorage) EnergyTxUserToLocation(ctx context.Context, userId, locationId string, energy uint64) error {
+// 	tx := s.Db.MustBegin()
+// 	query1 := `UPDATE users SET energy=energy-$1 WHERE id=$2;`
+// 	query2 := `UPDATE location SET energy=energy+$1 WHERE id=$2;`
+
+// 	_, err := tx.ExecContext(ctx, query1, energy, userId)
+// 	if err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+// 	_, err = tx.ExecContext(ctx, query2, energy, locationId)
+// 	if err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+// 	if err := tx.Commit(); err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }

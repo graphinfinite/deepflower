@@ -94,6 +94,13 @@ div#login div#form input {
   width: 100%;
 }
 
+
+div#login div#form i {
+
+  cursor: pointer;
+}
+
+
 div#login div#form label {
   color: #6e5c7c;
   font-size: 1em;

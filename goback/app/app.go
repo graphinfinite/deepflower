@@ -38,16 +38,16 @@ func (app *App) Run(cfg config.Configuration) error {
 
 	zlog.Info().Msgf("start with config: \n%+v", cfg)
 	zlog.Info().Msgf("connect to db...")
-	dbPool, err := postgres.NewPostgresPool(cfg.Db.Psql)
+	db, err := postgres.NewPG(cfg.Db.Psql)
 	if err != nil {
 		zlog.Err(err).Msg("App/NewPostgresPool ")
 		return err
 	}
-	defer dbPool.Close()
+	defer db.Db.Close()
 
 	// TODO migrations
 	zlog.Info().Msgf("up migrations... ")
-	if err := postgres.MigrateUp(dbPool); err != nil {
+	if err := postgres.MigrateUp(db.Db); err != nil {
 		zlog.Err(err).Msg("App/MigrateUp ")
 		return err
 	}
@@ -65,12 +65,6 @@ func (app *App) Run(cfg config.Configuration) error {
 	defer bot.Bot.StopReceivingUpdates()
 	bot.StartReceiveUpdates(0, 500, 60, botOutChan)
 
-	// for {
-	// 	fmt.Println(<-botOutChan)
-	// 	time.Sleep(2 * time.Second)
-
-	// }
-
 	// OBS
 	obs := observer.NewObserver(&zlog)
 	// OBS
@@ -78,7 +72,7 @@ func (app *App) Run(cfg config.Configuration) error {
 
 	// Auth
 	authUC := usecase.NewAuthUsecase(
-		repository.NewUserStorage(dbPool),
+		repository.NewUserStorage(db),
 		cfg.Auth.Cost,
 		cfg.Auth.Signing_key,
 		time.Duration(cfg.Auth.Token_ttl)*time.Minute)
@@ -87,23 +81,24 @@ func (app *App) Run(cfg config.Configuration) error {
 	// OBS
 	obs.AddTopicsHandler([]observer.Topic{"bot/registration"}, auth.Registration)
 
-	zlog.Debug().Msgf("///%s ////%s ///%s", obs.Handlers, obs.PublisherChans, obs.TopicsHandler)
+	zlog.Debug().Msgf("///%s ////%s /////%s", obs.Handlers, obs.PublisherChans, obs.TopicsHandler)
 
 	// OBS START
 	obs.Start()
 
 	// User
-	user := ctrl.NewUserController(usecase.NewUserUC(repository.NewUserStorage(dbPool)), &zlog)
+	userStore := repository.NewUserStorage(db)
+	user := ctrl.NewUserController(usecase.NewUserUC(userStore), &zlog)
 
 	// Dream
-	dream := ctrl.NewDreamController(usecase.NewDreamUsecase(repository.NewDreamStorage(dbPool)), &zlog)
+	dream := ctrl.NewDreamController(usecase.NewDreamUsecase(repository.NewDreamStorage(db), userStore, db), &zlog)
 
 	// Location
-	loc := ctrl.NewLocationController(usecase.NewLocationUsecase(repository.NewLocationStorage(dbPool)), &zlog)
+	loc := ctrl.NewLocationController(usecase.NewLocationUsecase(repository.NewLocationStorage(db), userStore, db), &zlog)
 
 	// Project
 
-	projstore := repository.NewProjectStorage(dbPool)
+	projstore := repository.NewProjectStorage(db)
 	consensusUC := usecase.NewConsensusProcess(projstore, &bot)
 	projUC := usecase.NewProjectUsecase(projstore, consensusUC)
 	proj := ctrl.NewProjectController(projUC, &zlog)
@@ -128,24 +123,24 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Use(auth.JWT)
 		r.Get("/", user.GetUserInfo)
 	})
-	r.Route("/dreams", func(r chi.Router) {
-		r.Use(auth.JWT)
-		r.Post("/", dream.CreateDream)
-		r.Get("/", dream.SearchDreams)
-		r.Patch("/{dreamId}", dream.UpdateUserDream)
-		r.Delete("/{dreamId}", dream.DeleteUserDream)
-		r.Post("/{dreamId}/publish", dream.PublishDream)
-		r.Post("/{dreamId}/energy", dream.AddEnergyToDream)
-	})
 
 	r.Route("/locations", func(r chi.Router) {
 		r.Use(auth.JWT)
 		r.Post("/", loc.CreateLocation)
 		r.Get("/", loc.SearchLocations)
-		r.Patch("/{locationId}", loc.UpdateUserLocation)
+		//r.Patch("/{locationId}", loc.UpdateUserLocation)
 		r.Delete("/{locationId}", loc.DeleteUserLocation)
 		r.Post("/{locationId}/energy", loc.AddEnergyToLocation)
 		r.Get("/{locationId}/dreams", loc.GetLocationDreams)
+	})
+	r.Route("/dreams", func(r chi.Router) {
+		r.Use(auth.JWT)
+		r.Post("/", dream.CreateDream)
+		r.Get("/", dream.SearchDreams)
+		//r.Patch("/{dreamId}", dream.UpdateUserDream)
+		r.Delete("/{dreamId}", dream.DeleteUserDream)
+		r.Post("/{dreamId}/publish", dream.PublishDream)
+		r.Post("/{dreamId}/energy", dream.AddEnergyToDream)
 	})
 
 	r.Route("/projects", func(r chi.Router) {

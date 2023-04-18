@@ -21,6 +21,7 @@ func (u *UserUC) GetUserInfo(ctx context.Context, userId string) (user model.Use
 	return user, nil
 }
 
+/*
 func (u *UserUC) UpdateUser(ctx context.Context, m model.User) (user model.User, err error) {
 	user, err = u.Rep.UpdateUser(ctx, m)
 	if err != nil {
@@ -29,3 +30,4 @@ func (u *UserUC) UpdateUser(ctx context.Context, m model.User) (user model.User,
 	return user, nil
 
 }
+*/

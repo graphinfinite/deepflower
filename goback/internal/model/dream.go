@@ -13,6 +13,5 @@ type Dream struct {
 	Status    string    `db:"status" json:"Status,omitempty"`
 	Creater   string    `db:"creater" json:"Creater,omitempty"`
 	Energy    uint64    `db:"energy" json:"Energy"`
-	Location  string    `db:"location" json:"Location,omitempty"`
 	CountG    int32     `db:"countg" json:"CountG,omitempty"`
 }

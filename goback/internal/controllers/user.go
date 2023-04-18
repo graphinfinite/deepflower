@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"deepflower/internal/model"
 	"net/http"
 
 	"github.com/rs/zerolog"
@@ -27,6 +26,8 @@ func (u *UserController) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	JSONstruct(w, STATUS_OK, "user info", user)
 }
 
+/*
+
 func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	user := model.User{}
 	if err := DecodeJSONBody(w, r, &user); err != nil {
@@ -41,4 +42,4 @@ func (u *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	JSONstruct(w, STATUS_OK, "user successfully updated", userUpdated)
-}
+}*/
