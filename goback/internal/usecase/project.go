@@ -7,17 +7,19 @@ import (
 )
 
 type ProjectUsecase struct {
-	Rep ProjectStorageInterface
-	CP  ConsensusProcessInterface
+	Tranzactor       Tranzactor
+	ProjectStorage   ProjectStorageInterface
+	UserStorage      UserStorageInterface
+	ConsensusProcess ConsensusProcessInterface
 }
 
-func NewProjectUsecase(s ProjectStorageInterface, c ConsensusProcessInterface) *ProjectUsecase {
-	return &ProjectUsecase{Rep: s, CP: c}
+func NewProjectUsecase(ps ProjectStorageInterface, us UserStorageInterface, cp ConsensusProcessInterface, tx Tranzactor) *ProjectUsecase {
+	return &ProjectUsecase{ProjectStorage: ps, UserStorage: us, ConsensusProcess: cp, Tranzactor: tx}
 }
 
 // TODO проверка что мечта опубликована
 func (d *ProjectUsecase) CreateProject(ctx context.Context, name, info, graph, dreamName, creater string) (model.Project, error) {
-	project, err := d.Rep.CreateProject(ctx, name, info, graph, dreamName, creater)
+	project, err := d.ProjectStorage.CreateProject(ctx, name, info, graph, dreamName, creater)
 	if err != nil {
 		return model.Project{}, err
 	}
@@ -29,7 +31,7 @@ func (d *ProjectUsecase) SearchProjects(ctx context.Context, userId string,
 	limit uint64, offset uint64, onlyMyProjects bool, order string, searchTerm string,
 	sort string) ([]model.Project, int, error) {
 	// search
-	projects, cnt, err := d.Rep.SearchProjects(ctx, userId,
+	projects, cnt, err := d.ProjectStorage.SearchProjects(ctx, userId,
 		limit, offset, onlyMyProjects, order, searchTerm, sort)
 	if err != nil {
 		return []model.Project{}, 0, err
@@ -38,7 +40,7 @@ func (d *ProjectUsecase) SearchProjects(ctx context.Context, userId string,
 }
 
 func (d *ProjectUsecase) PublishProject(ctx context.Context, userId, projectId string) error {
-	project, err := d.Rep.GetProjectById(ctx, projectId)
+	project, err := d.ProjectStorage.GetProjectById(ctx, projectId)
 	if err != nil {
 		return err
 	}
@@ -49,8 +51,20 @@ func (d *ProjectUsecase) PublishProject(ctx context.Context, userId, projectId s
 		return fmt.Errorf("error: project has already been published")
 	}
 
-	// TODO объединить?
-	if err := d.Rep.EnergyTxUserToProject(ctx, userId, projectId, EnergyForPublish); err != nil {
+	if err := d.Tranzactor.WithTx(ctx, func(ctx context.Context) error {
+		if err := d.UserStorage.SubtractEnergy(ctx, userId, EnergyForPublish); err != nil {
+			return err
+		}
+
+		if err := d.ProjectStorage.AddEnergyToProject(ctx, projectId, EnergyForPublish); err != nil {
+			return err
+		}
+
+		d.ProjectStorage.UpdateProjectToPublished(ctx, projectId)
+
+		return nil
+
+	}); err != nil {
 		return err
 	}
 	if _, err := d.Rep.UpdateUserProject(ctx, projectId, map[string]interface{}{"Published": true}); err != nil {

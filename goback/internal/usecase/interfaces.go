@@ -53,9 +53,12 @@ type (
 			limit, offset uint64, onlyMyProjects bool, order string, searchTerm string, sort string) ([]model.Project, int, error)
 		//EnergyTxUserToProject(ctx context.Context, userId, projectId string, EnergyForPublish uint64) error
 		GetProjectById(ctx context.Context, projectId string) (model.Project, error)
-		UpdateUserProject(ctx context.Context, projectId string, projectUpdate map[string]interface{}) (model.Project, error)
+		AddEnergyToProject(ctx context.Context, projectId string, energy uint64) error
 		DeleteUserProject(ctx context.Context, projectId string) error
-		EnergyTxUserToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error
+		UpdateProjectToPublished(ctx context.Context, projectId string) error
+		//UpdateUserProject(ctx context.Context, projectId string, projectUpdate map[string]interface{}) (model.Project, error)
+
+		//EnergyTxUserToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error
 		UpdateTaskStatus(ctx context.Context, projectId, nodeId, userId, newStatus string) (processId string, err error)
 
 		//
