@@ -12,21 +12,21 @@ import (
 )
 
 type TelegramBot struct {
-	Bot *tgbotapi.BotAPI
-	log *zerolog.Logger
+	Bot       *tgbotapi.BotAPI
+	log       *zerolog.Logger
+	callbacks map[string]*string
 }
 
-func NewBot(token string, buffer int, client http.Client, debug bool, logger *zerolog.Logger) (TelegramBot, error) {
+func NewBot(token string, buffer int, client http.Client, debug bool, logger *zerolog.Logger) (*TelegramBot, error) {
 	bot, err := tgbotapi.NewBotAPIWithClient(token, &client)
 	bot.Debug = debug
 	bot.Buffer = buffer
+	var callbacks = make(map[string]*string)
 	if err != nil {
-		return TelegramBot{}, err
+		return &TelegramBot{}, err
 	}
-	return TelegramBot{Bot: bot, log: logger}, nil
+	return &TelegramBot{Bot: bot, log: logger, callbacks: callbacks}, nil
 }
-
-var callback_data_ok = "ok"
 
 func (t *TelegramBot) StartReceiveUpdates(offset, limit, timeout int, outChan chan observer.Event) {
 	t.log.Info().Msgf("Authorized on account %s", t.Bot.Self.UserName)
@@ -109,14 +109,20 @@ func (t *TelegramBot) SendMessages(ctx context.Context, chatIds []int64, msg str
 	return nil
 }
 
-func (t *TelegramBot) SendMessagesWithOkButton(ctx context.Context, chatIds []int64, msg string) error {
+func (t *TelegramBot) SendMessagesWithCallbacks(ctx context.Context, chatIds []int64, msg string, callback map[string]string) error {
 
 	fmt.Println("QWERTY BRO BRO", chatIds, msg)
+
+	var buttons []tgbotapi.InlineKeyboardButton
+	for key, val := range callback {
+		t.callbacks[key] = &val
+		buttons = append(buttons, tgbotapi.InlineKeyboardButton{Text: key, CallbackData: t.callbacks[key]})
+	}
 
 	for _, chatId := range chatIds {
 		msg := tgbotapi.NewMessage(chatId, msg)
 
-		msg.ReplyMarkup = tgbotapi.InlineKeyboardMarkup{InlineKeyboard: [][]tgbotapi.InlineKeyboardButton{{{Text: "ok", CallbackData: &callback_data_ok}}}}
+		msg.ReplyMarkup = tgbotapi.InlineKeyboardMarkup{InlineKeyboard: [][]tgbotapi.InlineKeyboardButton{buttons}}
 
 		_, err := t.Bot.Send(msg)
 		if err != nil {

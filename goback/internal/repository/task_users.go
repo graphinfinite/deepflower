@@ -15,7 +15,7 @@ func NewTaskUsersStorage(db *postgres.PG) *TaskUsersStorage {
 	return &TaskUsersStorage{Db: db}
 }
 
-func (s *TaskUsersStorage) Create(ctx context.Context, userId, projectId, nodeId string, energy uint64) error {
+func (s *TaskUsersStorage) AddTaskUser(ctx context.Context, userId, projectId, nodeId string, energy uint64) error {
 	tx := s.Db.ExtractTx(ctx)
 
 	query4 := `INSERT INTO "task_users" (projectid, nodeid, userid, updatedAt, energy, confirmed)
@@ -31,7 +31,7 @@ func (s *TaskUsersStorage) Create(ctx context.Context, userId, projectId, nodeId
 	return nil
 }
 
-func (s *TaskUsersStorage) GetTaskUsersIds(ctx context.Context, projectId, nodeId string) ([]model.User, error) {
+func (s *TaskUsersStorage) GetTaskUsersByTaskId(ctx context.Context, projectId, nodeId string) ([]model.User, error) {
 	tx := s.Db.ExtractTx(ctx)
 	query := `SELECT * FROM "users" WHERE id IN (SELECT userid FROM "task_users" WHERE projectid=$1 AND nodeid=$2);`
 	var users []model.User

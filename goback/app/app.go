@@ -76,7 +76,7 @@ func (app *App) Run(cfg config.Configuration) error {
 		cfg.Auth.Cost,
 		cfg.Auth.Signing_key,
 		time.Duration(cfg.Auth.Token_ttl)*time.Minute)
-	auth := ctrl.NewAuthController(authUC, &bot, &zlog)
+	auth := ctrl.NewAuthController(authUC, bot, &zlog)
 
 	// OBS
 	obs.AddTopicsHandler([]observer.Topic{"bot/registration"}, auth.Registration)
@@ -97,11 +97,17 @@ func (app *App) Run(cfg config.Configuration) error {
 	loc := ctrl.NewLocationController(usecase.NewLocationUsecase(repository.NewLocationStorage(db), userStore, db), &zlog)
 
 	// Project
-
-	projstore := repository.NewProjectStorage(db)
-	consensusUC := usecase.NewConsensusProcess(projstore, &bot)
-	projUC := usecase.NewProjectUsecase(projstore, consensusUC)
+	ps := repository.NewProjectStorage(db)
+	projUC := usecase.NewProjectUsecase(ps, userStore, db)
 	proj := ctrl.NewProjectController(projUC, &zlog)
+
+	// TASK
+	ts := repository.NewTaskStorage(db)
+	tus := repository.NewTaskUsersStorage(db)
+	tps := repository.NewTaskProcessStorage(db)
+	consensusUC := usecase.NewTaskConsensus(db, bot, ps, userStore, ts, tus, tps)
+	taskUC := usecase.NewTaskUsecase(db, ps, userStore, ts, tus, tps, consensusUC)
+	task := ctrl.NewTaskController(taskUC, zlog)
 
 	// Router settings
 	r := chi.NewRouter()

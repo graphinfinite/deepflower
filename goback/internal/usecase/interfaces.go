@@ -59,19 +59,35 @@ type (
 		//UpdateUserProject(ctx context.Context, projectId string, projectUpdate map[string]interface{}) (model.Project, error)
 
 		//EnergyTxUserToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error
-		UpdateTaskStatus(ctx context.Context, projectId, nodeId, userId, newStatus string) (processId string, err error)
+		//UpdateTaskStatus(ctx context.Context, projectId, nodeId, userId, newStatus string) (processId string, err error)
 
 		//
-		GetTaskConsensusProcessById(ctx context.Context, processId string) (process model.ProcessTask, err error)
-		SelectTaskUsers(ctx context.Context, projectId, nodeId string) ([]model.User, error)
+		//GetTaskConsensusProcessById(ctx context.Context, processId string) (process model.ProcessTask, err error)
+		//SelectTaskUsers(ctx context.Context, projectId, nodeId string) ([]model.User, error)
 	}
 
-	ConsensusProcessInterface interface {
-		StartTaskConsensusProcess(ctx context.Context, processId string) error
+	TaskStorageInterface interface {
+		AddEnergyToTask(ctx context.Context, projectId, nodeId string, energy uint64) error
+		UpdateTaskStatus(ctx context.Context, projectId, nodeId, newStatus string) error
+		GetTaskData(ctx context.Context, projectId, nodeId string) (model.CellData, error)
+	}
+
+	TaskUsersStorageInterface interface {
+		AddTaskUser(ctx context.Context, userId, projectId, nodeId string, energy uint64) error
+		GetTaskUsersByTaskId(ctx context.Context, projectId, nodeId string) ([]model.User, error)
+	}
+
+	TaskProcessStorageInterface interface {
+		GetTaskConsensusProcessById(ctx context.Context, processId string) (model.ProcessTask, error)
+		UpsertTaskProcess(ctx context.Context, projectId, nodeId, userId, status string, taskEnerge, taskLeadTime uint64) (model.ProcessTask, error)
+	}
+
+	TaskConsensusInterface interface {
+		StartTaskConsensus(ctx context.Context, processId string) error
 	}
 
 	BotInterface interface {
 		SendMessage(ctx context.Context, chatId int64, message string) error
-		SendMessagesWithOkButton(ctx context.Context, chatIds []int64, msg string) error
+		SendMessagesWithCallbacks(ctx context.Context, chatIds []int64, msg string, buttons map[string]string) error
 	}
 )

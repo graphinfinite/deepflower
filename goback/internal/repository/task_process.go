@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"deepflower/internal/model"
 	"deepflower/pkg/postgres"
 	"fmt"
 	"time"
@@ -15,7 +16,17 @@ func NewTaskProcessStorage(db *postgres.PG) *TaskProcessStorage {
 	return &TaskProcessStorage{Db: db}
 }
 
-func (s *TaskProcessStorage) UpsertTaskProcess(ctx context.Context, projectId, nodeId, userId, status string, taskEnerge, taskLeadTime uint64) (processId string, err error) {
+func (s *TaskProcessStorage) GetTaskConsensusProcessById(ctx context.Context, processId string) (model.ProcessTask, error) {
+	tx := s.Db.ExtractTx(ctx)
+	query := `SELECT * FROM task_process WHERE id=$1;`
+	var process model.ProcessTask
+	if err := tx.GetContext(ctx, &process, query, processId); err != nil {
+		return model.ProcessTask{}, err
+	}
+	return process, nil
+}
+
+func (s *TaskProcessStorage) UpsertTaskProcess(ctx context.Context, projectId, nodeId, userId, status string, taskEnerge, taskLeadTime uint64) (model.ProcessTask, error) {
 	tx := s.Db.ExtractTx(ctx)
 	query4 := `
 	INSERT INTO "task_process" 
@@ -26,12 +37,12 @@ func (s *TaskProcessStorage) UpsertTaskProcess(ctx context.Context, projectId, n
 	ON CONFLICT (nodeid) 
 	DO 
 	   UPDATE SET status=$10, updatedat=$11
-	RETURNING id;`
-	var insId string
+	RETURNING *;`
+	var process model.ProcessTask
 	fmt.Println(projectId, nodeId, projectId, nodeId, userId, 0, taskEnerge, taskLeadTime, status, status, time.Now())
-	err = tx.GetContext(ctx, &insId, query4, projectId, nodeId, userId, projectId, nodeId, 0, taskEnerge, taskLeadTime, status, status, time.Now())
+	err := tx.SelectContext(ctx, &process, query4, projectId, nodeId, userId, projectId, nodeId, 0, taskEnerge, taskLeadTime, status, status, time.Now())
 	if err != nil {
-		return "", err
+		return model.ProcessTask{}, err
 	}
-	return insId, nil
+	return process, nil
 }

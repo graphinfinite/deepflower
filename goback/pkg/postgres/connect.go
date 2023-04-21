@@ -12,17 +12,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// func NewPostgresPool(dsn string) (*sqlx.DB, error) {
-// 	db, err := sqlx.Open("postgres", dsn)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if err = db.Ping(); err != nil {
-// 		return nil, err
-// 	}
-// 	return db, nil
-// }
-
 type Tranzactor interface {
 	WithTx(ctx context.Context, fn func(ctx context.Context) error) (err error)
 }
@@ -40,7 +29,6 @@ type Connector interface {
 
 }
 
-// PG is a connection wrapper with transaction decorators
 type PG struct {
 	Db *sqlx.DB
 }
@@ -58,7 +46,6 @@ func NewPG(dsn string) (*PG, error) {
 
 type ctxTxKey struct{}
 
-// WithTx execute callback with transaction in context
 func (pg *PG) WithTx(ctx context.Context, fn func(ctx context.Context) error) (err error) {
 	tx, alreadyHasTx := ctx.Value(ctxTxKey{}).(*sqlx.Tx)
 	if !alreadyHasTx {
