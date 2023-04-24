@@ -47,10 +47,11 @@ type (
 		PublishProject(ctx context.Context, userId, projectId string) error
 		SearchProjects(ctx context.Context, userId string, limit, offset uint64,
 			onlyMyProjects bool, order string, searchTerm, sort string) ([]model.Project, int, error)
-		UpdateUserProject(ctx context.Context, userId, projectId string, projectPatch map[string]interface{}) (model.Project, error)
+		//UpdateUserProject(ctx context.Context, userId, projectId string, projectPatch map[string]interface{}) (model.Project, error)
 		DeleteUserProject(ctx context.Context, userId, projectId string) error
+	}
 
-		// nodes updates
+	TaskUCInterface interface {
 		AddEnergyToTask(ctx context.Context, userId, projectId, nodeId string, energy uint64) error
 		ToWorkTask(ctx context.Context, userId, projectId, nodeId string) error
 		CloseTask(ctx context.Context, userId, projectId, nodeId string) error

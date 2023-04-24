@@ -2,10 +2,8 @@ package controllers
 
 import (
 	"deepflower/internal/model"
-	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog"
@@ -99,44 +97,46 @@ func (c *ProjectController) PublishProject(w http.ResponseWriter, r *http.Reques
 	JSON(w, STATUS_OK, "project was published")
 }
 
-func (c *ProjectController) UpdateUserProject(w http.ResponseWriter, r *http.Request) {
-	projectId := chi.URLParam(r, "projectId")
-	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	projectPatch := make(map[string]interface{}, 20)
+/*
+	func (c *ProjectController) UpdateUserProject(w http.ResponseWriter, r *http.Request) {
+		projectId := chi.URLParam(r, "projectId")
+		userId, _ := r.Context().Value(ContextUserIdKey).(string)
+		projectPatch := make(map[string]interface{}, 20)
 
-	if err := DecodeJSONBody(w, r, &projectPatch); err != nil {
-		c.log.Err(err).Msg("UpdateUserProject ")
-		JSON(w, STATUS_ERROR, err.Error())
-		return
-	}
-	// TODO validate patch
-	errorMsg := ""
-	for key, value := range projectPatch {
-		switch key {
-		case "Name", "Info":
-			_, ok := value.(string)
-			if !ok {
-				errorMsg += fmt.Sprintf("%s: not valid type ", key)
-			}
-		default:
-			errorMsg += fmt.Sprintf("Undefined key: %s", key)
+		if err := DecodeJSONBody(w, r, &projectPatch); err != nil {
+			c.log.Err(err).Msg("UpdateUserProject ")
+			JSON(w, STATUS_ERROR, err.Error())
+			return
 		}
-	}
-	if len(errorMsg) > 0 {
-		c.log.Error().Msg(errorMsg)
-		JSON(w, STATUS_ERROR, errorMsg)
-		return
-	}
-	// end validate patch
+		// TODO validate patch
+		errorMsg := ""
+		for key, value := range projectPatch {
+			switch key {
+			case "Name", "Info":
+				_, ok := value.(string)
+				if !ok {
+					errorMsg += fmt.Sprintf("%s: not valid type ", key)
+				}
+			default:
+				errorMsg += fmt.Sprintf("Undefined key: %s", key)
+			}
+		}
+		if len(errorMsg) > 0 {
+			c.log.Error().Msg(errorMsg)
+			JSON(w, STATUS_ERROR, errorMsg)
+			return
+		}
+		// end validate patch
 
-	updatedProject, err := c.Uc.UpdateUserProject(r.Context(), userId, projectId, projectPatch)
-	if err != nil {
-		c.log.Err(err).Msg("UpdateUserProject ")
-		JSON(w, STATUS_ERROR, err.Error())
-		return
+		updatedProject, err := c.Uc.UpdateUserProject(r.Context(), userId, projectId, projectPatch)
+		if err != nil {
+			c.log.Err(err).Msg("UpdateUserProject ")
+			JSON(w, STATUS_ERROR, err.Error())
+			return
+		}
+		JSONstruct(w, STATUS_OK, "project was updated", updatedProject)
 	}
-	JSONstruct(w, STATUS_OK, "project was updated", updatedProject)
-}
+*/
 func (c *ProjectController) DeleteUserProject(w http.ResponseWriter, r *http.Request) {
 	projectId := chi.URLParam(r, "projectId")
 	userId, _ := r.Context().Value(ContextUserIdKey).(string)
@@ -146,62 +146,4 @@ func (c *ProjectController) DeleteUserProject(w http.ResponseWriter, r *http.Req
 		return
 	}
 	JSON(w, STATUS_OK, "project was deleted")
-}
-
-type AddEnergyToTaskRequest struct {
-	Energy uint64 `json:"Energy,omitempty"`
-}
-
-func (c *ProjectController) AddEnergyToTask(w http.ResponseWriter, r *http.Request) {
-	var e AddEnergyToTaskRequest
-	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	projectId := chi.URLParam(r, "projectId")
-	nodeId := chi.URLParam(r, "nodeId")
-
-	if err := DecodeJSONBody(w, r, &e); err != nil {
-		c.log.Err(err).Msg("AddEnergyToTask/DecodeJSONBody")
-		JSON(w, STATUS_ERROR, err.Error())
-		return
-	}
-
-	//fmt.Println(userId, projectId, nodeId, e.Energy)
-
-	if err := c.Uc.AddEnergyToTask(r.Context(), userId, projectId, nodeId, e.Energy); err != nil {
-		c.log.Err(err).Msg("AddEnergyToTask/UC ")
-		JSON(w, STATUS_ERROR, err.Error())
-		return
-	}
-	JSON(w, STATUS_OK, "task energy updated")
-
-}
-
-func (c *ProjectController) ToWorkTask(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	projectId := chi.URLParam(r, "projectId")
-	nodeId := chi.URLParam(r, "nodeId")
-	if err := c.Uc.ToWorkTask(r.Context(), userId, projectId, nodeId); err != nil {
-		c.log.Err(err).Msg("ToWorkTask/UC ")
-		JSON(w, STATUS_ERROR, err.Error())
-		return
-	}
-	JSON(w, STATUS_OK, "task at work")
-}
-
-func (c *ProjectController) CloseTask(w http.ResponseWriter, r *http.Request) {
-	/// check
-	start := time.Now()
-	userId, _ := r.Context().Value(ContextUserIdKey).(string)
-	projectId := chi.URLParam(r, "projectId")
-	nodeId := chi.URLParam(r, "nodeId")
-
-	if err := c.Uc.CloseTask(r.Context(), userId, projectId, nodeId); err != nil {
-		c.log.Err(err).Msg("CloseTask ")
-		JSON(w, STATUS_ERROR, err.Error())
-		return
-	}
-	delta := time.Since(start)
-	fmt.Print(delta)
-
-	JSON(w, STATUS_OK, "confirmation started")
-
 }

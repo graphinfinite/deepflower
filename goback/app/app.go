@@ -107,7 +107,7 @@ func (app *App) Run(cfg config.Configuration) error {
 	tps := repository.NewTaskProcessStorage(db)
 	consensusUC := usecase.NewTaskConsensus(db, bot, ps, userStore, ts, tus, tps)
 	taskUC := usecase.NewTaskUsecase(db, ps, userStore, ts, tus, tps, consensusUC)
-	task := ctrl.NewTaskController(taskUC, zlog)
+	task := ctrl.NewTaskController(taskUC, &zlog)
 
 	// Router settings
 	r := chi.NewRouter()
@@ -153,15 +153,15 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Use(auth.JWT)
 		r.Post("/", proj.CreateProject)
 		r.Get("/", proj.SearchProjects)
-		r.Patch("/{projectId}", proj.UpdateUserProject)
+		//r.Patch("/{projectId}", proj.UpdateUserProject)
 		r.Delete("/{projectId}", proj.DeleteUserProject)
 		r.Post("/{projectId}/publish", proj.PublishProject)
 		//r.Post("/{projectId}/energy", proj.AddEnergyToProject)
 
 		// TODO
-		r.Post("/{projectId}/node/{nodeId}/addenergy", proj.AddEnergyToTask)
-		r.Post("/{projectId}/node/{nodeId}/grab", proj.ToWorkTask)
-		r.Post("/{projectId}/node/{nodeId}/close", proj.CloseTask)
+		r.Post("/{projectId}/node/{nodeId}/addenergy", task.AddEnergyToTask)
+		r.Post("/{projectId}/node/{nodeId}/grab", task.ToWorkTask)
+		r.Post("/{projectId}/node/{nodeId}/close", task.CloseTask)
 	})
 
 	// HTTP Server
