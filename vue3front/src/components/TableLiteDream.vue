@@ -20,8 +20,8 @@ columns: [
     sortable: true,
     display: (row) => {
         if (row.Name) {
-          if (row.Name.length>15) {
-            return (row.Name.slice(0, 15)+"...")
+          if (row.Name.length>25) {
+            return (row.Name.slice(0, 25)+"...")
           };
           return (row.Name);
         } else {
@@ -69,22 +69,6 @@ columns: [
     field: "Energy",
     width: "5%",
     sortable: true,
-    },
-    {
-    label: "Loc",
-    field: "Location",
-    width: "1%",
-    sortable: true,
-    display: (row) => {
-        if (row.Location) {
-          if (row.Location.length>30) {
-            return (row.Info.slice(0, 31)+"...")
-          };
-          return (row.Location);
-        } else {
-          return ("<b>Empty</b>")
-        };
-},
     },
     {
     label: "S",
@@ -147,7 +131,6 @@ const rowDream = reactive({
       Energy: 0,
       ID: 0,
       Info: "",
-      Location: "",
       Name: "",
       Published: false,
       PublishAt: "",
@@ -208,9 +191,11 @@ const newdream = reactive({
 })
 const doSend = () =>{
 
-  newdream.Name =newdream.Location +"/"+ newdream.Name
+  newdream.Name =newdream.Location +"‗"+ newdream.Name
   API.post("/dreams", JSON.stringify(newdream)).then((response) => {
     if (response.data.status === "ok") {
+      newdream.Name=""
+      newdream.Info=""
       doSearch(0, 10, "id", "asc")
       window.alert(response.data.message)
       return
@@ -223,10 +208,9 @@ const doSend = () =>{
 } 
 
 
-const energyToDream = ref(0)
+const energyToDream = ref(1)
 const addEnergyToDream = () => {
   if (energyToDream.value === 0) {
-    window.alert("add zero energy???")
     return
   }
   API.post("/dreams/"+rowDream.ID+"/energy", JSON.stringify({Energy: energyToDream.value})).then((response) => {
@@ -272,17 +256,17 @@ const addEnergyToDream = () => {
   />
   
 
-<div v-if='rowDream.Name !==""'>
+<div class="dream-row-panel" v-if='rowDream.Name !==""'>
   <div id="dreamrow">
-    <div class="row-name">  Name: {{ rowDream.Name }}</div>
-    <div class="row-published">  Published: {{ rowDream.Published }}</div>
-    <div class="row-location">Location: {{ rowDream.Location }}</div>
-    <div class="row-creater">Creater: {{ rowDream.Creater }}</div>
+    <div class="row-name">{{ rowDream.Name }}<span v-if="!rowDream.Published" id="row-published">no published</span> </div>
     <div class="row-energy">Energy: {{ rowDream.Energy }}</div>
+    <div v-if="rowDream.Published">PublishAt: {{ rowDream.PublishAt }}</div>
+    <div class="row-creater">Creater: {{ rowDream.Creater }}</div>
+    <div>CreatedAt: {{ rowDream.CreatedAt }}</div>
 
-    <div class="row-other">
-      ID: {{ rowDream.ID }} PublishAt: {{ rowDream.PublishAt }} CreatedAt: {{ rowDream.CreatedAt }} Status: {{ rowDream.Status }} G: {{ rowDream.CountG }}
-    </div>
+
+    <div class="row-status">  Status:{{ rowDream.Status }} </div>
+    <div>G: {{ rowDream.CountG }}</div>
 
     <div class="row-info">
       <div class="i-label">
@@ -296,16 +280,16 @@ const addEnergyToDream = () => {
     </div>
   </div>
   <div class="control-dream-panel">
-        <h1>Панель взаимодействия c мечтой</h1>  
+        <h1>Control</h1>  
         <div>
           <p>После публикации мечту нельзя будет изменить!</p> 
-          <p>На публикацию расходуется 1ед энергии.</p>
+          <p>На публикацию расходуется 1 энергия.</p>
           <button @click="deleteDream">Delete Dream</button>
           <button @click="publishDream">Publish Dream</button>
         </div>
         
         <div>
-          <p>Вы тратите свою личную энергию на мечту!</p>
+          <p>Добавить энергию мечте</p>
           <input type="number" id="energe-input" min="1" step="1" v-model="energyToDream">
           <button @click="addEnergyToDream">+{{ energyToDream }} Energy</button>
         </div>
@@ -399,11 +383,31 @@ const addEnergyToDream = () => {
 }
 
 
-#dreamrow {
+.dream-row-panel{
   display: flex;
-  width: 100%;
-  flex-direction: column;
+  flex-direction: row;
+  border-top: 7px solid #0B0410;
+}
+
+
+#dreamrow {
+
+  width: 80%;
   padding: 20px;
+}
+
+
+#dreamrow #row-published {
+  font-size: 10px;
+  margin-left: 5px;
+  color: rgb(235, 11, 78);
+
+}
+
+#dreamrow .row-name {
+  font-size: 20px;
+  margin-bottom: 20px;
+
 }
 #dreamrow div {
   padding-top: 10px;
@@ -412,10 +416,7 @@ const addEnergyToDream = () => {
 
 
 .control-dream-panel {
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  border: 1px solid whitesmoke;
+  width: 20%;
   box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
   padding: 20px;
 }
@@ -423,6 +424,16 @@ const addEnergyToDream = () => {
   padding-top: 15px;
   padding-bottom: 15px;
   border-top: 1px solid whitesmoke;
+}
+
+.control-dream-panel input{
+  margin-top: 10px;
+  padding:10px;
+}
+
+.control-dream-panel h1{
+
+  font-size: 20px;
 }
 
 
@@ -447,7 +458,8 @@ button:hover {
 ///  new
 #dreaminput {
     padding: 20px;
-    border: 1px solid whitesmoke;
+    border-top: 7px solid #0B0410;
+    border-bottom: 20px solid #0B0410;
 }
 
 #dreaminput h1 {

@@ -2,6 +2,32 @@ package postgres
 
 import "github.com/jmoiron/sqlx"
 
+func MigrateDown(dbPool *sqlx.DB) error {
+	q := `
+		DROP TABLE IF EXISTS "users" CASCADE;
+		
+		DROP TABLE IF EXISTS "location" CASCADE;
+
+		DROP TABLE IF EXISTS "dream" CASCADE;
+
+		DROP TABLE IF EXISTS "dream_location" CASCADE;
+
+		DROP TABLE IF EXISTS "project" CASCADE;
+
+		DROP TABLE IF EXISTS "dream_project" CASCADE;
+
+		DROP TABLE IF EXISTS "task_users" CASCADE;
+
+		DROP TABLE IF EXISTS "task_process" CASCADE;
+		`
+	_, errDb := dbPool.Exec(q)
+	if errDb != nil {
+		return errDb
+	}
+	return nil
+
+}
+
 func MigrateUp(dbPool *sqlx.DB) error {
 	q := `
 		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -28,7 +54,7 @@ func MigrateUp(dbPool *sqlx.DB) error {
 		createdat timestamp DEFAULT current_timestamp NOT NULL,
 		updatedat timestamp DEFAULT current_timestamp NOT NULL,
 		creater uuid REFERENCES users (id),
-		geolocation point,
+		geolocation point NOT NULL,
 		radius bigint NOT NULL DEFAULT 0 CHECK (radius >= 0),
 		height bigint NOT NULL DEFAULT 0,
 		energy bigint NOT NULL DEFAULT 0 CHECK (energy >= 0),
@@ -49,9 +75,8 @@ func MigrateUp(dbPool *sqlx.DB) error {
 
 		CREATE TABLE IF NOT EXISTS "dream_location" (
 		id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-		locationid uuid REFERENCES location (id),
-		dreamid uuid REFERENCES dream (id),
-		);
+		locationid uuid REFERENCES location (id) ON DELETE CASCADE,
+		dreamid uuid REFERENCES dream (id) ON DELETE CASCADE);
 
 		CREATE TABLE IF NOT EXISTS "project" (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -68,8 +93,8 @@ func MigrateUp(dbPool *sqlx.DB) error {
 
 		CREATE TABLE IF NOT EXISTS "dream_project" (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-			projectid uuid REFERENCES project (id),
-			dreamid uuid REFERENCES dream (id));
+			projectid uuid REFERENCES project (id) ON DELETE CASCADE,
+			dreamid uuid REFERENCES dream (id) ON DELETE CASCADE);
 
 		CREATE TABLE IF NOT EXISTS "task_users" (
 			id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),

@@ -20,8 +20,8 @@ columns: [
     sortable: true,
     display: (row) => {
         if (row.Name) {
-          if (row.Name.length>15) {
-            return (row.Name.slice(0, 15)+"...")
+          if (row.Name.length>25) {
+            return (row.Name.slice(0, 25)+"...")
           };
           return (row.Name);
         } else {
@@ -217,10 +217,6 @@ const doSend = () => {
       return
     }  
     if (
-      !isNaN(parseFloat(arrayll[0])) &&
-      !isNaN(parseFloat(arrayll[1])) &&
-      arrayll[0].length < 8 &&
-      arrayll[1].length < 8 &&
       parseFloat(arrayll[0])<90 &&
       parseFloat(arrayll[0])>-90 &&
       parseFloat(arrayll[0])<180 &&
@@ -236,12 +232,12 @@ const doSend = () => {
             window.alert(response.data.messag)
             })
     } else {
-      window.alert("Неправильный формат локации")
+      window.alert("Неправильный формат геолокации")
     }
   }
 }
 
-const energyToLocation = ref(0)
+const energyToLocation = ref(1)
 const addEnergyToLocation = () => {
   if (energyToLocation.value === 0) {
     window.alert("add zero energy???")
@@ -313,21 +309,24 @@ const showLocationDream = () => {
   />
 
 
-<div v-if='rowLocation.Name !==""'>
+<div class="location-row-control" v-if='rowLocation.Name !==""'>
   <div id="locationrow">
-    <div class="row-name">  Name: {{ rowLocation.Name }}</div>
-    <div class="row-location">Geolocation: {{ rowLocation.Geolocation }}</div>
+    <div class="row-name">{{ rowLocation.Name }} <span id="row-active" v-if="rowLocation.Active">✓</span></div>
+
+    
     <div v-if="rowLocation.Geolocation != '(0,0)'">
       <img v-bind:src=rowmapurl alt="Геолокация не определена" width="300" height="300">
     </div>
+    <div  class="row-location">Geolocation: {{ rowLocation.Geolocation }}</div>
     <div class="row-radiusr">Radius: {{ rowLocation.Radius }}</div>
     <div class="row-height">Height: {{ rowLocation.Height }}</div>
     <div class="row-creater">Creater: {{ rowLocation.Creater }}</div>
-    <div class="row-energy">Energy: {{ rowLocation.Energy }}</div>
-
-    <div class="row-other">
-      ID: {{ rowLocation.ID }} UpdatedAt: {{ rowLocation.UpdatedAt }} CreatedAt: {{ rowLocation.CreatedAt }} Active: {{ rowLocation.Active }}
+    <div class="row-createdat">
+      CreatedAt: {{ rowLocation.CreatedAt }}
     </div>
+    <div class="row-updatedat">UpdatedAt: {{ rowLocation.UpdatedAt }}</div>
+    <div class="row-energy">Energy: {{ rowLocation.Energy }}</div>
+    
 
     <div class="row-info">
       <div class="i-label">
@@ -340,7 +339,22 @@ const showLocationDream = () => {
     <button type="checkbox" id="checkbox3" v-on:click="() => {isVisibleLocationDreams=!isVisibleLocationDreams}">Dreams</button>
   </div>
 
-  <div v-if="isVisibleLocationDreams" class="location_dreams">
+  <div class="control-location-panel">
+        <h1>Control</h1>  
+        <div>
+          <p>Удаляя локацию, вы удаляете также связи её с мечтами. Сами мечты остаются без изменения.</p>
+          <button @click="deleteLocation">Delete Location</button>
+        </div>
+        
+        <div>
+          <p>Повысить энергетический статус</p>
+          <input type="number" id="energe-input" min="1" step="1" v-model="energyToLocation">
+          <button @click="addEnergyToLocation">+{{ energyToLocation }} Energy</button>
+        </div>
+  </div>
+</div>
+
+<div v-if="isVisibleLocationDreams" class="location_dreams">
     <ul>
       <li v-for="dream in dreams" :key="dream.ID">
       ID: {{ dream.ID }} <br>
@@ -350,23 +364,6 @@ const showLocationDream = () => {
       </li>
     </ul>
   </div>
-
-
-
-  <div class="control-location-panel">
-        <h1>Локация</h1>  
-        <div>
-          <p>Удалить локацию.</p>
-          <button @click="deleteLocation">Delete Location</button>
-        </div>
-        
-        <div>
-          <p>Повысить энергетический статус локации</p>
-          <input type="number" id="energe-input" min="1" step="1" v-model="energyToLocation">
-          <button @click="addEnergyToLocation">+{{ energyToLocation }} Energy</button>
-        </div>
-  </div>
-</div>
 
 <div id="locationinput">
         <h1>Create new location!</h1>
@@ -467,16 +464,27 @@ flex-direction: row;
   border: 1px solid clr.$clr-table-header;
 }
 
-
+.location-row-control{
+  display: flex;
+  flex-direction: row;
+  border-top: 7px solid #0B0410;
+}
 
 #locationrow {
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  border: 1px solid whitesmoke;
+  width: 80%;
   padding: 20px;
 }
 
+#locationrow .row-name{
+  font-size: 23px;
+  margin-bottom: 15px;
+
+}
+
+#row-active{
+  margin-left: 10px;
+  color: green;
+}
 #locationrow div {
   margin-top: 10px;
 }
@@ -506,32 +514,34 @@ flex-direction: row;
 
 .control-location-panel {
   box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  border: 1px solid whitesmoke;
+  width: 20%;
   padding: 20px;
+}
+
+.control-location-panel h1{
+  font-size: 20px;
 }
 .control-location-panel div {
   padding-top: 15px;
   padding-bottom: 15px;
-  border-top: 1px solid whitesmoke;
 }
 
 .control-location-panel button {
-  color: clr.$clr-button;
+  box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
   background-color:clr.$bg-button;
+  color: clr.$clr-button;
   cursor: pointer;
   padding: 10px;
-  transition: background-color 1.5s ease-in-out;
-  margin-top: 30px;
-  width: 20%;
+  transition: 0.5s;
 }
 .control-location-panel button:hover {
-  background-color: clr.$bg-button-hover;
+  box-shadow: 0px 0px 5px rgba(60, 41, 75, 0.5);
+  background-color:clr.$bg-button-hover;
 }
 
 .control-location-panel #energe-input{
+  margin-top: 10px;
+
   padding: 10px;
   border: 1px solid rgb(233, 229, 229);
 }
@@ -539,12 +549,13 @@ flex-direction: row;
 
 #locationinput {
     padding: 20px;
-    border: 1px solid whitesmoke;
+    border-top: 7px solid #0B0410;
+    border-bottom: 20px solid #0B0410;
 }
 
 #locationinput h1 {
-    margin-bottom: 30px;
     margin-top: 30px;
+    margin-bottom: 30px;
     color:clr.$clr-button;
     font-size: 20px;
 }
@@ -553,10 +564,11 @@ flex-direction: row;
     display: flex;
     width: 100%;
     flex-direction: column;
+    margin-bottom: 10px;
 }
 
 #locationinput form label {
-    margin-top: 20px;
+    margin-bottom: 20px;
 
 }
 

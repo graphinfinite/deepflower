@@ -72,10 +72,12 @@ func (s *TaskUsecase) ToWorkTask(ctx context.Context, userId, projectId, nodeId 
 		if err = s.TaskStorage.UpdateTaskStatus(ctx, projectId, nodeId, TaskStatus_inwork); err != nil {
 			return err
 		}
+		fmt.Println("j")
 		task, err := s.TaskStorage.GetTaskData(ctx, projectId, nodeId)
 		if err != nil {
 			return err
 		}
+		fmt.Println("k")
 		pc, err := s.TaskProcessStorage.UpsertTaskProcess(ctx, projectId, nodeId, userId, TaskStatus_inwork, task.Energy, task.LeadTime)
 
 		if err != nil {
@@ -84,6 +86,7 @@ func (s *TaskUsecase) ToWorkTask(ctx context.Context, userId, projectId, nodeId 
 
 		///////
 		fmt.Println(pc)
+		fmt.Println(err)
 
 		return nil
 

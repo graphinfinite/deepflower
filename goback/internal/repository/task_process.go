@@ -37,10 +37,12 @@ func (s *TaskProcessStorage) UpsertTaskProcess(ctx context.Context, projectId, n
 	ON CONFLICT (nodeid) 
 	DO 
 	   UPDATE SET status=$10, updatedat=$11
-	RETURNING *;`
+	RETURNING *
+	;`
 	var process model.ProcessTask
 	fmt.Println(projectId, nodeId, projectId, nodeId, userId, 0, taskEnerge, taskLeadTime, status, status, time.Now())
-	err := tx.SelectContext(ctx, &process, query4, projectId, nodeId, userId, projectId, nodeId, 0, taskEnerge, taskLeadTime, status, status, time.Now())
+
+	err := tx.GetContext(ctx, &process, query4, projectId, nodeId, userId, projectId, nodeId, 0, taskEnerge, taskLeadTime, status, status, time.Now())
 	if err != nil {
 		return model.ProcessTask{}, err
 	}

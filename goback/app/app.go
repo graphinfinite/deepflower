@@ -46,9 +46,20 @@ func (app *App) Run(cfg config.Configuration) error {
 	defer db.Db.Close()
 
 	// TODO migrations
+
+	/*
+
+		zlog.Info().Msgf("down migrations... ")
+		if err := postgres.MigrateDown(db.Db); err != nil {
+			zlog.Err(err).Msg("App/MigrateDown")
+
+			return err
+		}*/
+
 	zlog.Info().Msgf("up migrations... ")
 	if err := postgres.MigrateUp(db.Db); err != nil {
 		zlog.Err(err).Msg("App/MigrateUp ")
+
 		return err
 	}
 

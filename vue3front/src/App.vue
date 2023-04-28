@@ -8,7 +8,10 @@ import Login from '@/components/Login.vue'
   <div id="root">
     <SidebarMenu class="sidebar"/>
 
-    <div v-if="isAuthorazed"><RouterView class="router-view"/></div>
+    <div v-if="isAuthorazed">
+      <RouterView class="router-view"/>
+      
+    </div>
     <div v-else><Login/></div>
 
   </div>
@@ -16,8 +19,6 @@ import Login from '@/components/Login.vue'
 
 <script setup lang="ts">
 import {ref} from "vue"
-
-console.log(localStorage.getItem("tokenAccess"))
 const isAuthorazed = ref(Boolean(localStorage.getItem("tokenAccess")))
 </script>
 <style scoped lang="scss">
@@ -25,18 +26,13 @@ const isAuthorazed = ref(Boolean(localStorage.getItem("tokenAccess")))
    display: grid;
    grid-template-areas: 'sidebar router-view';
    grid-template-columns: auto 1fr;
-   //font-family: 'Times New Roman', Times, sans-serif;
-
-
 }
 
  .sidebar {
    grid-area: 'sidebar';
-   height: 100%;
  }
  .router-view {
-
-    //grid-area: 'router-view';
-    height: 100%;
+    grid-area: 'router-view';
  }
+
 </style>

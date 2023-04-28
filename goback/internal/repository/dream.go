@@ -21,7 +21,7 @@ func (s *DreamStorage) CreateDream(ctx context.Context, name, info, location, cr
 	var m model.Dream
 	q1 := `
 	INSERT INTO dream (name, info,published, status, creater, energy, countG) 
-	VALUES ($1,$2,$3,$4,$5,$6,$7,$8) 
+	VALUES ($1,$2,$3,$4,$5,$6,$7) 
 	returning *;
 	`
 	err := tx.GetContext(ctx, &m, q1, name, info, false, "created", creater, 0, 0)
@@ -124,7 +124,7 @@ func (s *DreamStorage) DeleteUserDream(ctx context.Context, dreamId string) erro
 // TODO result sql
 func (s *DreamStorage) UpdateDreamPublished(ctx context.Context, dreamId string) error {
 	tx := s.Db.ExtractTx(ctx)
-	q := `UPDATE dream SET publish=true WHERE id=$1`
+	q := `UPDATE dream SET published=true WHERE id=$1`
 	if _, err := tx.ExecContext(ctx, q, dreamId); err != nil {
 		return err
 	}

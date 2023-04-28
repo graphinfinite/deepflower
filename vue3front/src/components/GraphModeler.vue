@@ -1245,19 +1245,15 @@ width: 50%;
 
 
 .close-task-form {
-
   padding:30px;
-
   background-color: #ede9f8;
 }
 .close-task-form button {
-
 }
 
 .energy-to-task-form{
   border: 1px solid whitesmoke;
   margin-bottom: 10px;
-
   padding: 20px;
 }
 

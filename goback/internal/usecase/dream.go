@@ -82,7 +82,7 @@ func (d *DreamUsecase) AddEnergyToDream(ctx context.Context, userId, dreamId str
 		return err
 	}
 	if !dream.Published {
-		return fmt.Errorf("error: article not published")
+		return fmt.Errorf("error: dream not published")
 	}
 
 	err = d.Tranzactor.WithTx(ctx, func(ctx context.Context) error {
