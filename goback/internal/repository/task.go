@@ -73,6 +73,39 @@ func (s *TaskStorage) AddEnergyToTask(ctx context.Context, projectId, nodeId str
 	return nil
 }
 
+func (s *TaskStorage) SubtractEnergy(ctx context.Context, projectId, nodeId string, energy uint64) error {
+	tx := s.Db.ExtractTx(ctx)
+	query2 := `SELECT graph FROM project WHERE id=$1;`
+	var graphStr string
+	err := tx.GetContext(ctx, &graphStr, query2, projectId)
+	if err != nil {
+		return err
+	}
+	var graph model.Graph
+	err = json.Unmarshal([]byte(graphStr), &graph)
+	if err != nil {
+		return err
+	}
+	for n, c := range graph.Cells {
+		if c.Shape == "slow-model" || c.Shape == "fast-model" {
+			if c.Id == nodeId {
+				graph.Cells[n].Data.Energy = c.Data.Energy - energy
+			}
+		}
+	}
+	updatedGraphByte, err := json.Marshal(graph)
+	if err != nil {
+		return err
+	}
+
+	var query3 = `UPDATE project SET graph=$1 WHERE id=$2;`
+	_, err = tx.ExecContext(ctx, query3, string(updatedGraphByte), projectId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // CODE PROTOTYPE !!!!!!!!!!!!!!
 // / TODO :POSTGRES-> JSONB OR DECOMPOSE NODES DATA OR OTHER DB ?????
 func (s *TaskStorage) UpdateTaskStatus(ctx context.Context, projectId, nodeId, newStatus string) error {

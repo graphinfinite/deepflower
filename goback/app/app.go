@@ -4,6 +4,7 @@ import (
 	"context"
 	"deepflower/config"
 	ctrl "deepflower/internal/controllers"
+	"deepflower/internal/migrations"
 	"deepflower/internal/repository"
 	"deepflower/internal/usecase"
 	"deepflower/pkg/postgres"
@@ -18,7 +19,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog"
 
-	"deepflower/pkg/telegram"
+	"deepflower/internal/services/telegram"
 
 	"deepflower/internal/observer"
 
@@ -48,16 +49,14 @@ func (app *App) Run(cfg config.Configuration) error {
 	// TODO migrations
 
 	/*
-
 		zlog.Info().Msgf("down migrations... ")
-		if err := postgres.MigrateDown(db.Db); err != nil {
+		if err := migrations.Down(db.Db); err != nil {
 			zlog.Err(err).Msg("App/MigrateDown")
 
 			return err
 		}*/
-
 	zlog.Info().Msgf("up migrations... ")
-	if err := postgres.MigrateUp(db.Db); err != nil {
+	if err := migrations.Up(db.Db); err != nil {
 		zlog.Err(err).Msg("App/MigrateUp ")
 
 		return err
@@ -76,11 +75,6 @@ func (app *App) Run(cfg config.Configuration) error {
 	defer bot.Bot.StopReceivingUpdates()
 	bot.StartReceiveUpdates(0, 500, 60, botOutChan)
 
-	// OBS
-	obs := observer.NewObserver(&zlog)
-	// OBS
-	obs.AddPublisherChan(botOutChan)
-
 	// Auth
 	authUC := usecase.NewAuthUsecase(
 		repository.NewUserStorage(db),
@@ -88,14 +82,6 @@ func (app *App) Run(cfg config.Configuration) error {
 		cfg.Auth.Signing_key,
 		time.Duration(cfg.Auth.Token_ttl)*time.Minute)
 	auth := ctrl.NewAuthController(authUC, bot, &zlog)
-
-	// OBS
-	obs.AddTopicsHandler([]observer.Topic{"bot/registration"}, auth.Registration)
-
-	zlog.Debug().Msgf("///%s ////%s /////%s", obs.Handlers, obs.PublisherChans, obs.TopicsHandler)
-
-	// OBS START
-	obs.Start()
 
 	// User
 	userStore := repository.NewUserStorage(db)
@@ -118,7 +104,15 @@ func (app *App) Run(cfg config.Configuration) error {
 	tps := repository.NewTaskProcessStorage(db)
 	consensusUC := usecase.NewTaskConsensus(db, bot, ps, userStore, ts, tus, tps)
 	taskUC := usecase.NewTaskUsecase(db, ps, userStore, ts, tus, tps, consensusUC)
-	task := ctrl.NewTaskController(taskUC, &zlog)
+	task := ctrl.NewTaskController(taskUC, consensusUC, &zlog)
+
+	// OBS
+	obs := observer.NewObserver(&zlog)
+	obs.AddPublisherChan(botOutChan)
+	obs.AddTopicsHandler([]observer.Topic{"bot/registration"}, auth.Registration)
+	obs.AddTopicsHandler([]observer.Topic{"bot/pc/confirm"}, task.Confirmation)
+	zlog.Debug().Msgf("Handlers: %s PublisherChans: %s TopicsHandler: %s", obs.Handlers, obs.PublisherChans, obs.TopicsHandler)
+	obs.Start()
 
 	// Router settings
 	r := chi.NewRouter()

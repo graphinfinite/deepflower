@@ -67,35 +67,25 @@ func (s *TaskUsecase) ToWorkTask(ctx context.Context, userId, projectId, nodeId 
 	if !project.Published {
 		return fmt.Errorf("not available for no published project")
 	}
-
 	if err := s.Tranzactor.WithTx(ctx, func(ctx context.Context) error {
 		if err = s.TaskStorage.UpdateTaskStatus(ctx, projectId, nodeId, TaskStatus_inwork); err != nil {
 			return err
 		}
-		fmt.Println("j")
 		task, err := s.TaskStorage.GetTaskData(ctx, projectId, nodeId)
 		if err != nil {
 			return err
 		}
-		fmt.Println("k")
-		pc, err := s.TaskProcessStorage.UpsertTaskProcess(ctx, projectId, nodeId, userId, TaskStatus_inwork, task.Energy, task.LeadTime)
+		_, err = s.TaskProcessStorage.UpsertTaskProcess(ctx, projectId, nodeId, userId, TaskStatus_inwork, task.Energy, task.LeadTime)
 
 		if err != nil {
 			return err
 		}
-
-		///////
-		fmt.Println(pc)
-		fmt.Println(err)
 
 		return nil
 
 	}); err != nil {
 		return err
 	}
-
-	///
-
 	return nil
 }
 
@@ -131,7 +121,7 @@ func (s *TaskUsecase) CloseTask(ctx context.Context, userId, projectId, nodeId s
 	}
 
 	//TODO
-	fmt.Printf("START ---> PROCESS ID: %s  ...", pc)
+	fmt.Printf("START ---> PROCESS: %#v  ...", pc)
 	// start consensus process
 	if errProcess := s.TaskConsensus.StartTaskConsensus(ctx, pc.ID); err != nil {
 		fmt.Println(errProcess)

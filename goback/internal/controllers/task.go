@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"context"
+	"deepflower/internal/observer"
+	"deepflower/internal/services/telegram"
 	"fmt"
 	"net/http"
 	"time"
@@ -10,12 +13,13 @@ import (
 )
 
 type TaskController struct {
-	log    *zerolog.Logger
-	TaskUC TaskUCInterface
+	log           *zerolog.Logger
+	TaskUC        TaskUCInterface
+	ProcessTaskUC ProcessTaskUCInterface
 }
 
-func NewTaskController(tuc TaskUCInterface, logger *zerolog.Logger) TaskController {
-	return TaskController{log: logger, TaskUC: tuc}
+func NewTaskController(tuc TaskUCInterface, ptu ProcessTaskUCInterface, logger *zerolog.Logger) TaskController {
+	return TaskController{log: logger, TaskUC: tuc, ProcessTaskUC: ptu}
 }
 
 type AddEnergyToTaskRequest struct {
@@ -73,5 +77,21 @@ func (c *TaskController) CloseTask(w http.ResponseWriter, r *http.Request) {
 	fmt.Print(delta)
 
 	JSON(w, STATUS_OK, "confirmation started")
+}
 
+func (c *TaskController) Confirmation(event observer.Event) {
+	ctx := context.Background()
+	switch event.Topic {
+	case TopicBotConfirmation:
+		e, ok := event.Payload.(telegram.CallBackPayload)
+		if !ok {
+			c.log.Error().Msg("Registration/event/error payload type")
+		}
+		err := c.ProcessTaskUC.ConsensusConfirmation(ctx, e.ProcessId)
+		if err != nil {
+			c.log.Error().Msgf("Registration/event/ProcessTaskUC.ConsensusConfirmation/error %s", err.Error())
+		}
+	default:
+		c.log.Error().Msg("Confirmation/event/unknow topic")
+	}
 }

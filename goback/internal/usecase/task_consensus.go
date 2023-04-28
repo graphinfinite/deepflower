@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"deepflower/internal/model"
 	"fmt"
 )
 
@@ -52,20 +53,96 @@ func (c *TaskConsensus) StartTaskConsensus(ctx context.Context, processId string
 		fmt.Println(user.TgChatId, usersDests)
 	}
 
+	execuser, err := c.UserStorage.GetUserById(ctx, process.ExecUserId)
+	if err != nil {
+		return err
+	}
+
+	project, err := c.ProjectStorage.GetProjectById(ctx, process.ProjectId)
+	if err != nil {
+		return err
+	}
+	task, err := c.TaskStorage.GetTaskData(ctx, project.ID, process.NodeId)
+	if err != nil {
+		return err
+	}
+
 	msg := fmt.Sprintf(`Подтвердите выполнение задачи:
-	process.ID - %s
-	process.ExecUserId %s
-	process.ProjectId %s
-	process.NodeId %s
-	`, process.ID, process.ExecUserId, process.ProjectId, process.NodeId)
+	Исполнитель - %s
+	Энергия задачи - %d
+	Число участников - %d
+	Проект - %s
+	Описание задачи: 
+	%s
+	`,
+		execuser.Username,
+		process.EnergyTotal,
+		process.InspectorsTotal,
+		project.Name,
+		task.Description,
+	)
 
-	print(msg)
-	print(usersDests)
-
-	if err := c.Bot.SendMessagesWithCallbacks(ctx, usersDests, msg, map[string]string{"ok": "ok"}); err != nil {
+	ev := fmt.Sprintf("pc/%s/confirm", process.ID)
+	if err := c.Bot.SendMessagesWithCallbacks(ctx, usersDests, msg, map[string]string{"ok": ev}); err != nil {
 		fmt.Println(err)
 		return err
 	}
 
 	return nil
+}
+
+func (c *TaskConsensus) ConsensusConfirmation(ctx context.Context, processId string) error {
+	pc, err := c.TaskProcessStorage.AddInspectorConfirmed(ctx, processId)
+	if err != nil {
+		return err
+	}
+
+	if pc.InspectorsConfirmed != pc.InspectorsTotal {
+		return nil
+	}
+
+	if err := c.Tranzactor.WithTx(ctx, func(ctx context.Context) error {
+		execuser, err := c.UserStorage.GetUserById(ctx, pc.ExecUserId)
+		if err != nil {
+			return err
+		}
+
+		// TODO
+		// статус процесса = завершен
+		_, err = c.TaskProcessStorage.UpsertTaskProcess(ctx, "", pc.NodeId, "", TaskStatus_complited, 0, 0)
+		if err != nil {
+			return err
+		}
+		// статус задачи = выполнен
+		if err := c.TaskStorage.UpdateTaskStatus(ctx, pc.ProjectId, pc.NodeId, TaskStatus_complited); err != nil {
+			return err
+		}
+		// передать энергию от задачи к исполнителю
+		if err := c.UserStorage.AddEnergy(ctx, pc.ExecUserId, pc.EnergyTotal); err != nil {
+			return err
+		}
+
+		if err := c.TaskStorage.SubtractEnergy(ctx, pc.ProjectId, pc.NodeId, pc.EnergyTotal); err != nil {
+
+			return err
+		}
+
+		// отправка уведомления исполнителю
+		c.Bot.SendMessage(ctx, execuser.TgChatId, fmt.Sprintf("Confirmation complited for process %s", pc.ID))
+		return nil
+
+	}); err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (c *TaskConsensus) GetAllUserTaskProcess(ctx context.Context, userId string) ([]model.ProcessTask, error) {
+	process, err := c.TaskProcessStorage.GetTaskConsensusByExecUserId(ctx, userId)
+	if err != nil {
+		return []model.ProcessTask{}, err
+	}
+	return process, nil
 }

@@ -1,7 +1,12 @@
 package usecase
 
+// энергия на публикацию
 const EnergyForPublish uint64 = 1
 
-const TaskStatus_created = "created"
-const TaskStatus_inwork = "inwork"
-const TaskStatus_confirmation = "confirmation"
+// / статусы задач
+const (
+	TaskStatus_created      = "created"
+	TaskStatus_inwork       = "inwork"
+	TaskStatus_confirmation = "confirmation"
+	TaskStatus_complited    = "complited"
+)

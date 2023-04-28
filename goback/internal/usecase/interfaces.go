@@ -16,6 +16,7 @@ type (
 		GetUserById(ctx context.Context, userId string) (model.User, error)
 		//UpdateUser(context.Context, model.User) (model.User, error)
 		SubtractEnergy(ctx context.Context, userId string, energy uint64) error
+		AddEnergy(ctx context.Context, userId string, energy uint64) error
 	}
 
 	LocationStorageInterface interface {
@@ -68,6 +69,7 @@ type (
 
 	TaskStorageInterface interface {
 		AddEnergyToTask(ctx context.Context, projectId, nodeId string, energy uint64) error
+		SubtractEnergy(ctx context.Context, projectId, nodeId string, energy uint64) error
 		UpdateTaskStatus(ctx context.Context, projectId, nodeId, newStatus string) error
 		GetTaskData(ctx context.Context, projectId, nodeId string) (model.CellData, error)
 	}
@@ -78,8 +80,10 @@ type (
 	}
 
 	TaskProcessStorageInterface interface {
+		GetTaskConsensusByExecUserId(ctx context.Context, userId string) ([]model.ProcessTask, error)
 		GetTaskConsensusProcessById(ctx context.Context, processId string) (model.ProcessTask, error)
 		UpsertTaskProcess(ctx context.Context, projectId, nodeId, userId, status string, taskEnerge, taskLeadTime uint64) (model.ProcessTask, error)
+		AddInspectorConfirmed(ctx context.Context, processId string) (model.ProcessTask, error)
 	}
 
 	TaskConsensusInterface interface {

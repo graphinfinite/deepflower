@@ -48,3 +48,26 @@ func (s *TaskProcessStorage) UpsertTaskProcess(ctx context.Context, projectId, n
 	}
 	return process, nil
 }
+
+func (s *TaskProcessStorage) GetTaskConsensusByExecUserId(ctx context.Context, userId string) ([]model.ProcessTask, error) {
+	tx := s.Db.ExtractTx(ctx)
+	q := `SELECT * FROM "task_process" WHERE exec_userid=$1;`
+	var processes []model.ProcessTask
+
+	if err := tx.SelectContext(ctx, processes, q, userId); err != nil {
+		return []model.ProcessTask{}, err
+	}
+	return processes, nil
+}
+
+func (s *TaskProcessStorage) AddInspectorConfirmed(ctx context.Context, processId string) (model.ProcessTask, error) {
+	tx := s.Db.ExtractTx(ctx)
+	q := `UPDATE "task_process" SET inspectors_confirmed=inspectors_confirmed+1 WHERE id=$1 RETURNING *;`
+
+	var process model.ProcessTask
+	err := tx.GetContext(ctx, &process, q, processId)
+	if err != nil {
+		return model.ProcessTask{}, err
+	}
+	return process, nil
+}

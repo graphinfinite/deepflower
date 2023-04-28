@@ -51,7 +51,7 @@ func (auth *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 func (auth *AuthController) Registration(event observer.Event) {
 	ctx := context.Background()
 	switch event.Topic {
-	case "bot/registration":
+	case TopicRegistration:
 		e, ok := event.Payload.(model.UserTelegram)
 		if !ok {
 			auth.log.Error().Msg("Registration/event/error payload type")

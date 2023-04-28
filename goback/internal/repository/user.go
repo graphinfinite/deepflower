@@ -94,3 +94,13 @@ func (s *UserStorage) SubtractEnergy(ctx context.Context, userId string, energy 
 	}
 	return nil
 }
+
+func (s *UserStorage) AddEnergy(ctx context.Context, userId string, energy uint64) error {
+	tx := s.Db.ExtractTx(ctx)
+	query1 := `UPDATE users SET energy=energy+$1 WHERE id=$2;`
+	_, err := tx.ExecContext(ctx, query1, energy, userId)
+	if err != nil {
+		return err
+	}
+	return nil
+}

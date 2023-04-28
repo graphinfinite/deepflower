@@ -6,6 +6,7 @@ import (
 	"deepflower/internal/observer"
 	"fmt"
 	"net/http"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/rs/zerolog"
@@ -28,6 +29,11 @@ func NewBot(token string, buffer int, client http.Client, debug bool, logger *ze
 	return &TelegramBot{Bot: bot, log: logger, callbacks: callbacks}, nil
 }
 
+type CallBackPayload struct {
+	TgId      int
+	ProcessId string
+}
+
 func (t *TelegramBot) StartReceiveUpdates(offset, limit, timeout int, outChan chan observer.Event) {
 	t.log.Info().Msgf("Authorized on account %s", t.Bot.Self.UserName)
 	updateschan, err := t.Bot.GetUpdatesChan(tgbotapi.UpdateConfig{
@@ -43,45 +49,53 @@ func (t *TelegramBot) StartReceiveUpdates(offset, limit, timeout int, outChan ch
 		for upd := range updateschan {
 
 			if upd.Message != nil {
-				t.log.Debug().Msgf("rrrrrrr [%s] %s", upd.Message.From.UserName, upd.Message.Text)
-
+				t.log.Debug().Msgf("Update Msg [%s] %s", upd.Message.From.UserName, upd.Message.Text)
 				var message string
 				var msg tgbotapi.MessageConfig
+				usertg := model.UserTelegram{
+					TgId:           upd.Message.From.ID,
+					TgChatId:       upd.Message.Chat.ID,
+					TgFirstName:    upd.Message.From.FirstName,
+					TgLastName:     upd.Message.From.LastName,
+					TgUserName:     upd.Message.From.UserName,
+					TgLanguageCode: upd.Message.From.LanguageCode,
+				}
 
 				switch upd.Message.Text {
 				case "/start":
-					message = "send '/auth' for registration"
+					message = "Send '/auth' for registration"
 					msg = tgbotapi.NewMessage(upd.Message.Chat.ID, message)
 					t.Bot.Send(msg)
 
 				case "/auth":
-					usertg := model.UserTelegram{
-						TgId:           upd.Message.From.ID,
-						TgChatId:       upd.Message.Chat.ID,
-						TgFirstName:    upd.Message.From.FirstName,
-						TgLastName:     upd.Message.From.LastName,
-						TgUserName:     upd.Message.From.UserName,
-						TgLanguageCode: upd.Message.From.LanguageCode,
-					}
 					event.Topic = "bot/registration"
 					event.Payload = usertg
 					outChan <- event
 				default:
-					message = "ничего не понял :( "
+					message = "unknow"
 					msg = tgbotapi.NewMessage(upd.Message.Chat.ID, message)
 					t.Bot.Send(msg)
 				}
-				// end switch
-				// switch upd.CallbackQuery.Data {
+				// end message handling
+			}
 
-				// case callback_data_ok:
-				// 	event.Topic = "bot/ok"
-				// 	event.Payload = ""
-				// 	outChan <- event
-				// default:
-				// 	print("callback")
-				// }
+			if upd.CallbackQuery != nil {
+				t.log.Debug().Msgf("BOT/CallbackQuery %#v ", upd.CallbackQuery)
 
+				switch upd.CallbackQuery.Data[:1] {
+
+				// TODO
+				//pc/%s/confirm
+				case "pc":
+					event.Topic = "bot/pc/confirm"
+
+					processId := strings.Split(upd.CallbackQuery.Data, "/")[1]
+					fmt.Printf("BOT PC: %s", processId)
+
+					event.Payload = CallBackPayload{TgId: upd.CallbackQuery.From.ID, ProcessId: processId}
+					outChan <- event
+					t.Bot.DeleteMessage(tgbotapi.NewDeleteMessage(upd.CallbackQuery.Message.Chat.ID, upd.CallbackQuery.Message.MessageID))
+				}
 			}
 
 		}
@@ -89,7 +103,6 @@ func (t *TelegramBot) StartReceiveUpdates(offset, limit, timeout int, outChan ch
 }
 
 func (t *TelegramBot) SendMessage(ctx context.Context, chatId int64, message string) error {
-
 	msg := tgbotapi.NewMessage(chatId, message)
 	_, err := t.Bot.Send(msg)
 	if err != nil {
@@ -110,9 +123,6 @@ func (t *TelegramBot) SendMessages(ctx context.Context, chatIds []int64, msg str
 }
 
 func (t *TelegramBot) SendMessagesWithCallbacks(ctx context.Context, chatIds []int64, msg string, callback map[string]string) error {
-
-	fmt.Println("QWERTY BRO BRO", chatIds, msg)
-
 	var buttons []tgbotapi.InlineKeyboardButton
 	for key, val := range callback {
 		t.callbacks[key] = &val

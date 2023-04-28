@@ -57,6 +57,10 @@ type (
 		CloseTask(ctx context.Context, userId, projectId, nodeId string) error
 	}
 
+	ProcessTaskUCInterface interface {
+		ConsensusConfirmation(ctx context.Context, processId string) error
+	}
+
 	BotInterface interface {
 		SendMessage(ctx context.Context, chatId int64, message string) error
 	}

@@ -1,8 +1,8 @@
-package postgres
+package migrations
 
 import "github.com/jmoiron/sqlx"
 
-func MigrateDown(dbPool *sqlx.DB) error {
+func Down(dbPool *sqlx.DB) error {
 	q := `
 		DROP TABLE IF EXISTS "users" CASCADE;
 		
@@ -28,7 +28,7 @@ func MigrateDown(dbPool *sqlx.DB) error {
 
 }
 
-func MigrateUp(dbPool *sqlx.DB) error {
+func Up(dbPool *sqlx.DB) error {
 	q := `
 		CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 	
