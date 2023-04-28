@@ -117,7 +117,6 @@ const visibleTgInfo = ref(false)
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
-  text-shadow: 0px 0px 3px rgb(255, 255, 255);
   color: clr.$clr-route-header;
   padding: 20px;
   font-size: clr.$route-header-fontsize;
