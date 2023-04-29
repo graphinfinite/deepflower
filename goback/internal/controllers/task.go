@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"context"
+	"deepflower/internal/model"
 	"deepflower/internal/observer"
 	"deepflower/internal/services/telegram"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -85,13 +87,58 @@ func (c *TaskController) Confirmation(event observer.Event) {
 	case TopicBotConfirmation:
 		e, ok := event.Payload.(telegram.CallBackPayload)
 		if !ok {
-			c.log.Error().Msg("Registration/event/error payload type")
+			c.log.Error().Msg("Confirmation/event/error payload type")
 		}
 		err := c.ProcessTaskUC.ConsensusConfirmation(ctx, e.ProcessId)
 		if err != nil {
-			c.log.Error().Msgf("Registration/event/ProcessTaskUC.ConsensusConfirmation/error %s", err.Error())
+			c.log.Error().Msgf("Confirmation/event/ProcessTaskUC.ConsensusConfirmation/error %s", err.Error())
 		}
 	default:
 		c.log.Error().Msg("Confirmation/event/unknow topic")
 	}
+}
+
+type SearchProcessesResponse struct {
+	Processes        []model.ProcessTask `json:"Processes,omitempty"`
+	TotalRecordCount int                 `json:"TotalRecordCount,omitempty"`
+}
+
+func (c *TaskController) SearchUserTaskProcesses(w http.ResponseWriter, r *http.Request) {
+	userId, _ := r.Context().Value(ContextUserIdKey).(string)
+	searchTerm := r.URL.Query().Get("SearchTerm")
+	sort := r.URL.Query().Get("Sort")
+	order := r.URL.Query().Get("Order")
+	limit, err := strconv.ParseUint(r.URL.Query().Get("Limit"), 0, 64)
+	if err != nil {
+		c.log.Err(err).Msg("SearchUserTaskProcesses ")
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	offset, err := strconv.ParseUint(r.URL.Query().Get("Offset"), 0, 64)
+	if err != nil {
+		c.log.Err(err).Msg("SearchUserTaskProcesses ")
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+
+	onlyActive, err := strconv.ParseBool(r.URL.Query().Get("OnlyActive"))
+	if err != nil {
+		c.log.Err(err).Msg("SearchUserTaskProcesses ")
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+
+	onlyForUser := true
+	processes, count, err := c.ProcessTaskUC.SearchUserTaskProcesses(r.Context(), userId, limit, offset,
+		onlyActive, onlyForUser, order, searchTerm, sort)
+	if err != nil {
+		c.log.Err(err).Msg("SearchUserTaskProcesses ")
+		JSON(w, STATUS_ERROR, err.Error())
+		return
+	}
+	var result SearchProcessesResponse
+	result.Processes = processes
+	result.TotalRecordCount = count
+	JSONstruct(w, STATUS_OK, "", &result)
+
 }

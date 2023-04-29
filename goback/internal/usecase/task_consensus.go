@@ -96,20 +96,17 @@ func (c *TaskConsensus) ConsensusConfirmation(ctx context.Context, processId str
 	if err != nil {
 		return err
 	}
-
 	if pc.InspectorsConfirmed != pc.InspectorsTotal {
 		return nil
 	}
-
 	if err := c.Tranzactor.WithTx(ctx, func(ctx context.Context) error {
 		execuser, err := c.UserStorage.GetUserById(ctx, pc.ExecUserId)
 		if err != nil {
 			return err
 		}
-
 		// TODO
 		// статус процесса = завершен
-		_, err = c.TaskProcessStorage.UpsertTaskProcess(ctx, "", pc.NodeId, "", TaskStatus_complited, 0, 0)
+		_, err = c.TaskProcessStorage.UpsertTaskProcess(ctx, pc.ProjectId, pc.NodeId, pc.ExecUserId, TaskStatus_complited, 0, 0)
 		if err != nil {
 			return err
 		}
@@ -121,12 +118,10 @@ func (c *TaskConsensus) ConsensusConfirmation(ctx context.Context, processId str
 		if err := c.UserStorage.AddEnergy(ctx, pc.ExecUserId, pc.EnergyTotal); err != nil {
 			return err
 		}
-
 		if err := c.TaskStorage.SubtractEnergy(ctx, pc.ProjectId, pc.NodeId, pc.EnergyTotal); err != nil {
 
 			return err
 		}
-
 		// отправка уведомления исполнителю
 		c.Bot.SendMessage(ctx, execuser.TgChatId, fmt.Sprintf("Confirmation complited for process %s", pc.ID))
 		return nil
@@ -145,4 +140,15 @@ func (c *TaskConsensus) GetAllUserTaskProcess(ctx context.Context, userId string
 		return []model.ProcessTask{}, err
 	}
 	return process, nil
+}
+
+func (c *TaskConsensus) SearchUserTaskProcesses(ctx context.Context, userId string,
+	limit uint64, offset uint64, onlyActive bool, onlyForUser bool, order string, searchTerm string,
+	sort string) ([]model.ProcessTask, int, error) {
+	processes, cnt, err := c.TaskProcessStorage.SearchProcesses(ctx, userId,
+		limit, offset, onlyActive, onlyForUser, order, searchTerm, sort)
+	if err != nil {
+		return []model.ProcessTask{}, 0, err
+	}
+	return processes, cnt, nil
 }

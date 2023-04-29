@@ -84,6 +84,8 @@ type (
 		GetTaskConsensusProcessById(ctx context.Context, processId string) (model.ProcessTask, error)
 		UpsertTaskProcess(ctx context.Context, projectId, nodeId, userId, status string, taskEnerge, taskLeadTime uint64) (model.ProcessTask, error)
 		AddInspectorConfirmed(ctx context.Context, processId string) (model.ProcessTask, error)
+		SearchProcesses(ctx context.Context, userId string,
+			limit, offset uint64, onlyActive bool, onlyForUser bool, order string, searchTerm string, sort string) ([]model.ProcessTask, int, error)
 	}
 
 	TaskConsensusInterface interface {

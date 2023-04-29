@@ -7,7 +7,7 @@ nes (7 sloc)  136 Bytes
 
         
   <div class="logout">
-      <div @click="doLogout">ᛪ</div>
+      <div @click="doLogout">🢖</div>
     </div>
   </div>
 
@@ -15,21 +15,13 @@ nes (7 sloc)  136 Bytes
 
 <div class="userinfo">
   <div class="userinfo-main">
-    <div id="username"><span>{{ state.userData.Username }}</span></div>
+    <div id="username"><span @click="()=>{visibleTgInfo=!visibleTgInfo}">{{ state.userData.Username }}</span></div>
     <div id="userenergy">E = <span>{{ state.userData.Energy }}</span></div>
   </div>
 
-
-<div class="info-menu">
-  <div @click="()=>{visibleTgInfo=!visibleTgInfo}">᧠</div>
-  <div>᧡</div>
-  <div>᧰</div>
-  <div>᧽</div>
-  <div>᧯</div>
-</div>
-
 <div class="info-menu-item">
   <div v-if="visibleTgInfo" class="userinfo-tgsettings">
+    Telegram 
     <ul>
       <li>Id: {{ state.userData.TgId }}</li>
       <li>Username: {{ state.userData.TgUserName }}</li>
@@ -49,16 +41,31 @@ nes (7 sloc)  136 Bytes
 
   <h1>Processes</h1>
 
-  <div class="ert">No active processes</div>
+  <div class="searchBox">
+
+<label for="checkbox1">OnlyActive: {{ onlyActive }}</label>
+<input type="checkbox" id="checkbox1" v-model="onlyActive" />
+
+<label for="filterInput">Search by status:</label>
+<input id="filterInput" v-model="searchTerm" />
+<button @click="doSearch(0, 10, 'id', 'asc')">ᐅ</button>
 </div>
 
+  <div class="process-table">
+  <table-lite
+  :max-width=300
+  :is-loading="table.isLoading"
+  :columns="table.columns"
+  :rows="table.rows"
+  :total="table.totalRecordCount"
+  :sortable="table.sortable"
+  :messages="table.messages"
+  @do-search="doSearch"
+  @is-finished="tableLoadingFinish"
+  @row-clicked="rowClicked"
+  /></div>
 
-
-
-
-
-
-
+</div>
 </div>
 
 
@@ -66,11 +73,12 @@ nes (7 sloc)  136 Bytes
 
 </template>
 
-<script setup lang="ts">
+<script setup>
 import API from "@/modules/api"
 import AuthService from "@/modules/auth"
 import { ref, reactive } from "vue"
 
+import TableLite from "vue3-table-lite";
 const state = reactive({
   userData: {
     Active: false,
@@ -92,11 +100,101 @@ API.get("/user").then((response) => {
   state.userData = response.data.data;
 }
 )
-
 const doLogout = () =>  AuthService.logout()
-
-
 const visibleTgInfo = ref(false)
+
+
+
+
+
+const onlyActive = ref(true)
+const searchTerm = ref("")
+const table = reactive({
+isLoading: false,
+columns: [
+    {
+    label: "ID",
+    field: "ID",
+    width: "5%",
+    sortable: false,
+    isKey: true,
+    },
+    {
+    label: "LeadTime",
+    field: "LeadTime",
+    width: "5%",
+    sortable: true,
+    },
+    {
+    label: "EnergyTotal",
+    field: "EnergyTotal",
+    width: "5%",
+    sortable: true,
+    },
+
+    {
+    label: "InspectorsTotal",
+    field: "InspectorsTotal",
+    width: "5%",
+    sortable: true,
+    },
+    {
+    label: "InspectorsConfirmed",
+    field: "InspectorsConfirmed",
+    width: "5%",
+    sortable: true,
+    },
+    {
+    label: "S",
+    field: "Status",
+    width: "7%",
+    sortable: true,
+    },
+    {
+    label: "UpdatedAt",
+    field: "UpdatedAt",
+    width: "3%",
+    sortable: true,
+    },
+],
+rows: [],
+totalRecordCount: 0,
+
+sortable: {
+    order: "id",
+    sort: "asc",
+},
+});
+ // 
+const doSearch = (offset, limit, order, sort) => {
+  var searchData = {
+    Offset: offset,
+    Limit: limit,
+    Order: order,
+    Sort: sort,
+    OnlyActive: onlyActive.value,
+    SearchTerm: searchTerm.value
+    }
+  console.log(JSON.stringify(searchData))
+  table.isLoading = true;
+  let url = '/processes';
+  API.get(url, {params: searchData} ).then((response) => {
+      if (response.data.status === "ok") {
+        table.isLoading = false;
+        // refresh table rows
+        table.rows = response.data.data.Processes;
+        table.totalRecordCount = response.data.data.TotalRecordCount;
+        table.sortable.order = order;
+        table.sortable.sort = sort;
+        return
+      } 
+      window.alert(response.data.message);
+  }); 
+};
+
+
+
+doSearch(0, 10, 'id', 'asc')
 
 
 </script>
@@ -179,6 +277,7 @@ li{
 
 .userinfo #username span{
   color: #043b02;
+  cursor: pointer;
 }
 
 .userinfo #userenergy span{
@@ -186,33 +285,7 @@ li{
 }
 
 
-
-.info-menu {
-
-
-  display: flex;
-  flex-direction: row;
-}
-
-.info-menu div{
-  font-size: 13px;
-  padding:5px;
-  border: 1px solid whitesmoke;
-  margin: 3px;
-
-  cursor: pointer;
-  color: clr.$clr-button;
-  transition: 0.5s;
-  box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
-}
-
-
-.info-menu div:hover {
-  box-shadow: 0px 0px 5px rgba(60, 41, 75, 0.5);
-}
-
 .info-menu-item{
-
   color: grey;
   padding-top: 10px;
 }
@@ -221,9 +294,11 @@ li{
 .process-panel{
   display: flex;
   flex-direction: column;
-  padding: 20px;
   border-bottom: 7px solid #0B0410;
+
+  padding-bottom: 30px;
 }
+
 
 .process-panel div{
 
@@ -233,7 +308,59 @@ li{
 .process-panel h1{
   color: #3b035c;
   font-size: 20px;
+  margin-left: 20px;
+  margin-top: 20px;
 }
+
+
+.searchBox {
+  border: 1px solid whitesmoke;
+  padding: 10px;
+  background-color:white ;
+}
+.searchBox #checkbox1, #checkbox2  {
+  cursor:pointer;
+  border: 1px solid black;
+  padding: 5px;
+  background-color: blueviolet;
+  margin-left: 3px;
+  margin-right: 7px;
+}
+
+.searchBox #checkbox1:checked {
+  background-color: #365778;
+}
+.searchBox label {
+  cursor:default;
+}
+.searchBox #filterInput {
+  margin-left: 15px;
+  padding: 10px;
+  border: 1px solid whitesmoke;
+}
+
+
+.searchBox button{
+  font-size: 13px;
+  padding:5px;
+  border: 1px solid whitesmoke;
+  margin: 3px;
+
+  cursor: pointer;
+  color: clr.$clr-button;
+  transition: 0.5s;
+  box-shadow: 0 0 10px rgba(168, 164, 172, 0.5);
+
+
+
+}
+
+
+.searchBox button:hover{
+  box-shadow: 0px 0px 5px rgba(60, 41, 75, 0.5);
+
+}
+
 
 
 

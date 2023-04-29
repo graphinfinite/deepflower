@@ -59,6 +59,8 @@ type (
 
 	ProcessTaskUCInterface interface {
 		ConsensusConfirmation(ctx context.Context, processId string) error
+		SearchUserTaskProcesses(ctx context.Context, userId string, limit, offset uint64,
+			onlyActive bool, onlyForUser bool, order string, searchTerm, sort string) ([]model.ProcessTask, int, error)
 	}
 
 	BotInterface interface {

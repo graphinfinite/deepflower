@@ -81,14 +81,13 @@ func (t *TelegramBot) StartReceiveUpdates(offset, limit, timeout int, outChan ch
 
 			if upd.CallbackQuery != nil {
 				t.log.Debug().Msgf("BOT/CallbackQuery %#v ", upd.CallbackQuery)
-
-				switch upd.CallbackQuery.Data[:1] {
-
+				first := strings.Split(upd.CallbackQuery.Data, "/")[0]
+				switch {
 				// TODO
 				//pc/%s/confirm
-				case "pc":
-					event.Topic = "bot/pc/confirm"
 
+				case first == "pc":
+					event.Topic = "bot/pc/confirm"
 					processId := strings.Split(upd.CallbackQuery.Data, "/")[1]
 					fmt.Printf("BOT PC: %s", processId)
 

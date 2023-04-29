@@ -71,3 +71,37 @@ func (s *TaskProcessStorage) AddInspectorConfirmed(ctx context.Context, processI
 	}
 	return process, nil
 }
+
+func (s *TaskProcessStorage) SearchProcesses(ctx context.Context, userId string,
+	limit uint64, offset uint64, onlyActive bool, onlyForUser bool, order string, searchTerm string,
+	sort string) ([]model.ProcessTask, int, error) {
+	tx := s.Db.ExtractTx(ctx)
+	var processes []model.ProcessTask
+	var args []interface{}
+	var query string
+	var queryCnt string
+	var count int
+
+	queryCnt = `SELECT count(id) FROM task_process WHERE LOWER(status) LIKE CONCAT('%%',$1::text,'%%')`
+	query = `SELECT * FROM "task_process" WHERE LOWER(status) LIKE CONCAT('%%',$1::text,'%%')`
+
+	if onlyForUser {
+		queryCnt += " AND exec_userid=$2"
+		query += " AND exec_userid=$2"
+		args = append(args, searchTerm, userId)
+	}
+	if onlyActive {
+		queryCnt += " AND completed=$3"
+		query += " AND completed=$3"
+		args = append(args, !onlyActive)
+	}
+
+	filter := fmt.Sprintf(` ORDER BY %s %s LIMIT %d OFFSET %d;`, order, sort, limit, offset)
+	q := query + filter
+
+	if err := tx.SelectContext(ctx, &processes, q, args...); err != nil {
+		return []model.ProcessTask{}, 0, err
+	}
+	tx.GetContext(ctx, &count, queryCnt, args...)
+	return processes, count, nil
+}

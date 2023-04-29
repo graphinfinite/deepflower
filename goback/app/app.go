@@ -169,6 +169,12 @@ func (app *App) Run(cfg config.Configuration) error {
 		r.Post("/{projectId}/node/{nodeId}/close", task.CloseTask)
 	})
 
+	r.Route("/processes", func(r chi.Router) {
+		r.Use(auth.JWT)
+		r.Get("/", task.SearchUserTaskProcesses)
+
+	})
+
 	// HTTP Server
 	app.httpServer = &http.Server{
 		Addr:           net.JoinHostPort(cfg.Server.Host, cfg.Server.Port),

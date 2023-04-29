@@ -237,7 +237,7 @@ const addEnergyToDream = () => {
 
   <label for="filterInput">Search by location/dream:</label>
   <input id="filterInput" v-model="searchTerm" />
-  <button @click="doSearch(0, 10, 'id', 'asc')">GO</button>
+  <button @click="doSearch(0, 10, 'id', 'asc')">ᐅ</button>
 </div>
 
 

@@ -87,13 +87,13 @@ columns: [
     sortable: true,
     },
     {
-    label: "Radius",
+    label: "R",
     field: "Radius",
     width: "1%",
     sortable: true,
     },
     {
-    label: "Height",
+    label: "H",
     field: "Height",
     width: "1%",
     sortable: true,
@@ -288,9 +288,9 @@ const showLocationDream = () => {
   <label for="checkbox1">Only my locations: {{ onlyMyLocations }}</label>
   <input type="checkbox" id="checkbox1" v-model="onlyMyLocations" />
 
-  <label for="filterInput">SearchBy:</label>
+  <label for="filterInput">SearchByName:</label>
   <input id="filterInput" v-model="searchTerm" />
-  <button @click="doSearch(0, 10, 'id', 'asc')">GO</button>
+  <button @click="doSearch(0, 10, 'id', 'asc')">ᐅ</button>
 </div>
 
 

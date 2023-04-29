@@ -10,7 +10,7 @@
 
 <label for="filterInput">Search by dream/project_name:</label>
 <input id="filterInput" v-model="searchTerm" />
-<button @click="doSearch(0, 10, 'id', 'asc')">GO</button>
+<button @click="doSearch(0, 10, 'id', 'asc')">ᐅ</button>
 </div>
 
 <div class="projectstable">
@@ -442,7 +442,7 @@ const NewProject = reactive({
 })
 const createNewProject = () => {
   NewProject.Graph = JSON.stringify(graph.toJSON())
-  NewProject.Name = NewProject.DreamName +"/"+ NewProject.Name
+  NewProject.Name = NewProject.DreamName +"‗"+ NewProject.Name
   let url = '/projects';
   API.post(url, NewProject).then((response) => {
       if (response.data.status === "ok") {

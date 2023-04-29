@@ -29,7 +29,7 @@ func NewAuthUsecase(r UserStorageInterface, cost int, signingKey string, expireD
 // if user with tgId already exist -> ErrAuthUserAlreadyExist (and update chatId, userName, firstName, lastName, languageCode)
 func (auth *AuthUsecase) RegistrationFromTg(ctx context.Context, tguser m.UserTelegram) (m.User, error) {
 	var ErrUserNotFound *repository.ErrStoreUserNotFound
-	_, err := auth.Rep.GetUserByTgId(ctx, tguser.TgId)
+	userold, err := auth.Rep.GetUserByTgId(ctx, tguser.TgId)
 	switch {
 	case errors.As(err, &ErrUserNotFound):
 		newusername := h.GenUserName()
@@ -46,7 +46,7 @@ func (auth *AuthUsecase) RegistrationFromTg(ctx context.Context, tguser m.UserTe
 	case err != nil:
 		return m.User{}, err
 	default:
-		return m.User{}, NewErrAuthUserAlreadyExist("", fmt.Errorf("user with tgid: %d already exist", tguser.TgId))
+		return m.User{Username: userold.Username}, NewErrAuthUserAlreadyExist("", fmt.Errorf("user with tgid: %d already exist", tguser.TgId))
 	}
 }
 

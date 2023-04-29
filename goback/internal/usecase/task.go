@@ -44,10 +44,10 @@ func (s *TaskUsecase) AddEnergyToTask(ctx context.Context, userId, projectId, no
 		return fmt.Errorf("not available")
 	}
 	if err := s.Tranzactor.WithTx(ctx, func(ctx context.Context) error {
-		if err = s.UserStorage.SubtractEnergy(ctx, userId, EnergyForPublish); err != nil {
+		if err = s.UserStorage.SubtractEnergy(ctx, userId, energy); err != nil {
 			return err
 		}
-		if err = s.TaskStorage.AddEnergyToTask(ctx, projectId, nodeId, EnergyForPublish); err != nil {
+		if err = s.TaskStorage.AddEnergyToTask(ctx, projectId, nodeId, energy); err != nil {
 			return err
 		}
 		s.TaskUsersStorage.AddTaskUser(ctx, userId, projectId, nodeId, energy)
